@@ -1,9 +1,0 @@
-.queryBar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-  
-.inputField {
-    flex-grow: 1;
-}
