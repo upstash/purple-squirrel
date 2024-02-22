@@ -1,5 +1,6 @@
 import {Input} from "@nextui-org/input";
 import {Button, ButtonGroup} from "@nextui-org/button";
+import {Tooltip} from "@nextui-org/tooltip";
 import SearchIcon from '@mui/icons-material/Search';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
@@ -16,10 +17,14 @@ export default function Page() {
               <Button color="success" size="md" startContent={<SearchIcon />}>Search</Button>
             </div>
             <div className="flex-initial px-unit-1">
-              <Button isIconOnly color="secondary" size="md"><BookmarkBorderIcon /></Button>
+              <Tooltip content="Save Query" color={"secondary"} delay={400} closeDelay={600}>
+                <Button isIconOnly color="secondary" size="md"><BookmarkBorderIcon /></Button>
+              </Tooltip>
             </div>
             <div className="flex-initial px-unit-1">
-              <Button isIconOnly color="secondary" size="md"><SettingsOutlinedIcon /></Button>
+              <Tooltip content="Settings" color={"secondary"} delay={400} closeDelay={600}>
+                <Button isIconOnly color="secondary" size="md"><SettingsOutlinedIcon /></Button>
+              </Tooltip>
             </div>
           </div>
         </div>
