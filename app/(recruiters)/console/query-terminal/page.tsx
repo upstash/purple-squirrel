@@ -9,7 +9,7 @@ export default function Page() {
     return (
       <div className="flex flex-col h-full">
         <div className="flex-initial pb-unit-2">
-          <div className="bg-default-50 flex items-center rounded-xl px-unit-3 py-unit-3 h-full">
+          <div className="bg-default-50 flex items-center rounded-xl p-unit-2 h-full">
             <div className="flex-auto px-unit-1">
               <Input label="Query" size="sm"/>
             </div>
