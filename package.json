@@ -15,11 +15,13 @@
     "@mui/material": "^5.15.10",
     "@nextui-org/react": "^2.2.9",
     "@primer/octicons-react": "^19.8.0",
+    "@uploadthing/react": "^6.2.4",
     "framer-motion": "^11.0.5",
     "next": "14.1.0",
     "next-themes": "^0.2.1",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "uploadthing": "^6.4.1"
   },
   "devDependencies": {
     "@types/node": "^20",
