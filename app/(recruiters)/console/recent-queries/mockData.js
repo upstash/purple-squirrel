@@ -64,11 +64,7 @@ const queries = [
   {
     id: 15,
     query: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  },
-  {
-    id: 16,
-    query: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  },
+  }
 ];
 
 export {columns, queries};
