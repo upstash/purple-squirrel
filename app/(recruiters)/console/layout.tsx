@@ -17,7 +17,7 @@ export default function ConsoleLayout({
 
     return (
       <section className="flex flex-col box-border h-screen">
-        <header className="flex-initial p-unit-4">
+        <header className="flex-initial pt-unit-4 p-unit-4">
           <div className="flex items-center bg-default-50 py-unit-2 px-unit-1 rounded-xl">
             <div className="flex-1 flex items-center justify-start">
               <div className="text-secondary pl-unit-3 pr-unit-1">
