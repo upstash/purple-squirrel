@@ -17,6 +17,7 @@
     "@primer/octicons-react": "^19.8.0",
     "@uploadthing/react": "^6.2.4",
     "framer-motion": "^11.0.5",
+    "mailparser": "^3.6.7",
     "next": "14.1.0",
     "next-themes": "^0.2.1",
     "node-imap": "^0.9.6",
