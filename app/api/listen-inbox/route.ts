@@ -3,7 +3,12 @@ inspect = require('util').inspect;
 var fs = require('fs');
 const {simpleParser} = require('mailparser');
 var async = require('async');
-import { Kafka } from "@upstash/kafka";
+import { Redis } from '@upstash/redis';
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL as string,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN as string,
+});
 
 export async function POST() {
     var imap = new Imap({
@@ -23,12 +28,6 @@ export async function POST() {
       mailParserOptions: { streamAttachments: true }, // options to be passed to mailParser lib. 
       attachments: true, // download attachments as they are encountered to the project directory 
       attachmentOptions: { directory: process.cwd + "/tmp/" } // specify a download directory for attachments 
-    });
-
-    const kafka = new Kafka({
-      url: process.env.UPSTASH_KAFKA_REST_URL!,
-      username: process.env.UPSTASH_KAFKA_REST_USERNAME!,
-      password: process.env.UPSTASH_KAFKA_REST_PASSWORD!
     });
 
     let currentStatus = 200;
@@ -64,9 +63,8 @@ export async function POST() {
                     // console.log('headers', parsed.headers, seqno, attrs);
                     // console.log('body', { html: parsed.html, text: parsed.text, textAsHtml: parsed.textAsHtml }, seqno, attrs);
                     if (parsed.attachments.length == 1) {
-                      if (parsed.attachments[0].content.length < 1e6) {
-                        console.log('Sending rawMailData to Kafka');
-                        let p = kafka.producer();
+                      if (parsed.attachments[0].content.length < (1e6 - 5e4)) {
+                        console.log('Pushing rawMailData to Redis');
                         let rawMailData = {
                           "mailDate": parsed.date,
                           "mailSubject": parsed.subject,
@@ -75,8 +73,8 @@ export async function POST() {
                           "mailBody": parsed.html,
                           "resumeBuffer": parsed.attachments[0].content
                         }
-                        let message = { rawMailData: rawMailData };
-                        const res = await p.produce("raw-mail-data", message);
+                        await redis.lpush("raw:mail:data:list", JSON.stringify(rawMailData));
+                        console.log('Pushed rawMailData to Redis');
                         resolve();
                       } else {
                         console.log('Attachment too big to handle. Ignoring.');
