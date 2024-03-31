@@ -65,5 +65,6 @@ export type Applicant = {
         experience: boolean;
         projects: boolean;
       }
+      fullText: string;
     }
   };
