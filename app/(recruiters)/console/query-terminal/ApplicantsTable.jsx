@@ -279,9 +279,11 @@ export default function ApplicantsTable() {
             </Dropdown>
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
-                <Tooltip content="Advanced Filters" color={"secondary"} delay={400} closeDelay={600}>
-                  <Button isIconOnly color="secondary" variant="solid" size="md"><FilterAltOutlinedIcon /></Button>
-                </Tooltip>
+                <Button isIconOnly color="secondary" variant="solid" size="md">
+                  <Tooltip content="Advanced Filters" color={"secondary"}>
+                    <FilterAltOutlinedIcon />
+                  </Tooltip>
+                </Button>
               </DropdownTrigger>
               <DropdownMenu
                 disallowEmptySelection
