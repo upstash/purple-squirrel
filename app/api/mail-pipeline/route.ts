@@ -184,7 +184,8 @@ function mailDataToApplicant(processedMailData: any, parsedMailData: any) {
                 "education": educationText ? true : false,
                 "experience": experienceText ? true : false,
                 "projects": projectsText ? true : false
-            }
+            },
+            "fullText": fullResumeText,
         }
     };
     let texts = {
