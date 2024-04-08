@@ -8,7 +8,7 @@ import ReplayOutlinedIcon from '@mui/icons-material/ReplayOutlined';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 
 
-export default function Page() {
+export default function RecentQueries() {
   const renderCell = React.useCallback((query, columnKey) => {
     const cellValue = query[columnKey];
 
