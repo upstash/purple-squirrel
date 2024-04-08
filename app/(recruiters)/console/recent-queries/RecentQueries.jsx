@@ -18,8 +18,10 @@ export default function RecentQueries({
     setQueryText,
     loadingRecentQueries,
     setActiveTab,
+    setVarColor,
     savedQueries,
-    setSavedQueries
+    setSavedQueries,
+    emptyRecentQueries,
 }) {
   const renderCell = React.useCallback((item, columnKey) => {
     const cellValue = item[columnKey];
@@ -57,6 +59,7 @@ export default function RecentQueries({
                 onPress = {async () => {
                     setQueryText(item.query);
                     setActiveTab("query-terminal");
+                    setVarColor("secondary");
                 }}
               >
                 <span className="text-lg text-secondary-400 cursor-pointer active:opacity-50">
@@ -69,7 +72,7 @@ export default function RecentQueries({
       default:
         return cellValue;
     }
-  }, [savedQueries, setSavedQueries, setQueryText, setActiveTab]);
+  }, [savedQueries, setSavedQueries, setQueryText, setActiveTab, setVarColor]);
 
   return (
     <div className="flex flex-col h-full">
@@ -82,7 +85,7 @@ export default function RecentQueries({
               </TableColumn>
             )}
           </TableHeader>
-          <TableBody items={recentQueries} isLoading={loadingRecentQueries} loadingContent={<Spinner className="h-full w-full bg-default-50/75" label="warning" color="warning" labelColor="warning" />}>
+          <TableBody emptyContent={emptyRecentQueries} items={recentQueries} isLoading={loadingRecentQueries} loadingContent={<Spinner className="h-full w-full bg-default-50/75" label="warning" color="warning" labelColor="warning" />}>
             {(item) => (
               <TableRow key={item.id}>
                 {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
