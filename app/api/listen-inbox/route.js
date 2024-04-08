@@ -5,8 +5,8 @@ const {simpleParser} = require('mailparser');
 import { Redis } from '@upstash/redis';
 
 const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL as string,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN as string,
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
 export async function POST() {
@@ -37,26 +37,26 @@ export async function POST() {
       console.log("Connection ready");
       console.log("Opening inbox");
       try{ 
-        imap.openBox('INBOX', false, function (err: any, box: any) {
-          imap.search([ 'UNSEEN' ], function(err: any, results: any) {
+        imap.openBox('INBOX', false, function (err, box) {
+          imap.search([ 'UNSEEN' ], function(err, results) {
             if(!results || !results.length){
               console.log("No new emails")
               imap.end();
               return;
             }    
 
-            Promise.all(results.map((result: any) => {
-              return new Promise<void>((resolve, reject) => {
+            Promise.all(results.map((result) => {
+              return new Promise((resolve, reject) => {
                 let f = imap.fetch(result, {
                   bodies: '',
                   markSeen: true
                 });
-                f.on('message', (msg: any, seqno: any) => {
+                f.on('message', (msg, seqno) => {
                   let attrs;
-                  msg.on('attributes', (a: any) => {
+                  msg.on('attributes', (a) => {
                     attrs = a;
                   });
-                  msg.on('body', async (stream: any, info: any) => {
+                  msg.on('body', async (stream, info) => {
                     let parsed = await simpleParser(stream);
                     // console.log('mail', parsed, seqno, attrs);
                     // console.log('headers', parsed.headers, seqno, attrs);
@@ -88,7 +88,7 @@ export async function POST() {
                     }
                   });
                 });
-                f.once('error', (error: any) => {
+                f.once('error', (error) => {
                   if (error) {
                     console.log('Error in fetching', error);
                     currentStatus = 500;
@@ -113,7 +113,7 @@ export async function POST() {
           }
     });
     
-    imap.once('error', function(err: any) {
+    imap.once('error', function(err) {
       console.log("Error in connection to IMAP", err);
       currentStatus = 500;
       currentMessage = "Error in connection to IMAP" + err;
