@@ -27,7 +27,7 @@ const statusColorMap = {
     hired: "success",
   };
 
-function InfoCard({cardID, tableInfo, cardScore}) {
+function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, setApplicantIDs}) {
     const applicantName = tableInfo[cardID].name;
     const applicantRole = tableInfo[cardID].role;
     const applicantTeam = tableInfo[cardID].team;
@@ -159,7 +159,24 @@ function InfoCard({cardID, tableInfo, cardScore}) {
                             <Button color="success" className="flex-1 w-full" startContent={<CreateOutlinedIcon/>}>
                                 Take Notes
                             </Button>    
-                            <Button color="danger" variant="bordered" className="flex-1" startContent={<PersonOffOutlinedIcon/>}>
+                            <Button color="danger" variant="bordered" className="flex-1" startContent={<PersonOffOutlinedIcon/>}
+                                onPress={async () => {
+                                    await fetch(`/api/delete-applicants`, {
+                                      method: "POST",
+                                      headers: {
+                                        "Content-Type": "application/json",
+                                      },
+                                      body: JSON.stringify({ids: [cardID]}),
+                                    });
+                                    setDisplayCard(false);
+                                    setApplicantIDs((prevApplicantIDs) => prevApplicantIDs.filter((pair) => pair.id !== cardID));
+                                    setTableInfo(prevTableInfo => {
+                                        const updatedTableInfo = { ...prevTableInfo };
+                                        delete updatedTableInfo[cardID];
+                                        return updatedTableInfo;
+                                    });
+                                  }}
+                            >
                                 Delete Applicant
                             </Button>
                         </div>
@@ -262,10 +279,10 @@ function EmptyCard() {
     );
 }
 
-export default function ApplicantCard({displayCard, cardID, tableInfo, cardScore}) {
+export default function ApplicantCard({displayCard, setDisplayCard, cardID, tableInfo, setTableInfo, cardScore, setApplicantIDs}) {
     return (
         <div>
-            {displayCard ? <InfoCard cardID={cardID} tableInfo={tableInfo} cardScore={cardScore}/> : <EmptyCard/>}
+            {displayCard ? <InfoCard cardID={cardID} tableInfo={tableInfo} setTableInfo={setTableInfo} cardScore={cardScore} setDisplayCard={setDisplayCard} setApplicantIDs={setApplicantIDs} /> : <EmptyCard/>}
         </div>
     );
 }
