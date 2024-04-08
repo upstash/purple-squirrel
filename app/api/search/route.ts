@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import type { NextRequest } from 'next/server';
-import BASE_URL from "@/app/utils/baseUrl";
+import BASE_URL from "@/app/utils/BaseURL";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
