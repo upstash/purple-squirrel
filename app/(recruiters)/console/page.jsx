@@ -14,8 +14,6 @@ export default function Page() {
 
     const [applicantIDs, setApplicantIDs] = useState([]);
     const [tableInfo, setTableInfo] = useState({});
-    const [recentQueries, setRecentQueries] = useState([]);
-    const [savedQueries, setSavedQueries] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchSettings, setSearchSettings] = useState(null);
     const [loadingColor, setLoadingColor] = useState("default");
@@ -33,6 +31,13 @@ export default function Page() {
     const [educationWeight, setEducationWeight] = useState(0.4);
     const [experienceWeight, setExperienceWeight] = useState(0.7);
     const [projectsWeight, setProjectsWeight] = useState(0.1);
+
+    const [recentQueries, setRecentQueries] = useState([]);
+    const [savedQueries, setSavedQueries] = useState([]);
+    const [emptyRecentQueries, setEmptyRecentQueries] = useState(" ");
+    const [emptySavedQueries, setEmptySavedQueries] = useState(" ");
+    const [loadingRecentQueries, setLoadingRecentQueries] = useState(true);
+    const [loadingSavedQueries, setLoadingSavedQueries] = useState(true);
 
     useEffect(() => {
         fetch('/api/get-search-settings')
@@ -52,6 +57,26 @@ export default function Page() {
           })
       }, [setEducationWeight, setEmptyContent, setExperienceWeight, setInitialMultiplier, setIsLoading, setMainWeight, setProjectsWeight, setRegularMultiplier, setSearchSettings, setTopK, setWeightedAverage]);
 
+    useEffect(() => {
+        fetch('/api/get-recent-queries')
+          .then((res) => res.json())
+          .then((data) => {
+            setRecentQueries(data);
+            setLoadingRecentQueries(false);
+            setEmptyRecentQueries("No recent queries found.");
+          })
+      }, [setRecentQueries, setLoadingRecentQueries, setEmptyRecentQueries]);
+    
+    useEffect(() => {
+        fetch('/api/get-saved-queries')
+          .then((res) => res.json())
+          .then((data) => {
+            setSavedQueries(data);
+            setLoadingSavedQueries(false);
+            setEmptySavedQueries("No saved queries found.");
+          })
+      }, [setSavedQueries, setLoadingSavedQueries, setEmptySavedQueries]);
+    
     return (
         <section className="flex flex-col box-border h-screen">
           <header className="flex-initial pt-unit-4 p-unit-4">
@@ -117,9 +142,26 @@ export default function Page() {
                                                     setExperienceWeight={setExperienceWeight}
                                                     projectsWeight={projectsWeight}
                                                     setProjectsWeight={setProjectsWeight}
+                                                    recentQueries={recentQueries}
+                                                    setRecentQueries={setRecentQueries}
+                                                    savedQueries={savedQueries}
+                                                    setSavedQueries={setSavedQueries}
                                                 />
-            : ((activeTab === "recent-queries") ? <RecentQueries />
-            : <SavedQueries />)}
+            : ((activeTab === "recent-queries") ? <RecentQueries 
+                                                    recentQueries={recentQueries}
+                                                    setQueryText={setQueryText}
+                                                    loadingRecentQueries={loadingRecentQueries}
+                                                    setActiveTab={setActiveTab}
+                                                    savedQueries={savedQueries}
+                                                    setSavedQueries={setSavedQueries}
+                                                />
+            : <SavedQueries
+                savedQueries={savedQueries}
+                setSavedQueries={setSavedQueries}
+                setQueryText={setQueryText}
+                loadingSavedQueries={loadingSavedQueries}
+                setActiveTab={setActiveTab}
+            />)}
           </div>
         </section>
     )
