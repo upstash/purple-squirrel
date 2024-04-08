@@ -1,7 +1,7 @@
 import { Redis } from '@upstash/redis';
 import OpenAI from "openai";
 import type { Applicant } from '@/types/types';
-import BASE_URL from '@/app/utils/BaseURL';
+import BASE_URL from '@/app/utils/baseURL';
 
 export const runtime = "edge";
 

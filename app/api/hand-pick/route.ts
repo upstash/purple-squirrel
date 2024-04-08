@@ -1,7 +1,7 @@
 import { Redis } from '@upstash/redis';
 import OpenAI from "openai";
 import type { NextRequest } from 'next/server';
-import BASE_URL from '@/app/utils/BaseURL';
+import BASE_URL from '@/app/utils/baseURL';
 
 const SYSTEM_MESSAGE = `You are an applicant filterer.
 
