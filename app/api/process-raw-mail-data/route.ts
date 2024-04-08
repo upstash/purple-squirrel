@@ -3,6 +3,7 @@ import { utapi } from "@/app/utils/uploadthing/server/uploadthing";
 import PDFParser from 'pdf2json';
 import type { NextRequest } from 'next/server'
 import { Redis } from '@upstash/redis';
+import { FileEsque } from "uploadthing/types";
 
 const redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL as string,
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
         let resumeBuffer = Buffer.from(rawMailData.resumeBuffer.data);
     
         let fileBlob = new Blob([resumeBuffer]);
-        let response = await utapi.uploadFiles(fileBlob);
+        let response = await utapi.uploadFiles(fileBlob as FileEsque);
         // console.log(response);
         
         if (response.data) {
