@@ -79,6 +79,71 @@ Below are information about the key value pairs.
 "experienceText" is the text of the experience section of the resume formatted according to the rules defined above. Another name for this section may be used in resume, just make sure to include the information from the corresponding work experience section not competitions etc.
 "projectsText" is the text of the projects section of the resume formatted according to the rules defined above.`;
 
+const TEST_MESSAGE = `You are a resume parser.
+You will be presented information in the following format:
+CURRENT_DATE
+<current-date>
+
+RESUME_TEXT
+<resume-text>
+
+You will give nothing but the JSON like below:
+{
+    "basicInfo": {
+        "fullName": "<full-name>",
+        "role": "<role>",
+        "location": "<location>",
+        "age": <age>,
+        "university": "<university>",
+        "email": "<email>",
+        "phone": "<phone>",
+        "websiteUrl": "<website-url>",
+        "linkedinUrl": "<linkedin-url>",
+        "githubUrl": "<github-url>"
+    },
+    "manualFilters": {
+        "yoe": <yoe>,
+        "highestDegree": "<highest-degree>",
+        "degreeSubject": "<degree-subject>",
+        "graduationYear": <graduation-year>,
+        "graduationMonth": <graduation-month>,
+        "ongoing": <ongoing>,
+        "team": "<team>",
+        "countryCode": "<country-code>"
+    },
+    "textData": {
+        "fullResumeText": "<full-resume-text>",
+        "educationText": "<education-text>",
+        "experienceText": "<experience-text>",
+        "projectsText": "<projects-text>"
+    }
+}
+All the values are strings except age and yoe.
+If the information is not available in the text, put null.
+Below are information about the key value pairs.
+
+"basicInfo" is an object consisting of basic information about the applicant. You can format the information when you put them here with correct capitalization.
+"fullName", "age", "email", "phone", "websiteUrl", "linkedinUrl", "githubUrl" are self explanatory.
+"role" is the role of the applicant, such as Senior Software Engineer, you can put the latest or the best describing role.
+"location" is where the applicant lives, you can guess it based on the resume.
+"university" is the latest university that the applicant got their degree in.
+
+"manualFilters" are critical information that the applicant will be filtered on.
+"yoe" is the years of experience of the applicant in an industrial sense. For example: work experience and research experience should be counted but personal hobby projects or education should not be counted. If the information is already presented it in the resume take it, otherwise calculate yourself.
+"highestDegree" is highest degree applicant achieved or pursuing. It can be "Associate's", "Bachelor's", "Master's" or "Doctoral".
+"degreeSubject" is the subject of the highest degree such as Computer Science.
+"graduationYear" is the year the applicant graduated or will graduate.
+"graduationMonth" is the month the applicant graduated or will graduate. It can be "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November" or "December".
+"ongoing" is a boolean value indicating if the applicant's latest education is still ongoing. It can be derived from the graduation year, graduation month and the CURRENT_DATE provided.
+"team" can either be "Development", "Design", "Management", "HR", "Sales and Marketing", "Customer Support", "Quality Assurance", "Operations" or "Finance and Accounting".
+"countryCode" is the alpha-2 country code of the applicant such as "TR" for "Turkey".
+
+"textData" is  an object containing text sections from the resume. Given resume text may not be parsed correctly, you should format so it has meaningful spacing and capitalization. Do not change the meaning, lose information, or add comments in formatting.
+"fullResumeText" is the full text of the resume formatted according to the rules defined above.
+"educationText" is the text of the education section of the resume formatted according to the rules defined above. Another name for this section may be used in resume, just make sure to include the information from the corresponding formal education section not certificates etc.
+"experienceText" is the text of the experience section of the resume formatted according to the rules defined above. Another name for this section may be used in resume, just make sure to include the information from the corresponding work experience section not competitions etc.
+"projectsText" is the text of the projects section of the resume formatted according to the rules defined above.`;
+
 function mailDataToApplicant(processedMailData: any, parsedMailData: any) {
     if (!parsedMailData.hasOwnProperty("basicInfo") || !parsedMailData.hasOwnProperty("textData")) {
         console.log('PIPELINE: OpenAI Parsing fields missing');
@@ -254,11 +319,19 @@ export async function POST() {
                                 console.log('PIPELINE: Fetching OpenAI Parsing Response');
                                 
                                 let userMessage = `CURRENT_DATE\n${CURRENT_DATE}\n\nMAIL_SUBJECT\n${processedMailData.mailSubject}\n\nMAIL_FROM\n${processedMailData.mailFrom}\n\nMAIL_BODY\n${processedMailData.mailBody}\n\nRESUME_TEXT\n${processedMailData.resumeText}`;
+                                let test_mode = true;
+                                let systemMessage;
+                                if (test_mode) {
+                                    systemMessage = TEST_MESSAGE;
+                                    console.log('PIPELINE: Test Mode Active');
+                                } else {
+                                    systemMessage = SYSTEM_MESSAGE;
+                                }
                                 let completion = await openai.chat.completions.create({
                                     messages: [
                                     {
                                         role: "system",
-                                        content: SYSTEM_MESSAGE,
+                                        content: systemMessage,
                                     },
                                     { role: "user", content: userMessage },
                                     ],
