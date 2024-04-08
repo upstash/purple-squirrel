@@ -7,7 +7,7 @@ import {columns, queries} from "./mockData.js";
 import ReplayOutlinedIcon from '@mui/icons-material/ReplayOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 
-export default function Page() {
+export default function SavedQueries() {
   const renderCell = React.useCallback((query, columnKey) => {
     const cellValue = query[columnKey];
 
