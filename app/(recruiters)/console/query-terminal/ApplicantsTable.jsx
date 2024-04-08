@@ -19,7 +19,6 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import StarOutlinedIcon from '@mui/icons-material/StarOutlined';
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
-import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 
 const columns = [
   {name: "ID", uid: "id", sortable: true},
@@ -56,13 +55,53 @@ const statusColorMap = {
   hired: "success",
 };
 
+const teamOptions = [
+  {name: "Development", uid: "Development"},
+  {name: "Design", uid: "Design"},
+  {name: "Management", uid: "Management"},
+  {name: "HR", uid: "HR"},
+  {name: "Sales and Marketing", uid: "Sales and Marketing"},
+  {name: "Customer Support", uid: "Customer Support"},
+  {name: "Quality Assurance", uid: "Quality Assurance"},
+  {name: "Operations", uid: "Operations"},
+  {name: "Finance and Accounting", uid: "Finance and Accounting"},
+];
+
+const starsOptions = [
+  {name: "No Filter", uid: "No Filter"},
+  {name: "1+", uid: "1"},
+  {name: "2+", uid: "2"},
+  {name: "3+", uid: "3"},
+  {name: "4+", uid: "4"},
+  {name: "5+", uid: "5"},
+];
+
+
 const INITIAL_VISIBLE_COLUMNS = ["score", "name", "role", "location", "stars", "status", "actions"];
 
-export default function ApplicantsTable({applicantIDs, tableInfo, loadingColor, loadingText, isLoading, emptyContent, setDisplayCard, setCardID, setCardScore}) {
+export default function ApplicantsTable({
+  applicantIDs,
+  setApplicantIDs,
+  tableInfo,
+  setTableInfo,
+  loadingColor,
+  setLoadingColor,
+  loadingText,
+  setLoadingText,
+  isLoading,
+  setIsLoading,
+  emptyContent,
+  cardID,
+  setCardID,
+  setDisplayCard,
+  setCardScore,
+}) {
   const [filterValue, setFilterValue] = React.useState("");
   const [selectedKeys, setSelectedKeys] = React.useState(new Set([]));
   const [visibleColumns, setVisibleColumns] = React.useState(new Set(INITIAL_VISIBLE_COLUMNS));
   const [statusFilter, setStatusFilter] = React.useState("all");
+  const [teamFilter, setTeamFilter] = React.useState("all");
+  const [starsFilter, setStarsFilter] = React.useState(new Set(["No Filter"]));
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [sortDescriptor, setSortDescriptor] = React.useState({
     column: "score",
@@ -91,9 +130,20 @@ export default function ApplicantsTable({applicantIDs, tableInfo, loadingColor, 
         Array.from(statusFilter).includes(tableInfo[id].status),
       );
     }
+    if (teamFilter !== "all" && Array.from(teamFilter).length !== teamOptions.length) {
+      filteredApplicants = filteredApplicants.filter(({id, score}) =>
+        Array.from(teamFilter).includes(tableInfo[id].team),
+      );
+    }
+    const [insideStarsFilter] = starsFilter;
+    if (insideStarsFilter !== "No Filter") {
+      filteredApplicants = filteredApplicants.filter(({id, score}) =>
+        tableInfo[id].stars >= parseInt(insideStarsFilter),
+      );
+    }
 
     return filteredApplicants;
-  }, [filterValue, statusFilter, hasSearchFilter, applicantIDs, tableInfo]);
+  }, [filterValue, statusFilter, hasSearchFilter, applicantIDs, tableInfo, teamFilter, starsFilter]);
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
@@ -162,11 +212,36 @@ export default function ApplicantsTable({applicantIDs, tableInfo, loadingColor, 
         return (
           <p className="text-bold text-sm capitalize">{tableInfo[applicantID].age}</p>
         );
+      case "id":
+        return (
+          <p className="text-bold text-sm capitalize">{applicantID}</p>
+        );
       case "actions":
         return (
           <div className="relative flex items-center gap-0 justify-end pr-unit-2">
             <Tooltip content="Delete Applicant" color={"danger"} delay={400} closeDelay={600}>
-              <Button isIconOnly variant="light" aria-label="Delete Applicant" size="sm">
+              <Button isIconOnly variant="light" aria-label="Delete Applicant" size="sm"
+                onPress={async () => {
+                  setLoadingText("Deleting Applicant...");
+                  setLoadingColor("danger");
+                  setIsLoading(true);
+                  await fetch(`/api/delete-applicants`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ids: [applicantID]}),
+                  });
+                  if (cardID && applicantID === cardID) setDisplayCard(false);
+                  setApplicantIDs((prevApplicantIDs) => prevApplicantIDs.filter((pair) => pair.id !== applicantID));
+                  setTableInfo(prevTableInfo => {
+                    const updatedTableInfo = { ...prevTableInfo };
+                    delete updatedTableInfo[applicantID];
+                    return updatedTableInfo;
+                  });
+                  setIsLoading(false);
+                }}
+              >
                 <span className="text-lg text-danger-400 cursor-pointer active:opacity-50">
                   <DeleteOutlinedIcon />
                 </span>
@@ -196,7 +271,7 @@ export default function ApplicantsTable({applicantIDs, tableInfo, loadingColor, 
       default:
         return "?";
     }
-  }, [tableInfo, setDisplayCard, setCardID, setCardScore]);
+  }, [tableInfo, setTableInfo, cardID, setCardID, setDisplayCard, setCardScore, setApplicantIDs, setIsLoading, setLoadingColor, setLoadingText]);
 
   const onRowsPerPageChange = React.useCallback((e) => {
     setRowsPerPage(Number(e.target.value));
@@ -235,20 +310,20 @@ export default function ApplicantsTable({applicantIDs, tableInfo, loadingColor, 
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
                 <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
-                  Role
+                  Team
                 </Button>
               </DropdownTrigger>
               <DropdownMenu
                 disallowEmptySelection
                 aria-label="Table Columns"
                 closeOnSelect={false}
-                selectedKeys={statusFilter}
+                selectedKeys={teamFilter}
                 selectionMode="multiple"
-                onSelectionChange={setStatusFilter}
+                onSelectionChange={setTeamFilter}
               >
-                {statusOptions.map((status) => (
-                  <DropdownItem key={status.uid} className="capitalize">
-                    {capitalize(status.name)}
+                {teamOptions.map((team) => (
+                  <DropdownItem key={team.uid} className="capitalize">
+                    {capitalize(team.name)}
                   </DropdownItem>
                 ))}
               </DropdownMenu>
@@ -283,14 +358,14 @@ export default function ApplicantsTable({applicantIDs, tableInfo, loadingColor, 
               <DropdownMenu
                 disallowEmptySelection
                 aria-label="Table Columns"
-                closeOnSelect={false}
-                selectedKeys={statusFilter}
-                selectionMode="multiple"
-                onSelectionChange={setStatusFilter}
+                closeOnSelect={true}
+                selectedKeys={starsFilter}
+                selectionMode="single"
+                onSelectionChange={setStarsFilter}
               >
-                {statusOptions.map((status) => (
-                  <DropdownItem key={status.uid} className="capitalize">
-                    {capitalize(status.name)}
+                {starsOptions.map((stars) => (
+                  <DropdownItem key={stars.uid} className="capitalize">
+                    {capitalize(stars.name)}
                   </DropdownItem>
                 ))}
               </DropdownMenu>
@@ -316,28 +391,6 @@ export default function ApplicantsTable({applicantIDs, tableInfo, loadingColor, 
                 ))}
               </DropdownMenu>
             </Dropdown>
-            <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button isIconOnly color="secondary" variant="solid" size="md">
-                  <Tooltip content="Advanced Filters" color={"secondary"}>
-                    <FilterAltOutlinedIcon />
-                  </Tooltip>
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Table Columns"
-                closeOnSelect={false}
-                selectedKeys={visibleColumns}
-                onSelectionChange={setVisibleColumns}
-              >
-                {columns.map((column) => (
-                  <DropdownItem key={column.uid} className="capitalize">
-                    {capitalize(column.name)}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
           </div>
         </div>
       </div>
@@ -348,6 +401,8 @@ export default function ApplicantsTable({applicantIDs, tableInfo, loadingColor, 
     statusFilter,
     visibleColumns,
     onSearchChange,
+    teamFilter,
+    starsFilter,
   ]);
 
   const bottomContent = React.useMemo(() => {
