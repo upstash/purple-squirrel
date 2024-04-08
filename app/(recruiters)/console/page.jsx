@@ -39,14 +39,16 @@ export default function Page() {
     const [loadingRecentQueries, setLoadingRecentQueries] = useState(true);
     const [loadingSavedQueries, setLoadingSavedQueries] = useState(true);
 
+    const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+
     useEffect(() => {
         fetch('/api/get-search-settings')
           .then((res) => res.json())
           .then((data) => {
             setSearchSettings(data);
-            setTopK(data.TopK);
+            setTopK(data.topK);
             setInitialMultiplier(data.multipliers.firstTopKMultiplier);
-            setRegularMultiplier(data.multipliers.regularMultiplier);
+            setRegularMultiplier(data.multipliers.regularTopKMultiplier);
             setWeightedAverage(data.weights.newWeight);
             setMainWeight(data.weights.mainWeight);
             setEducationWeight(data.weights.educationWeight);
@@ -146,14 +148,18 @@ export default function Page() {
                                                     setRecentQueries={setRecentQueries}
                                                     savedQueries={savedQueries}
                                                     setSavedQueries={setSavedQueries}
+                                                    settingsModalOpen={settingsModalOpen}
+                                                    setSettingsModalOpen={setSettingsModalOpen}
                                                 />
             : ((activeTab === "recent-queries") ? <RecentQueries 
                                                     recentQueries={recentQueries}
                                                     setQueryText={setQueryText}
                                                     loadingRecentQueries={loadingRecentQueries}
                                                     setActiveTab={setActiveTab}
+                                                    setVarColor={setVarColor}
                                                     savedQueries={savedQueries}
                                                     setSavedQueries={setSavedQueries}
+                                                    emptyRecentQueries={emptyRecentQueries}
                                                 />
             : <SavedQueries
                 savedQueries={savedQueries}
@@ -161,6 +167,8 @@ export default function Page() {
                 setQueryText={setQueryText}
                 loadingSavedQueries={loadingSavedQueries}
                 setActiveTab={setActiveTab}
+                setVarColor={setVarColor}
+                emptySavedQueries={emptySavedQueries}
             />)}
           </div>
         </section>
