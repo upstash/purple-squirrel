@@ -14,6 +14,7 @@ import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import ApplicantsTable from "./ApplicantsTable";
 import ApplicantCard from "./ApplicantCard";
 import { Divider } from "@nextui-org/react";
+import { v4 as uuidv4 } from 'uuid';
 
 export default function QueryTerminal({
     applicantIDs,
@@ -54,6 +55,10 @@ export default function QueryTerminal({
     setExperienceWeight,
     projectsWeight,
     setProjectsWeight,
+    recentQueries,
+    setRecentQueries,
+    savedQueries,
+    setSavedQueries,
   }) {
     return (
       <div className="flex flex-col h-full">
@@ -81,13 +86,21 @@ export default function QueryTerminal({
                       searchSettings: searchSettings,
                       previousApplicants: applicantIDs,
                     }
-                    const searchResponse = await fetch("/api/search", {
+                    const queryID = uuidv4();
+                    setRecentQueries([{id: queryID, query: queryText}, ...recentQueries]);
+                    const [searchResponse, redisResponse] = await Promise.all([fetch("/api/search", {
                       method: "POST",
                       headers: {
                         "Content-Type": "application/json"
                       },
                       body: JSON.stringify(data)
-                    })
+                    }), fetch("/api/push-recent-query", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({id: queryID, query: queryText})
+                    })]);
                     const searchResponseData = await searchResponse.json();
                     if (searchResponseData.status === 200) {
                       if (applicantIDs.length === 0) {
@@ -155,13 +168,21 @@ export default function QueryTerminal({
                         searchSettings: searchSettings,
                         previousApplicants: applicantIDs,
                       }
-                      const flashRankResponse = await fetch("/api/flash-rank", {
+                      const queryID = uuidv4();
+                      setRecentQueries([{id: queryID, query: queryText}, ...recentQueries]);
+                      const [flashRankResponse, redisResponse] = await Promise.all([fetch("/api/flash-rank", {
                         method: "POST",
                         headers: {
                           "Content-Type": "application/json"
                         },
                         body: JSON.stringify(data)
-                      })
+                      }), fetch("/api/push-recent-query", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({id: queryID, query: queryText})
+                    })]);
                       const flashRankResponseData = await flashRankResponse.json();
                       if (flashRankResponseData.status === 200) {
                         if (applicantIDs.length === 0) {
@@ -231,13 +252,21 @@ export default function QueryTerminal({
                         searchSettings: searchSettings,
                         previousApplicants: applicantIDs,
                       }
-                      const handPickResponse = await fetch("/api/hand-pick", {
+                      const queryID = uuidv4();
+                      setRecentQueries([{id: queryID, query: queryText}, ...recentQueries]);
+                      const [handPickResponse, redisResponse] = await Promise.all([fetch("/api/hand-pick", {
                         method: "POST",
                         headers: {
                           "Content-Type": "application/json"
                         },
                         body: JSON.stringify(data)
-                      })
+                      }), fetch("/api/push-recent-query", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({id: queryID, query: queryText})
+                    })]);
                       const handPickResponseData = await handPickResponse.json();
                       if (handPickResponseData.status === 200) {
                         if (applicantIDs.length === 0) {
@@ -288,7 +317,24 @@ export default function QueryTerminal({
             </div>
             <div className="flex-initial px-unit-1">
               <Tooltip content="Save Query" color={"secondary"} delay={400} closeDelay={600}>
-                <Button isIconOnly color="secondary" size="md"><BookmarkBorderIcon /></Button>
+                <Button isIconOnly color="secondary" size="md"
+                    onPress={async () => {
+                        if (queryText === "" || isLoading) {
+                            return;
+                        }
+                        const queryID = uuidv4();
+                        setSavedQueries([{id: queryID, query: queryText}, ...savedQueries]);
+                        await fetch("/api/save-query", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({id: queryID, query: queryText})
+                        });
+                    }}
+                >
+                    <BookmarkBorderIcon />
+                </Button>
               </Tooltip>
             </div>
             <div className="flex-initial px-unit-1">
