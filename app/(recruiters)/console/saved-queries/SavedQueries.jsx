@@ -20,6 +20,8 @@ export default function SavedQueries({
     setQueryText,
     loadingSavedQueries,
     setActiveTab,
+    setVarColor,
+    emptySavedQueries,
 }) {
   const renderCell = React.useCallback((item, columnKey) => {
     const cellValue = item[columnKey];
@@ -57,6 +59,7 @@ export default function SavedQueries({
                 onPress = {async () => {
                     setQueryText(item.query);
                     setActiveTab("query-terminal");
+                    setVarColor("secondary");
                 }}
               >
                 <span className="text-lg text-secondary-400 cursor-pointer active:opacity-50">
@@ -69,7 +72,7 @@ export default function SavedQueries({
       default:
         return cellValue;
     }
-  }, [savedQueries, setSavedQueries, setQueryText, setActiveTab]);
+  }, [savedQueries, setSavedQueries, setQueryText, setActiveTab, setVarColor]);
 
   return (
     <div className="flex flex-col h-full">
@@ -82,7 +85,7 @@ export default function SavedQueries({
               </TableColumn>
             )}
           </TableHeader>
-          <TableBody items={savedQueries} isLoading={loadingSavedQueries} loadingContent={<Spinner className="h-full w-full bg-default-50/75" label="primary" color="primary" labelColor="primary" />}>
+          <TableBody emptyContent={emptySavedQueries} items={savedQueries} isLoading={loadingSavedQueries} loadingContent={<Spinner className="h-full w-full bg-default-50/75" label="primary" color="primary" labelColor="primary" />}>
             {(item) => (
               <TableRow key={item.id}>
                 {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
