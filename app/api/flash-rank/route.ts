@@ -40,21 +40,21 @@ export async function POST(req: NextRequest) {
     const topK = data.searchSettings.topK;
     const multipliers = data.searchSettings.multipliers;
     const weights = data.searchSettings.weights;
-
     const previousApplicants = data.previousApplicants;
     if (!Array.isArray(previousApplicants)) {
         return Response.json({ status: 500, message: "Previous applicants is not an array" });
     }
     const fromScratch = (previousApplicants.length === 0);
-
     const extendedTopK = (fromScratch) ? topK * multipliers.firstTopKMultiplier : topK * multipliers.regularTopKMultiplier;
 
     const inverse = queryEmbedding.map(function(x) { return x * -1; });
     const results = await gatherResults(queryEmbedding, inverse, extendedTopK);
     const [mainResults, educationResults, experienceResults, projectsResults,
         inverseMainResults, inverseEducationResults, inverseExperienceResults, inverseProjectsResults] = results;
-    const [mainMax, educationMax, experienceMax, projectsMax] = [mainResults, educationResults, experienceResults, projectsResults].map((x) => x[0].score);
-    const [mainMin, educationMin, experienceMin, projectsMin] = [inverseMainResults, inverseEducationResults, inverseExperienceResults, inverseProjectsResults].map((x) => 1 - x[0].score);
+
+    const [mainMax, educationMax, experienceMax, projectsMax] = [mainResults, educationResults, experienceResults, projectsResults].map((x) => (x.length === 0) ? 0 : x[0].score);
+    const [mainMin, educationMin, experienceMin, projectsMin] = [inverseMainResults, inverseEducationResults, inverseExperienceResults, inverseProjectsResults].map((x) => (x.length === 0) ? 0 : 1 - x[0].score);
+
     const mainResultSet = (fromScratch) ? null : mainResults.reduce((acc: Record<string, number>, val) => {
         acc[val.id] = val.score;
         return acc;
