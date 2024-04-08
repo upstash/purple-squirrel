@@ -22,25 +22,27 @@ During the partition and rephrasing try not to add commentary.
 `;
 
 async function flashRank(data: any) {
-    const topApplicants = await fetch("http://localhost:3000/api/flash-rank", {
+    const flashRankResponse = await fetch("http://localhost:3000/api/flash-rank", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
     });
-    return topApplicants;
+    const flashRankData = await flashRankResponse.json();
+    return flashRankData.topApplicants;
 }
 
 async function handPick(data: any) {
-    const filteredApplicants = await fetch("http://localhost:3000/api/hand-pick", {
+    const handPickResponse = await fetch("http://localhost:3000/api/hand-pick", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
     });
-    return filteredApplicants;
+    const handPickData = await handPickResponse.json();
+    return handPickData.filteredApplicants;
 }
 
 export async function POST(req: NextRequest) {
@@ -112,5 +114,5 @@ export async function POST(req: NextRequest) {
             return Response.json({ status: 500, message: "No filtering or ranking performed", data: null });
         }
     }
-    return Response.json({ status: 200, message: "Success", filteredTopApplicants });
+    return Response.json({ status: 200, message: "Success", filteredTopApplicants: filteredTopApplicants });
 }
