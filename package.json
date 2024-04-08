@@ -28,7 +28,8 @@
     "pdf2json": "^3.0.5",
     "react": "^18",
     "react-dom": "^18",
-    "uploadthing": "^6.4.1"
+    "uploadthing": "^6.4.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/node": "^20",
