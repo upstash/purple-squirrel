@@ -13,7 +13,7 @@ import BoltIcon from '@mui/icons-material/Bolt';
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import ApplicantsTable from "./ApplicantsTable";
 import ApplicantCard from "./ApplicantCard";
-import { Divider } from "@nextui-org/react";
+import { Divider, card } from "@nextui-org/react";
 import { v4 as uuidv4 } from 'uuid';
 
 export default function QueryTerminal({
@@ -59,6 +59,8 @@ export default function QueryTerminal({
     setRecentQueries,
     savedQueries,
     setSavedQueries,
+    settingsModalOpen,
+    setSettingsModalOpen,
   }) {
     return (
       <div className="flex flex-col h-full">
@@ -77,9 +79,9 @@ export default function QueryTerminal({
                     return;
                   }
                   setEmptyContent(" ");
-                  setIsLoading(true);
                   setLoadingColor("success");
                   setLoadingText("Searching...");
+                  setIsLoading(true);
                   try {
                     const data = {
                       queryText: queryText,
@@ -114,6 +116,13 @@ export default function QueryTerminal({
                         const getInfoResponseData = await getInfoResponse.json();
                         if (getInfoResponseData.status === 200) {
                           setApplicantIDs(searchResponseData.filteredTopApplicants);
+                          const displayPairArray = searchResponseData.filteredTopApplicants.filter((pair) => pair.id === cardID);
+                          if (displayPairArray.length > 0) {
+                            setCardScore(Math.round(displayPairArray[0].score * 100));
+                            setDisplayCard(true);
+                          } else {
+                            setDisplayCard(false);
+                          }
                           setTableInfo(getInfoResponseData.tableInfo);
                           setQueryText("");
                           setIsLoading(false);
@@ -124,6 +133,13 @@ export default function QueryTerminal({
                         }
                       } else {
                         setApplicantIDs(searchResponseData.filteredTopApplicants);
+                        const displayPairArray = searchResponseData.filteredTopApplicants.filter((pair) => pair.id === cardID);
+                        if (displayPairArray.length > 0) {
+                            setCardScore(Math.round(displayPairArray[0].score * 100));
+                            setDisplayCard(true);
+                        } else {
+                            setDisplayCard(false);
+                        }
                         setTableInfo(searchResponseData.filteredTopApplicants.reduce((acc, val) => {
                           acc[val.id] = tableInfo[val.id];
                           return acc;
@@ -149,7 +165,7 @@ export default function QueryTerminal({
               </Button>
             </div>
             <div className="flex-initial px-unit-1">
-              <Tooltip content="Flash Rank (Fast)" color={"primary"} delay={400} closeDelay={600}>
+              <Tooltip content="Flash-Rank" color={"primary"} delay={400} closeDelay={600}>
                 <Button
                   isIconOnly
                   color="primary"
@@ -182,7 +198,7 @@ export default function QueryTerminal({
                             "Content-Type": "application/json"
                         },
                         body: JSON.stringify({id: queryID, query: queryText})
-                    })]);
+                      })]);
                       const flashRankResponseData = await flashRankResponse.json();
                       if (flashRankResponseData.status === 200) {
                         if (applicantIDs.length === 0) {
@@ -196,6 +212,13 @@ export default function QueryTerminal({
                           const getInfoResponseData = await getInfoResponse.json();
                           if (getInfoResponseData.status === 200) {
                             setApplicantIDs(flashRankResponseData.topApplicants);
+                            const displayPairArray = flashRankResponseData.topApplicants.filter((pair) => pair.id === cardID);
+                            if (displayPairArray.length > 0) {
+                              setCardScore(Math.round(displayPairArray[0].score * 100));
+                              setDisplayCard(true);
+                            } else {
+                              setDisplayCard(false);
+                            }
                             setTableInfo(getInfoResponseData.tableInfo);
                             setQueryText("");
                             setIsLoading(false);
@@ -206,6 +229,13 @@ export default function QueryTerminal({
                           }
                         } else {
                           setApplicantIDs(flashRankResponseData.topApplicants);
+                          const displayPairArray = flashRankResponseData.topApplicants.filter((pair) => pair.id === cardID);
+                            if (displayPairArray.length > 0) {
+                                setCardScore(Math.round(displayPairArray[0].score * 100));
+                                setDisplayCard(true);
+                            } else {
+                                setDisplayCard(false);
+                            }
                           setTableInfo(flashRankResponseData.topApplicants.reduce((acc, val) => {
                             acc[val.id] = tableInfo[val.id];
                             return acc;
@@ -233,7 +263,7 @@ export default function QueryTerminal({
               </Tooltip>
             </div>
             <div className="flex-initial px-unit-1">
-              <Tooltip content="Hand-pick (Slow)" color={"danger"} delay={400} closeDelay={600}>
+              <Tooltip content="Hand-Pick" color={"danger"} delay={400} closeDelay={600}>
                 <Button
                   isIconOnly
                   color="danger"
@@ -279,7 +309,14 @@ export default function QueryTerminal({
                           })
                           const getInfoResponseData = await getInfoResponse.json();
                           if (getInfoResponseData.status === 200) {
-                            setApplicantIDs(handPickResponseData.topApplicants);
+                            setApplicantIDs(handPickResponseData.filteredApplicants);
+                            const displayPairArray = handPickResponseData.filteredApplicants.filter((pair) => pair.id === cardID);
+                            if (displayPairArray.length > 0) {
+                              setCardScore(Math.round(displayPairArray[0].score * 100));
+                              setDisplayCard(true);
+                            } else {
+                              setDisplayCard(false);
+                            }
                             setTableInfo(getInfoResponseData.tableInfo);
                             setQueryText("");
                             setIsLoading(false);
@@ -290,6 +327,13 @@ export default function QueryTerminal({
                           }
                         } else {
                           setApplicantIDs(handPickResponseData.filteredApplicants);
+                          const displayPairArray = handPickResponseData.filteredApplicants.filter((pair) => pair.id === cardID);
+                            if (displayPairArray.length > 0) {
+                              setCardScore(Math.round(displayPairArray[0].score * 100));
+                              setDisplayCard(true);
+                            } else {
+                              setDisplayCard(false);
+                            }
                           setTableInfo(handPickResponseData.filteredApplicants.reduce((acc, val) => {
                             acc[val.id] = tableInfo[val.id];
                             return acc;
@@ -319,6 +363,8 @@ export default function QueryTerminal({
               <Tooltip content="Save Query" color={"secondary"} delay={400} closeDelay={600}>
                 <Button isIconOnly color="secondary" size="md"
                     onPress={async () => {
+                        console.log(applicantIDs)
+                        console.log(tableInfo)
                         if (queryText === "" || isLoading) {
                             return;
                         }
@@ -338,7 +384,7 @@ export default function QueryTerminal({
               </Tooltip>
             </div>
             <div className="flex-initial px-unit-1">
-              <Popover placement="bottom">
+              <Popover placement="bottom" isOpen={settingsModalOpen} onOpenChange={(open) => setSettingsModalOpen(open)}>
                 <PopoverTrigger>
                   <Button isIconOnly color="secondary" size="md">
                     <Tooltip content="Settings" color={"secondary"} delay={400} closeDelay={600}>
@@ -444,7 +490,7 @@ export default function QueryTerminal({
                             className="flex-initial"
                             color="secondary"
                             onPress={async () => {
-                              const searchSettings = {
+                              const tempSearchSettings = {
                                 topK: TopK,
                                 multipliers: {
                                   firstTopKMultiplier: initialMultiplier,
@@ -459,14 +505,15 @@ export default function QueryTerminal({
                                   newWeight: weightedAverage
                                 }
                               }
-                              setSearchSettings(searchSettings);
+                              setSearchSettings(tempSearchSettings);
                               await fetch("/api/save-search-settings", {
                                 method: "POST",
                                 headers: {
                                   "Content-Type": "application/json"
                                 },
-                                body: JSON.stringify(searchSettings)
+                                body: JSON.stringify(tempSearchSettings)
                               });
+                              setSettingsModalOpen(false);
                             }}
                           >
                             Save
@@ -483,12 +530,12 @@ export default function QueryTerminal({
         <div className="flex-auto flex h-full">
           <div className="flex-[72_1_0%] pr-unit-2 pt-unit-2">
             <div className="flex flex-col bg-default-50 rounded-xl h-full p-unit-3">
-              <ApplicantsTable applicantIDs={applicantIDs} tableInfo={tableInfo} loadingColor={loadingColor} loadingText={loadingText} isLoading={isLoading} setIsLoading={setIsLoading} emptyContent={emptyContent} setDisplayCard={setDisplayCard} setCardID={setCardID} setCardScore={setCardScore} />
+              <ApplicantsTable applicantIDs={applicantIDs} setApplicantIDs={setApplicantIDs} tableInfo={tableInfo} setTableInfo={setTableInfo} loadingColor={loadingColor} setLoadingColor={setLoadingColor} loadingText={loadingText} setLoadingText={setLoadingText} isLoading={isLoading} setIsLoading={setIsLoading} emptyContent={emptyContent} cardID={cardID} setCardID={setCardID} setDisplayCard={setDisplayCard} setCardScore={setCardScore}/>
             </div>
           </div>
           <div className="flex-[28_1_0%] pl-unit-2 pt-unit-2">
             <div className="bg-default-50 rounded-xl h-full p-unit-3">
-              <ApplicantCard displayCard={displayCard} cardID={cardID} tableInfo={tableInfo} cardScore={cardScore} />
+              <ApplicantCard displayCard={displayCard} setDisplayCard={setDisplayCard} cardID={cardID} tableInfo={tableInfo} setTableInfo={setTableInfo} cardScore={cardScore} setApplicantIDs={setApplicantIDs} />
             </div>
           </div>
         </div>
