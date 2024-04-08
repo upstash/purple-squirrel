@@ -303,6 +303,7 @@ export async function POST() {
                     try {
                         console.log('PIPELINE: Mail Pipeline started');
                         console.log('PIPELINE: Starting /api/listen-inbox');
+                        console.log(`${BASE_URL}/api/listen-inbox`);
                         await fetch(`${BASE_URL}/api/listen-inbox`, { method: "POST" });
                         const rawMailDataNum = await redis.llen("raw:mail:data:list");
                         const rawMailDataIndexList = Array.from(Array(rawMailDataNum).keys());
