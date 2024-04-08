@@ -1,6 +1,7 @@
 import { Redis } from '@upstash/redis';
 import OpenAI from "openai";
 import type { Applicant } from '@/types/types';
+import BASE_URL from '@/app/utils/baseUrl';
 
 export const runtime = "edge";
 
@@ -302,13 +303,13 @@ export async function POST() {
                     try {
                         console.log('PIPELINE: Mail Pipeline started');
                         console.log('PIPELINE: Starting /api/listen-inbox');
-                        await fetch("http://localhost:3000/api/listen-inbox", { method: "POST" });
+                        await fetch(`${BASE_URL}/api/listen-inbox`, { method: "POST" });
                         const rawMailDataNum = await redis.llen("raw:mail:data:list");
                         const rawMailDataIndexList = Array.from(Array(rawMailDataNum).keys());
                         if (rawMailDataNum > 0) {
                             Promise.all(rawMailDataIndexList.map( async (index) => {
                                 console.log('PIPELINE: Starting /api/process-raw-mail-data');
-                                let processResponse = await fetch(`http://localhost:3000/api/process-raw-mail-data?index=${index}`, { method: "POST" });
+                                let processResponse = await fetch(`${BASE_URL}/api/process-raw-mail-data?index=${index}`, { method: "POST" });
                                 let processResponseJson = await processResponse.json();
                                 if (processResponseJson.status !== 200) {
                                     console.log('PIPELINE: Error in /api/process-raw-mail-data');
@@ -406,7 +407,7 @@ export async function POST() {
                                 }
 
                                 console.log('PIPELINE: Starting /api/create-applicant');
-                                await fetch("http://localhost:3000/api/create-applicant", {
+                                await fetch(`${BASE_URL}/api/create-applicant`, {
                                     method: "POST",
                                     headers: {
                                         "Content-Type": "application/json"

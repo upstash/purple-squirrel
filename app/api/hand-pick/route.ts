@@ -1,6 +1,7 @@
 import { Redis } from '@upstash/redis';
 import OpenAI from "openai";
 import type { NextRequest } from 'next/server';
+import BASE_URL from '@/app/utils/baseUrl';
 
 const SYSTEM_MESSAGE = `You are an applicant filterer.
 
@@ -41,7 +42,7 @@ const openai = new OpenAI({
 });
 
 async function flashRank(data: any) {
-    const previousApplicants = await fetch("http://localhost:3000/api/flash-rank", {
+    const previousApplicants = await fetch(`${BASE_URL}/api/flash-rank`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

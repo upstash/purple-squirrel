@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import type { NextRequest } from 'next/server';
+import BASE_URL from "@/app/utils/baseUrl";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
@@ -22,7 +23,7 @@ During the partition and rephrasing try not to add commentary.
 `;
 
 async function flashRank(data: any) {
-    const flashRankResponse = await fetch("http://localhost:3000/api/flash-rank", {
+    const flashRankResponse = await fetch(`${BASE_URL}/api/flash-rank`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -34,7 +35,7 @@ async function flashRank(data: any) {
 }
 
 async function handPick(data: any) {
-    const handPickResponse = await fetch("http://localhost:3000/api/hand-pick", {
+    const handPickResponse = await fetch(`${BASE_URL}/api/hand-pick`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
