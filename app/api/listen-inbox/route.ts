@@ -2,7 +2,6 @@ var Imap = require('node-imap'),
 inspect = require('util').inspect;
 var fs = require('fs');
 const {simpleParser} = require('mailparser');
-var async = require('async');
 import { Redis } from '@upstash/redis';
 
 const redis = new Redis({
