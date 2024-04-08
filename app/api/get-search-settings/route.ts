@@ -1,5 +1,4 @@
 import { Redis } from '@upstash/redis';
-import type { NextRequest } from 'next/server';
 
 const redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL as string,
