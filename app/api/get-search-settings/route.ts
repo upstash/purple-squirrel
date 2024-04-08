@@ -8,9 +8,9 @@ const redis = new Redis({
 export async function GET() {
     const value = await redis.json.get("search:settings", "$");
     
-    if (!value) {
+    if (!value || !Array.isArray(value) || value.length !== 1) {
         return Response.json({topK: 10, multipliers: {firstTopKMultiplier: 2, regularTopKMultiplier: 2}, weights: {mainWeight: 0.9, educationWeight: 0.4, experienceWeight: 0.7, projectsWeight: 0.1, oldWeight: 0.5, newWeight: 0.5}});
     }
 
-    return Response.json(value);
+    return Response.json(value[0]);
 }
