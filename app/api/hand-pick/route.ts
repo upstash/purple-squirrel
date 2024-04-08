@@ -110,5 +110,5 @@ export async function POST(req: NextRequest) {
         return filterResults;
     }
     const filteredApplicants = previousApplicants.filter((_: any, index: any) => filterResults[index]);
-    return Response.json({ status: 200, message: "Success", filteredApplicants });
+    return Response.json({ status: 200, message: "Success", filteredApplicants: filteredApplicants });
 }
