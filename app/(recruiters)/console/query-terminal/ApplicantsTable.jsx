@@ -4,14 +4,15 @@ import React from "react";
 
 import {  Dropdown,  DropdownTrigger,  DropdownMenu,  DropdownSection,  DropdownItem} from "@nextui-org/dropdown";
 import {  Table,  TableHeader,  TableBody,  TableColumn,  TableRow,  TableCell} from "@nextui-org/table";
+import {Spinner} from "@nextui-org/spinner";
 import {Button, ButtonGroup} from "@nextui-org/button";
+import {Link} from "@nextui-org/link";
 import {Input} from "@nextui-org/input";
 import {Chip} from "@nextui-org/chip";
 import {Tooltip} from "@nextui-org/tooltip";
 import {Pagination, PaginationItem, PaginationCursor} from "@nextui-org/pagination";
 
 import {ChevronDownIcon} from "./ChevronDownIcon";
-import {columns, applicants, statusOptions} from "./mockData";
 import {capitalize} from "./utils";
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
@@ -20,6 +21,29 @@ import StarOutlinedIcon from '@mui/icons-material/StarOutlined';
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 
+const columns = [
+  {name: "ID", uid: "id", sortable: true},
+  {name: "SCORE", uid: "score", sortable: true},
+  {name: "NAME", uid: "name", sortable: true},
+  {name: "AGE", uid: "age", sortable: true},
+  {name: "ROLE", uid: "role"},
+  {name: "TEAM", uid: "team"},
+  {name: "LOCATION", uid: "location"},
+  {name: "STATUS", uid: "status", sortable: true},
+  {name: "STARS", uid: "stars", sortable: true},
+  {name: "ACTIONS", uid: "actions"},
+];
+
+const statusOptions = [
+  {name: "New", uid: "newApply"},
+  {name: "Screening", uid: "screening"},
+  {name: "Assessment", uid: "assessment"},
+  {name: "Interview", uid: "interview"},
+  {name: "Consideration", uid: "consideration"},
+  {name: "Offer", uid: "offer"},
+  {name: "Onboarding", uid: "onboarding"},
+  {name: "Hired", uid: "hired"},
+];
 
 const statusColorMap = {
   newApply: "default",
@@ -34,7 +58,7 @@ const statusColorMap = {
 
 const INITIAL_VISIBLE_COLUMNS = ["score", "name", "role", "location", "stars", "status", "actions"];
 
-export default function ApplicantsTable() {
+export default function ApplicantsTable({applicantIDs, tableInfo, loadingColor, loadingText, isLoading, emptyContent, setDisplayCard, setCardID, setCardScore}) {
   const [filterValue, setFilterValue] = React.useState("");
   const [selectedKeys, setSelectedKeys] = React.useState(new Set([]));
   const [visibleColumns, setVisibleColumns] = React.useState(new Set(INITIAL_VISIBLE_COLUMNS));
@@ -55,21 +79,21 @@ export default function ApplicantsTable() {
   }, [visibleColumns]);
 
   const filteredItems = React.useMemo(() => {
-    let filteredApplicants = [...applicants];
+    let filteredApplicants = [...applicantIDs];
 
     if (hasSearchFilter) {
-      filteredApplicants = filteredApplicants.filter((user) =>
-        user.name.toLowerCase().includes(filterValue.toLowerCase()),
+      filteredApplicants = filteredApplicants.filter(({id, score}) =>
+        tableInfo[id].name.toLowerCase().includes(filterValue.toLowerCase()),
       );
     }
     if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
-      filteredApplicants = filteredApplicants.filter((user) =>
-        Array.from(statusFilter).includes(user.status),
+      filteredApplicants = filteredApplicants.filter(({id, score}) =>
+        Array.from(statusFilter).includes(tableInfo[id].status),
       );
     }
 
     return filteredApplicants;
-  }, [filterValue, statusFilter, hasSearchFilter]);
+  }, [filterValue, statusFilter, hasSearchFilter, applicantIDs, tableInfo]);
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
@@ -91,42 +115,52 @@ export default function ApplicantsTable() {
   }, [sortDescriptor, items]);
 
   const renderCell = React.useCallback((applicant, columnKey) => {
-    const cellValue = applicant[columnKey];
-
+    const applicantID = applicant.id;
     switch (columnKey) {
       case "score":
+        const applicantScore = Math.round(applicant.score * 100);
         return (
           <div>
-            <p className={(applicant.score > 89) ? "text-bold text-lg bg-gradient-to-r from-secondary to-secondary-400 bg-clip-text text-transparent w-min" : (applicant.score > 79) ? "text-bold text-lg bg-gradient-to-r from-success to-success-300 bg-clip-text text-transparent w-min" : (applicant.score > 49) ? "text-bold text-lg bg-gradient-to-r from-warning to-warning-300 bg-clip-text text-transparent w-min" : "text-bold text-lg bg-gradient-to-r from-danger to-danger-300 bg-clip-text text-transparent w-min"}>{cellValue}</p>
+            <p className={(applicantScore > 89) ? "text-bold text-lg bg-gradient-to-r from-secondary to-secondary-400 bg-clip-text text-transparent w-min" : (applicantScore > 79) ? "text-bold text-lg bg-gradient-to-r from-success to-success-300 bg-clip-text text-transparent w-min" : (applicantScore > 49) ? "text-bold text-lg bg-gradient-to-r from-warning to-warning-300 bg-clip-text text-transparent w-min" : "text-bold text-lg bg-gradient-to-r from-danger to-danger-300 bg-clip-text text-transparent w-min"}>{Math.round(applicantScore)}</p>
           </div>
         );
       case "name":
         return (
-          <p className="text-bold text-sm capitalize">{cellValue}</p>
+          <p className="text-bold text-sm capitalize">{tableInfo[applicantID].name}</p>
+        );
+      case "team":
+        return (
+          <p className="text-bold text-sm capitalize">{tableInfo[applicantID].team}</p>
         );
       case "role":
         return (
-          <p className="text-bold text-small capitalize">{cellValue}</p>
+          <p className="text-bold text-small capitalize">{tableInfo[applicantID].role}</p>
         );
       case "location":
         return (
-          <p className="text-bold text-sm capitalize">{cellValue}</p>
+          <p className="text-bold text-sm capitalize">{tableInfo[applicantID].location}</p>
         );
       case "stars":
+        const applicantStars = tableInfo[applicantID].stars;
         return (
           <div>
             <span className="text-large cursor-pointer active:opacity-50">
               {Array.from({ length: 5 }).map((_, index) =>
-                index < applicant.stars ? <StarOutlinedIcon key={index} className={(applicant.stars === 0) ? "text-large text-default" : "text-large"}/> : <StarBorderOutlinedIcon key={index} className={(applicant.stars === 0) ? "text-large text-default" : "text-large"}/>
+                index < applicantStars ? <StarOutlinedIcon key={index} className={(applicantStars === 0) ? "text-large text-default" : "text-large"}/> : <StarBorderOutlinedIcon key={index} className={(applicantStars === 0) ? "text-large text-default" : "text-large"}/>
               )}
             </span>
           </div>
         );
       case "status":
+        const applicantStatus = tableInfo[applicantID].status;
         return (
-          <Chip className="capitalize" color={statusColorMap[applicant.status]} size="sm" variant="flat">
-            {(applicant.status === "newApply") ? "new" : applicant.status}
+          <Chip className="capitalize" color={statusColorMap[applicantStatus]} size="sm" variant="flat">
+            {(applicantStatus === "newApply") ? "new" : applicantStatus}
           </Chip>
+        );
+      case "age":
+        return (
+          <p className="text-bold text-sm capitalize">{tableInfo[applicantID].age}</p>
         );
       case "actions":
         return (
@@ -139,14 +173,19 @@ export default function ApplicantsTable() {
               </Button>
             </Tooltip>
             <Tooltip content="View Resume" color={"default"} delay={400} closeDelay={600}>
-              <Button isIconOnly variant="light" aria-label="View Resume" size="sm">
+              <Button isIconOnly as={Link} href={tableInfo[applicantID].resumeUrl} target="_blank" rel="noreferrer" variant="light" aria-label="View Resume" size="sm">
                 <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
                   <InsertDriveFileOutlinedIcon />
                 </span>
               </Button>
             </Tooltip>
             <Tooltip content="View Applicant" color={"default"} delay={400} closeDelay={600}>
-              <Button isIconOnly variant="light" aria-label="View Applicant" size="sm">
+              <Button isIconOnly variant="light" aria-label="View Applicant" size="sm"
+                onPress={() => {
+                  setCardID(applicantID);
+                  setCardScore(Math.round(applicant.score * 100));
+                  setDisplayCard(true);
+                }}>
                 <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
                   <VisibilityOutlinedIcon />
                 </span>
@@ -155,9 +194,9 @@ export default function ApplicantsTable() {
           </div>
         );
       default:
-        return cellValue;
+        return "?";
     }
-  }, []);
+  }, [tableInfo, setDisplayCard, setCardID, setCardScore]);
 
   const onRowsPerPageChange = React.useCallback((e) => {
     setRowsPerPage(Number(e.target.value));
@@ -290,7 +329,6 @@ export default function ApplicantsTable() {
                 aria-label="Table Columns"
                 closeOnSelect={false}
                 selectedKeys={visibleColumns}
-                selectionMode="multiple"
                 onSelectionChange={setVisibleColumns}
               >
                 {columns.map((column) => (
@@ -318,7 +356,7 @@ export default function ApplicantsTable() {
         <span className="flex-1 w-[30%] text-small text-default-40 w-full">
           {selectedKeys === "all"
             ? "All items selected"
-            : `${selectedKeys.size} of ${filteredItems.length} selected`}
+            : `${selectedKeys.size} of ${filteredItems.length} items`}
         </span>
         <div className="flex-[3_1_0%] flex justify-center items-center w-full">
           <Pagination
@@ -375,7 +413,7 @@ export default function ApplicantsTable() {
           </TableColumn>
         )}
       </TableHeader>
-      <TableBody emptyContent={"No applicants found"} items={sortedItems}>
+      <TableBody emptyContent={emptyContent} items={sortedItems} isLoading={isLoading} loadingContent={<Spinner className="h-full w-full bg-default-50/75" label={loadingText} color={loadingColor} labelColor={loadingColor} size="lg" />}>
         {(item) => (
           <TableRow key={item.id}>
             {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
