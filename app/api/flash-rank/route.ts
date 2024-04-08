@@ -107,5 +107,5 @@ export async function POST(req: NextRequest) {
         return applicantScores;
     }
     const topApplicants = sort(applicantScores).desc(a => a.score).slice(0, topK);
-    return Response.json({ status: 200, message: "Success", topApplicants });
+    return Response.json({ status: 200, message: "Success", topApplicants: topApplicants });
 }
