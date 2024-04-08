@@ -5,12 +5,12 @@ import React from "react";
 import {  Dropdown,  DropdownTrigger,  DropdownMenu,  DropdownSection,  DropdownItem} from "@nextui-org/dropdown";
 import {  Table,  TableHeader,  TableBody,  TableColumn,  TableRow,  TableCell} from "@nextui-org/table";
 import {Spinner} from "@nextui-org/spinner";
-import {Button, ButtonGroup} from "@nextui-org/button";
+import {Button} from "@nextui-org/button";
 import {Link} from "@nextui-org/link";
 import {Input} from "@nextui-org/input";
 import {Chip} from "@nextui-org/chip";
 import {Tooltip} from "@nextui-org/tooltip";
-import {Pagination, PaginationItem, PaginationCursor} from "@nextui-org/pagination";
+import {Pagination} from "@nextui-org/pagination";
 
 import {ChevronDownIcon} from "./ChevronDownIcon";
 import {capitalize} from "./utils";
@@ -390,8 +390,9 @@ export default function ApplicantsTable({applicantIDs, tableInfo, loadingColor, 
       isHeaderSticky
       bottomContent={bottomContent}
       bottomContentPlacement="outside"
+      className="h-full"
       classNames={{
-        wrapper: "max-h-[calc(100vh-21rem)]",
+        wrapper: "max-h-[calc(100vh-21rem)] flex-auto",
       }}
       selectedKeys={selectedKeys}
       selectionMode="multiple"
