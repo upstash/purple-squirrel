@@ -78,8 +78,6 @@ export default function Page() {
             setEmptySavedQueries("No saved queries found.");
           })
       }, [setSavedQueries, setLoadingSavedQueries, setEmptySavedQueries]);
-
-    useEffect(() => {console.log(`cardID: ${cardID}`)}, [cardID]);
     
     return (
         <section className="flex flex-col box-border h-screen">
