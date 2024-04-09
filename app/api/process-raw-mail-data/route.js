@@ -32,25 +32,22 @@ export async function POST(req) {
             try {
                 const parsedPDF = await pdf(resumeBuffer);
                 console.log('PDF parsed successfully');
+                let processedMailData = {
+                    "mailDate": rawMailData.mailDate,
+                    "mailSubject": rawMailData.mailSubject,
+                    "mailFrom": rawMailData.mailFrom,
+                    //"to": parsed.to,
+                    "mailBody": rawMailData.mailBody,
+                    "resumeKey": response.data.key,
+                    "resumeUrl": response.data.url,
+                    "resumeText": parsedPDF.text
+                }
+                console.log('processedMailData created');
+                return Response.json({ status: 200, message: "Success", processedMailData: processedMailData });
             } catch (error) {
                 console.log('Error in parsing PDF', error);
                 return Response.json({ status: 500, message: `Error in parsing PDF ${error}` });
             }
-    
-            console.log('PDF parsed successfully');
-    
-            let processedMailData = {
-                "mailDate": rawMailData.mailDate,
-                "mailSubject": rawMailData.mailSubject,
-                "mailFrom": rawMailData.mailFrom,
-                //"to": parsed.to,
-                "mailBody": rawMailData.mailBody,
-                "resumeKey": response.data.key,
-                "resumeUrl": response.data.url,
-                "resumeText": parsedPDF.text
-            }
-            console.log('processedMailData created');
-            return Response.json({ status: 200, message: "Success", processedMailData: processedMailData });
         } else {
             console.log('Error in uploading file');
             return Response.json({ status: 500, message: "Error in uploading file" });
