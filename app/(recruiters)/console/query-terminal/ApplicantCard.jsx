@@ -312,12 +312,12 @@ function EmptyCard() {
                     <div className="flex justify-between items-center w-full">
                         <div className="flex flex-col gap-2">
                             <div className="flex gap-2">
-                                <div className="h-8 w-20 bg-default-300 rounded-3xl"></div>
-                                <div className="h-8 w-40 bg-default-300 rounded-3xl"></div>
+                                <div className="h-8 w-20 bg-default-200 rounded-3xl"></div>
+                                <div className="h-8 w-40 bg-default-200 rounded-3xl"></div>
                             </div>
-                            <div className="h-4 w-40 bg-default-200 rounded-3xl"></div>
+                            <div className="h-4 w-40 bg-default-100 rounded-3xl"></div>
                         </div>
-                        <div className="h-14 w-16 bg-default-300 rounded-xl"></div>
+                        <div className="h-14 w-16 bg-default-200 rounded-xl"></div>
                     </div>
                 </div>
             </CardHeader>
@@ -327,46 +327,46 @@ function EmptyCard() {
                     <div className="flex gap-2 h-full">
                         <div className="flex-auto flex flex-col gap-2 h-full">
                             <div className="flex-[1_1_0%] flex gap-2 w-full">
-                                <div className="flex-[1_1_0%] bg-default-200 rounded-xl py-1 px-3 h-10">
+                                <div className="flex-[1_1_0%] bg-default-100 rounded-xl py-1 px-3 h-10">
 
                                 </div>
-                                <div className="flex-[1_1_0%] bg-default-200 rounded-xl py-1 px-3 h-10">
+                                <div className="flex-[1_1_0%] bg-default-100 rounded-xl py-1 px-3 h-10">
 
                                 </div>
-                                <div className="flex-[10_1_0%] bg-default-200 rounded-xl py-1 px-3 h-10">
+                                <div className="flex-[10_1_0%] bg-default-100 rounded-xl py-1 px-3 h-10">
 
                                 </div>
                             </div>
                             <div className="flex-[1_1_0%] flex gap-2 items-end w-full">
-                                <div className="flex-[2_1_0%] bg-default-200 rounded-xl py-1.5 px-3 h-10">
+                                <div className="flex-[2_1_0%] bg-default-100 rounded-xl py-1.5 px-3 h-10">
 
                                 </div>
                                 <div className="flex-[1_1_0%]"></div>
-                                <div className="flex-[4_1_0%] bg-default-200 rounded-xl py-1.5 px-3 h-10">
+                                <div className="flex-[4_1_0%] bg-default-100 rounded-xl py-1.5 px-3 h-10">
 
                                 </div>
                             </div>
                             <div className="flex-[1_1_0%] flex gap-2 items-end w-full">
                                 <div className="flex-[1_1_0%] pl-1"></div>
-                                <div className="flex-[5_1_0%] bg-default-200 rounded-xl py-1.5 px-3 h-10">
+                                <div className="flex-[5_1_0%] bg-default-100 rounded-xl py-1.5 px-3 h-10">
 
                                 </div>
                             </div>
                             <div className="flex-[1_1_0%] flex gap-2 items-end w-full">
-                                <div className="flex-auto bg-default-200 rounded-xl py-1 px-3 h-10">
+                                <div className="flex-auto bg-default-100 rounded-xl py-1 px-3 h-10">
 
                                 </div>
                             </div>
                             <div className="flex-[1_1_0%] flex gap-2 items-end w-full">
-                                <div className="flex-auto bg-default-200 rounded-xl py-1 px-3 h-10">
+                                <div className="flex-auto bg-default-100 rounded-xl py-1 px-3 h-10">
 
                                 </div>
                             </div>
                         </div>
                         <div className="flex-initial flex flex-col items-center gap-2 h-full">
-                            <div className="h-10 w-10 bg-default-300 rounded-xl"></div>
-                            <div className="h-10 w-10 bg-default-300 rounded-xl"></div>
-                            <div className="h-10 w-10 bg-default-300 rounded-xl"></div>
+                            <div className="h-10 w-10 bg-default-200 rounded-xl"></div>
+                            <div className="h-10 w-10 bg-default-200 rounded-xl"></div>
+                            <div className="h-10 w-10 bg-default-200 rounded-xl"></div>
                         </div>
                     </div>
                 </div>
@@ -375,19 +375,21 @@ function EmptyCard() {
             <CardFooter>
                 <div className="flex flex-col gap-3 h-full w-full">
                     <div className="flex items-center justify-between gap-unit-2 h-full w-full">
-                        <div className="h-5 w-20 bg-default-300 rounded-xl"></div>
+                        <div className="h-5 w-20 bg-default-200 rounded-xl"></div>
                         <div className="flex items-center">
                             {Array.from({ length: 5 }).map((_, index) =>
-                                <StarOutlinedIcon key={index} size="sm" className={"text-default-400"}/>
+                                <Button isIconOnly key={index} variant="light" size="sm">
+                                    <StarOutlinedIcon key={index} className={"text-default-200"}/>
+                                </Button>
                             )}
                         </div>
                     </div>
                     <div className="flex flex-col gap-3 h-full w-full">
-                    <div className="flex-initial h-4 w-10 rounded-xl bg-default-200"></div>
-                        <div className="flex-initial h-20 w-full rounded-lg bg-default-200"></div>
+                    <div className="flex-initial h-4 w-10 rounded-xl bg-default-100"></div>
+                        <div className="flex-initial h-20 w-full rounded-lg bg-default-100"></div>
                         <div className="flex flex-initial gap-4 items-center justify-between w-full">
-                            <div className="flex-[1_1_0%] h-10 w-10 bg-default-300 rounded-xl"></div>
-                            <div className="flex-[1_1_0%] h-10 w-10 bg-default-300 rounded-xl"></div>
+                            <div className="flex-[1_1_0%] h-10 w-10 bg-default-200 rounded-xl"></div>
+                            <div className="flex-[1_1_0%] h-10 w-10 bg-default-200 rounded-xl"></div>
                         </div>
                     </div>
                 </div>
