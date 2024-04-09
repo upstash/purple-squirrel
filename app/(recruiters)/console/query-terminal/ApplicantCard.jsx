@@ -11,10 +11,13 @@ import {Snippet} from "@nextui-org/snippet";
 import StarOutlinedIcon from '@mui/icons-material/StarOutlined';
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
 import LanguageOutlinedIcon from '@mui/icons-material/LanguageOutlined';
+import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
 import {Chip} from "@nextui-org/chip";
 import {Input} from "@nextui-org/input";
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import { card } from "@nextui-org/react";
+import React, { use } from "react";
+import {  Dropdown,  DropdownTrigger,  DropdownMenu,  DropdownSection,  DropdownItem} from "@nextui-org/dropdown";
 
 const statusColorMap = {
     newApply: "default",
@@ -26,6 +29,8 @@ const statusColorMap = {
     onboarding: "success",
     hired: "success",
   };
+
+const statusArray = Object.keys(statusColorMap);
 
 function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, setApplicantIDs}) {
     const applicantName = tableInfo[cardID].name;
@@ -45,6 +50,8 @@ function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, s
     const applicantStatus = tableInfo[cardID].status;
     const applicantStars = tableInfo[cardID].stars;
     const applicantNotes = tableInfo[cardID].notes;
+    const applicantNotesSaved = tableInfo[cardID].notesSaved;
+
     return (
         <Card className="max-w-[400px] h-full">
             <CardHeader className="flex gap-3">
@@ -137,28 +144,138 @@ function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, s
             <CardFooter>
                 <div className="flex flex-col h-full w-full">
                     <div className="flex items-center justify-between gap-unit-2">
-                        <Chip className="capitalize" color={statusColorMap[applicantStatus]} size="sm" variant="flat">
-                            {(applicantStatus === "newApply") ? "new" : applicantStatus}
-                        </Chip>
+                        <Dropdown>
+                            <DropdownTrigger>
+                                <Button 
+                                    variant="light" 
+                                    radius="xl"
+                                    className="capitalize"
+                                    size="sm"
+                                    color="default"
+                                >
+                                    <Chip className="capitalize" color={statusColorMap[applicantStatus]} size="sm" variant="flat">
+                                        {applicantStatus === "newApply" ? "New" : applicantStatus}
+                                    </Chip>
+                                </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu 
+                                aria-label="Single selection example"
+                                variant="flat"
+                                disallowEmptySelection
+                                selectionMode="single"
+                                selectedKeys={new Set([applicantStatus])}
+                                onSelectionChange={
+                                    async (keys) => {
+                                        await fetch(`/api/set-applicant-status`, {
+                                            method: "POST",
+                                            headers: {
+                                              "Content-Type": "application/json",
+                                            },
+                                            body: JSON.stringify({id: cardID, status: Array.from(keys)[0]}),
+                                          });
+                                        setTableInfo((prevTableInfo) => {
+                                            const updatedTableInfo = { ...prevTableInfo };
+                                            updatedTableInfo[cardID].status = Array.from(keys)[0];
+                                            return updatedTableInfo;
+                                        });
+                                    }
+                                }
+                            >
+                                {statusArray.map((key) => 
+                                    <DropdownItem key={key} textValue={key === "newApply" ? "new" : key}>
+                                        <Chip className="capitalize" color={statusColorMap[key]} size="sm" variant="flat">
+                                            {key === "newApply" ? "New" : key}
+                                        </Chip>
+                                    </DropdownItem>
+                                )}
+                            </DropdownMenu>
+                        </Dropdown>
                         <div className="flex items-center">
                             {Array.from({ length: 5 }).map((_, index) =>
-                                index < applicantStars ? <Button isIconOnly key={index} variant="light" size="sm"><StarOutlinedIcon key={index} className={(applicantStars === 0) ? "text-default" : "text-warning"}/></Button> : <Button isIconOnly key={index} variant="light"><StarBorderOutlinedIcon key={index} size="sm" className={(applicantStars === 0) ? "text-default" : "text-warning"}/></Button>
+                                (!applicantStars)
+                                ? <Button isIconOnly key={index} variant="light" size="sm"
+                                    onPress={async () => {
+                                        await fetch(`/api/set-applicant-stars`, {
+                                            method: "POST",
+                                            headers: {
+                                              "Content-Type": "application/json",
+                                            },
+                                            body: JSON.stringify({id: cardID, stars: index + 1}),
+                                          });
+                                        setTableInfo((prevTableInfo) => {
+                                            const updatedTableInfo = { ...prevTableInfo };
+                                            updatedTableInfo[cardID].stars = index + 1;
+                                            return updatedTableInfo;
+                                        })
+                                    }}
+                                    ><StarBorderOutlinedIcon key={index} className={"text-default"}/></Button>
+                                : <Button isIconOnly key={index} variant="light" size="sm"
+                                    onPress={async () => {
+                                        await fetch(`/api/set-applicant-stars`, {
+                                            method: "POST",
+                                            headers: {
+                                              "Content-Type": "application/json",
+                                            },
+                                            body: JSON.stringify({id: cardID, stars: index + 1}),
+                                          });
+                                        setTableInfo((prevTableInfo) => {
+                                            const updatedTableInfo = { ...prevTableInfo };
+                                            updatedTableInfo[cardID].stars = index + 1;
+                                            return updatedTableInfo;
+                                        })
+                                    }}
+                                    ><StarOutlinedIcon key={index} className={(applicantStars > index) ? "text-warning" : "text-default"}/></Button>
                             )}
                         </div>
                     </div>
                     <div className="flex flex-col gap-3">
                         <Textarea
-                            isDisabled
+                            isDisabled={applicantNotesSaved}
                             label="Notes"
                             labelPlacement="outside"
                             placeholder="Enter your description"
-                            defaultValue={applicantNotes}
+                            value={tableInfo[cardID].notes || ""}
+                            onValueChange={(value) => {
+                                setTableInfo((prevTableInfo) => {
+                                    const updatedTableInfo = { ...prevTableInfo };
+                                    updatedTableInfo[cardID].notes = value;
+                                    return updatedTableInfo;
+                                });
+                            }}
                             className="w-full h-full"
+
                             />
                         <div className="flex gap-4 items-center justify-between w-full">
-                            <Button color="success" className="flex-1 w-full" startContent={<CreateOutlinedIcon/>}>
-                                Take Notes
-                            </Button>    
+                            {
+                                applicantNotesSaved
+                                ? <Button color="success" variant="bordered" className="flex-1 w-full" startContent={<CreateOutlinedIcon/>}
+                                    onPress={() => {
+                                        setTableInfo((prevTableInfo) => {
+                                            const updatedTableInfo = { ...prevTableInfo };
+                                            updatedTableInfo[cardID].notesSaved = false;
+                                            return updatedTableInfo;
+                                        })
+                                    }}>
+                                    Take Notes
+                                    </Button>
+                                : <Button color="success" className="flex-1 w-full" startContent={<CheckOutlinedIcon/>}
+                                    onPress={async () => {
+                                        await fetch(`/api/set-applicant-notes`, {
+                                            method: "POST",
+                                            headers: {
+                                              "Content-Type": "application/json",
+                                            },
+                                            body: JSON.stringify({id: cardID, notes: tableInfo[cardID].notes}),
+                                          });
+                                        setTableInfo((prevTableInfo) => {
+                                            const updatedTableInfo = { ...prevTableInfo };
+                                            updatedTableInfo[cardID].notesSaved = true;
+                                            return updatedTableInfo;
+                                        })
+                                    }}>
+                                    Save Notes
+                                    </Button>
+                            }
                             <Button color="danger" variant="bordered" className="flex-1" startContent={<PersonOffOutlinedIcon/>}
                                 onPress={async () => {
                                     await fetch(`/api/delete-applicants`, {
