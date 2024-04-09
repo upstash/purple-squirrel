@@ -64,3 +64,5 @@ export async function POST(req: NextRequest) {
     await redis.sadd("applicant:ids", applicantID);
     return Response.json({ status: 200, message: "Success" });
 }
+
+export const dynamic = "force-dynamic";

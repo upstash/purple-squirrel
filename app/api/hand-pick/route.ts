@@ -116,3 +116,5 @@ export async function POST(req: NextRequest) {
     const filteredApplicants = previousApplicants.filter((_: any, index: any) => filterResults[index]);
     return Response.json({ status: 200, message: "Success", filteredApplicants: filteredApplicants });
 }
+
+export const dynamic = "force-dynamic";

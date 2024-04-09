@@ -122,3 +122,5 @@ export async function POST(req: NextRequest) {
     }
     return Response.json({ status: 200, message: "Success", filteredTopApplicants: filteredTopApplicants });
 }
+
+export const dynamic = "force-dynamic";

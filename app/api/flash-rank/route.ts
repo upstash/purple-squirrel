@@ -109,3 +109,5 @@ export async function POST(req: NextRequest) {
     const topApplicants = sort(applicantScores).desc(a => a.score).slice(0, topK);
     return Response.json({ status: 200, message: "Success", topApplicants: topApplicants });
 }
+
+export const dynamic = "force-dynamic";

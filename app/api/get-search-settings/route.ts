@@ -14,3 +14,5 @@ export async function GET() {
 
     return Response.json(value[0]);
 }
+
+export const dynamic = "force-dynamic";

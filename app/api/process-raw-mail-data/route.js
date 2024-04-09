@@ -57,3 +57,5 @@ export async function POST(req) {
         return Response.json({ status: 500, message: `API Error ${error}` });
     }
 }
+
+export const dynamic = "force-dynamic";
