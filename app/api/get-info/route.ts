@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
             degree: applicantData[0].applicantInfo.latestEducation.degree,
             subject: applicantData[0].applicantInfo.latestEducation.subject,
             university: applicantData[0].applicantInfo.latestEducation.university,
+            notesSaved: true,
         };
         return {id, tableData};
     })).catch((error) => {
