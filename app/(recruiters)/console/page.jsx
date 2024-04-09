@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {Tabs, Tab} from "@nextui-org/react";
+import {Tabs, Tab, card} from "@nextui-org/react";
 import { ThemeSwitcher } from "@/app/components/ThemeSwitcher";
 import {SquirrelIcon} from '@primer/octicons-react'
 import QueryTerminal from "./query-terminal/QueryTerminal";
@@ -78,6 +78,8 @@ export default function Page() {
             setEmptySavedQueries("No saved queries found.");
           })
       }, [setSavedQueries, setLoadingSavedQueries, setEmptySavedQueries]);
+
+    useEffect(() => {console.log(`cardID: ${cardID}`)}, [cardID]);
     
     return (
         <section className="flex flex-col box-border h-screen">
