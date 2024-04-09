@@ -1,16 +1,15 @@
 import { Blob } from "buffer";
 import { utapi } from "@/app/utils/uploadthing/server/uploadthing";
-import PDFParser from 'pdf2json';
-import type { NextRequest } from 'next/server'
+import pdf from 'pdf-parse/lib/pdf-parse'
 import { Redis } from '@upstash/redis';
 import { FileEsque } from "uploadthing/types";
 
 const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL as string,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN as string,
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
-export async function POST(req: NextRequest) {
+export async function POST(req) {
     const index = req.nextUrl.searchParams.get("index");
 
     if (!index) {
@@ -24,30 +23,20 @@ export async function POST(req: NextRequest) {
         let resumeBuffer = Buffer.from(rawMailData.resumeBuffer.data);
     
         let fileBlob = new Blob([resumeBuffer]);
-        let response = await utapi.uploadFiles(fileBlob as FileEsque);
+        let response = await utapi.uploadFiles(fileBlob);
         // console.log(response);
         
         if (response.data) {
             console.log('File uploaded successfully');
-    
-            let parsedTextPromise = new Promise((resolve, reject) => {
-                let pdfParser = new (PDFParser as any)(null, 1);
-                pdfParser.on('pdfParser_dataReady', () => {
-                    // console.log(pdfParser.getRawTextContent());
-                    let parsedTextInPromise = pdfParser.getRawTextContent();
-                    resolve(parsedTextInPromise);
-                });
-            
-                pdfParser.on('pdfParser_dataError', (errData: any) => {
-                    reject(errData.parserError);
-                });
-                pdfParser.parseBuffer(resumeBuffer);
-            }).catch((error) => {
+
+            try {
+                const parsedPDF = await pdf(resumeBuffer);
+                console.log('PDF parsed successfully');
+            } catch (error) {
                 console.log('Error in parsing PDF', error);
-                return Response.json({ status: 500, message: `Error in parsing PDf ${error}` });
-            });
+                return Response.json({ status: 500, message: `Error in parsing PDF ${error}` });
+            }
     
-            let parsedText = await parsedTextPromise;
             console.log('PDF parsed successfully');
     
             let processedMailData = {
@@ -58,7 +47,7 @@ export async function POST(req: NextRequest) {
                 "mailBody": rawMailData.mailBody,
                 "resumeKey": response.data.key,
                 "resumeUrl": response.data.url,
-                "resumeText": parsedText
+                "resumeText": parsedPDF.text
             }
             console.log('processedMailData created');
             return Response.json({ status: 200, message: "Success", processedMailData: processedMailData });
