@@ -70,6 +70,12 @@ function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, s
                                         <p className="text-small text-bold">{applicantAge}</p>
                                     </div>
                                 </div>
+                                <div className="flex-inital border-default-300 border-2 rounded-xl py-1 px-3">
+                                    <div className="flex flex-col">
+                                        <p className="text-xs text-default-300">cardID</p>
+                                        <p className="text-small text-bold">{cardID}</p>
+                                    </div>
+                                </div>
                                 <div className="flex-initial border-default-300 border-2 rounded-xl py-1 px-3">
                                     <div className="flex flex-col">
                                         <p className="text-xs text-default-300">YOE</p>
