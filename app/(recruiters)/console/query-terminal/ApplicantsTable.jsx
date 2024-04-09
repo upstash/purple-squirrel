@@ -19,6 +19,7 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import StarOutlinedIcon from '@mui/icons-material/StarOutlined';
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
+import { card } from "@nextui-org/react";
 
 const columns = [
   {name: "ID", uid: "id", sortable: true},
@@ -144,6 +145,7 @@ export default function ApplicantsTable({
         tableInfo[id].stars >= parseInt(insideStarsFilter),
       );
     }
+    filteredApplicants = filteredApplicants.map(({id, score}) => ({id: id, score: score, info: {...tableInfo[id]}}));
 
     return filteredApplicants;
   }, [filterValue, statusFilter, hasSearchFilter, applicantIDs, tableInfo, teamFilter, starsFilter]);
@@ -169,6 +171,7 @@ export default function ApplicantsTable({
 
   const renderCell = React.useCallback((applicant, columnKey) => {
     const applicantID = applicant.id;
+    const info = applicant.info;
     switch (columnKey) {
       case "score":
         const applicantScore = Math.round(applicant.score * 100);
@@ -179,25 +182,25 @@ export default function ApplicantsTable({
         );
       case "name":
         return (
-          <p className="text-bold text-sm capitalize">{tableInfo[applicantID].name}</p>
+          <p className="text-bold text-sm capitalize">{info.name}</p>
         );
       case "team":
         return (
-          <p className="text-bold text-sm capitalize">{tableInfo[applicantID].team}</p>
+          <p className="text-bold text-sm capitalize">{info.team}</p>
         );
       case "role":
         return (
-          <p className="text-bold text-small capitalize">{tableInfo[applicantID].role}</p>
+          <p className="text-bold text-sm capitalize">{info.role}</p>
         );
       case "location":
         return (
-          <p className="text-bold text-sm capitalize">{tableInfo[applicantID].location}</p>
+          <p className="text-bold text-sm capitalize">{info.location}</p>
         );
       case "stars":
-        const applicantStars = tableInfo[applicantID].stars;
+        const applicantStars = info.stars;
         return (
           <div>
-            <span className="text-large cursor-pointer active:opacity-50">
+            <span className="flex text-large cursor-pointer active:opacity-50">
               {Array.from({ length: 5 }).map((_, index) =>
                 index < applicantStars ? <StarOutlinedIcon key={index} className={(applicantStars === 0) ? "text-large text-default" : "text-large"}/> : <StarBorderOutlinedIcon key={index} className={(applicantStars === 0) ? "text-large text-default" : "text-large"}/>
               )}
@@ -205,7 +208,7 @@ export default function ApplicantsTable({
           </div>
         );
       case "status":
-        const applicantStatus = tableInfo[applicantID].status;
+        const applicantStatus = info.status;
         return (
           <Chip className="capitalize" color={statusColorMap[applicantStatus]} size="sm" variant="flat">
             {(applicantStatus === "newApply") ? "new" : applicantStatus}
@@ -213,7 +216,7 @@ export default function ApplicantsTable({
         );
       case "age":
         return (
-          <p className="text-bold text-sm capitalize">{tableInfo[applicantID].age}</p>
+          <p className="text-bold text-sm capitalize">{info.age}</p>
         );
       case "id":
         return (
@@ -253,7 +256,7 @@ export default function ApplicantsTable({
               </Button>
             </Tooltip>
             <Tooltip content="View Resume" color={"default"} delay={400} closeDelay={600}>
-              <Button isIconOnly as={Link} href={tableInfo[applicantID].resumeUrl} target="_blank" rel="noreferrer" variant="light" aria-label="View Resume" size="sm">
+              <Button isIconOnly as={Link} href={info.resumeUrl} target="_blank" rel="noreferrer" variant="light" aria-label="View Resume" size="sm">
                 <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
                   <InsertDriveFileOutlinedIcon />
                 </span>
@@ -276,7 +279,7 @@ export default function ApplicantsTable({
       default:
         return "?";
     }
-  }, [tableInfo, setTableInfo, setCardID, setDisplayCard, setCardScore, setApplicantIDs, setIsLoading, setLoadingColor, setLoadingText]);
+  }, [setTableInfo, setCardID, setDisplayCard, setCardScore, setApplicantIDs, setIsLoading, setLoadingColor, setLoadingText]);
 
   const onRowsPerPageChange = React.useCallback((e) => {
     setRowsPerPage(Number(e.target.value));
@@ -413,11 +416,52 @@ export default function ApplicantsTable({
   const bottomContent = React.useMemo(() => {
     return (
       <div className="py-2 px-2 flex items-center">
-        <span className="flex-1 w-[30%] text-small text-default-40 w-full">
-          {selectedKeys === "all"
-            ? "All items selected"
-            : `${selectedKeys.size} of ${filteredItems.length} items`}
-        </span>
+        <div className="flex-1">
+          <Tooltip content="Delete Selected Applicant" color={"danger"} delay={400} closeDelay={600}>
+            <Button isIconOnly variant="light" aria-label="Delete Applicant" size="sm"
+              onPress={async () => {
+                if (selectedKeys.size === 0) {
+                  return;
+                }
+                if (selectedKeys === "all" || selectedKeys.has(cardIDRef.current)) {
+                  setDisplayCard(false);
+                }
+                setLoadingText("Deleting Selected Applicants...");
+                setLoadingColor("danger");
+                setIsLoading(true);
+                await fetch(`/api/delete-applicants`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ids: (selectedKeys === "all" ? applicantIDs.map((i) => i.id) : [...selectedKeys])}),
+                });
+                setApplicantIDs((prevApplicantIDs) => prevApplicantIDs.filter((pair) => (selectedKeys === "all" ? false : !selectedKeys.has(pair.id))));
+                setTableInfo(prevTableInfo => {
+                  if (selectedKeys === "all") {
+                    return {};
+                  }
+                  const updatedTableInfo = { ...prevTableInfo };
+                  selectedKeys.forEach((id) => {
+                    delete updatedTableInfo[id];
+                  });
+                  return updatedTableInfo;
+                });
+                setSelectedKeys(new Set([]));
+                setIsLoading(false);
+              }}
+            >
+              <span className="text-lg text-danger-400 cursor-pointer active:opacity-50">
+                <DeleteOutlinedIcon />
+              </span>
+            </Button>
+          </Tooltip>
+          <span className="w-[30%] text-small text-default-40 w-full">
+            {selectedKeys === "all"
+              ? "All items selected"
+              : `${selectedKeys.size} of ${filteredItems.length} items`}
+          </span>
+        </div>
         <div className="flex-[3_1_0%] flex justify-center items-center w-full">
           <Pagination
             isCompact
@@ -442,7 +486,7 @@ export default function ApplicantsTable({
           </label>
       </div>
     );
-  }, [onRowsPerPageChange, filteredItems.length, selectedKeys, page, pages]);
+  }, [onRowsPerPageChange, selectedKeys, page, pages, setIsLoading, setLoadingColor, setLoadingText, setTableInfo, setApplicantIDs, filteredItems, cardIDRef, setDisplayCard, applicantIDs]);
 
   return (
     <Table
