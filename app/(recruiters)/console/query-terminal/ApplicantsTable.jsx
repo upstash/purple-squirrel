@@ -222,6 +222,7 @@ export default function ApplicantsTable({
             <Tooltip content="Delete Applicant" color={"danger"} delay={400} closeDelay={600}>
               <Button isIconOnly variant="light" aria-label="Delete Applicant" size="sm"
                 onPress={async () => {
+                  console.log(applicantID, cardID);
                   if (applicantID === cardID) {
                     setDisplayCard(false);
                   }
