@@ -222,6 +222,9 @@ export default function ApplicantsTable({
             <Tooltip content="Delete Applicant" color={"danger"} delay={400} closeDelay={600}>
               <Button isIconOnly variant="light" aria-label="Delete Applicant" size="sm"
                 onPress={async () => {
+                  if (applicantID === cardID) {
+                    setDisplayCard(false);
+                  }
                   setLoadingText("Deleting Applicant...");
                   setLoadingColor("danger");
                   setIsLoading(true);
@@ -232,7 +235,6 @@ export default function ApplicantsTable({
                     },
                     body: JSON.stringify({ids: [applicantID]}),
                   });
-                  if (cardID && applicantID === cardID) setDisplayCard(false);
                   setApplicantIDs((prevApplicantIDs) => prevApplicantIDs.filter((pair) => pair.id !== applicantID));
                   setTableInfo(prevTableInfo => {
                     const updatedTableInfo = { ...prevTableInfo };
