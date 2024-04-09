@@ -530,7 +530,7 @@ export default function QueryTerminal({
         <div className="flex-auto flex h-full">
           <div className="flex-[72_1_0%] pr-unit-2 pt-unit-2">
             <div className="flex flex-col bg-default-50 rounded-xl h-full p-unit-3">
-              <ApplicantsTable applicantIDs={applicantIDs} setApplicantIDs={setApplicantIDs} tableInfo={tableInfo} setTableInfo={setTableInfo} loadingColor={loadingColor} setLoadingColor={setLoadingColor} loadingText={loadingText} setLoadingText={setLoadingText} isLoading={isLoading} setIsLoading={setIsLoading} emptyContent={emptyContent} cardID={cardID} setCardID={setCardID} setDisplayCard={setDisplayCard} setCardScore={setCardScore}/>
+              <ApplicantsTable applicantIDs={applicantIDs} setApplicantIDs={setApplicantIDs} tableInfo={tableInfo} setTableInfo={setTableInfo} loadingColor={loadingColor} setLoadingColor={setLoadingColor} loadingText={loadingText} setLoadingText={setLoadingText} isLoading={isLoading} setIsLoading={setIsLoading} emptyContent={emptyContent} cardID={cardID} setCardID={setCardID} setDisplayCard={setDisplayCard} setCardScore={setCardScore} />
             </div>
           </div>
           <div className="flex-[28_1_0%] pl-unit-2 pt-unit-2">
