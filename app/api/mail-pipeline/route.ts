@@ -1,12 +1,10 @@
 import { Redis } from '@upstash/redis';
 import OpenAI from "openai";
 import type { Applicant } from '@/types/types';
+import { headers } from 'next/headers'
 import BASE_URL from '@/app/utils/baseURL';
 
 export const runtime = "edge";
-
-const AUTH_USER = process.env.BASIC_AUTH_USER;
-const AUTH_PASS = process.env.BASIC_AUTH_PASSWORD;
 
 const SYSTEM_MESSAGE = `You are a resume parser.
 You will be presented information in the following format:
@@ -273,6 +271,8 @@ const redis = new Redis({
 });
 
 export async function POST() {
+    const authHeader = headers().get('authorization') || headers().get('Authorization');
+
     const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY
     });
@@ -301,13 +301,13 @@ export async function POST() {
                     try {
                         console.log('PIPELINE: Mail Pipeline started');
                         console.log('PIPELINE: Starting /api/listen-inbox');
-                        await fetch(`${BASE_URL}/api/listen-inbox`, { method: "POST", headers: { "Authorization": 'Basic ' + Buffer.from(AUTH_USER + ":" + AUTH_PASS).toString('base64') }});
+                        await fetch(`${BASE_URL}/api/listen-inbox`, { method: "POST", headers: { "Authorization": authHeader as string}});
                         const rawMailDataNum = await redis.llen("raw:mail:data:list");
                         const rawMailDataIndexList = Array.from(Array(rawMailDataNum).keys());
                         if (rawMailDataNum > 0) {
                             Promise.all(rawMailDataIndexList.map( async (index) => {
                                 console.log('PIPELINE: Starting /api/process-raw-mail-data');
-                                let processResponse = await fetch(`${BASE_URL}/api/process-raw-mail-data?index=${index}`, { method: "POST", headers: { "Authorization": 'Basic ' + Buffer.from(AUTH_USER + ":" + AUTH_PASS).toString('base64') } });
+                                let processResponse = await fetch(`${BASE_URL}/api/process-raw-mail-data?index=${index}`, { method: "POST", headers: { "Authorization": authHeader as string } });
                                 let processResponseJson = await processResponse.json();
                                 if (processResponseJson.status !== 200) {
                                     console.log('PIPELINE: Error in /api/process-raw-mail-data');
@@ -409,7 +409,7 @@ export async function POST() {
                                     method: "POST",
                                     headers: {
                                         "Content-Type": "application/json",
-                                        "Authorization": 'Basic ' + Buffer.from(AUTH_USER + ":" + AUTH_PASS).toString('base64')
+                                        "Authorization": authHeader as string
                                     },
                                     body: JSON.stringify({ applicant: applicant, embeddings: embeddings })
                                 });

@@ -1,10 +1,8 @@
 import { Redis } from '@upstash/redis';
 import OpenAI from "openai";
 import type { NextRequest } from 'next/server';
+import { headers } from 'next/headers'
 import BASE_URL from '@/app/utils/baseURL';
-
-const AUTH_USER = process.env.BASIC_AUTH_USER;
-const AUTH_PASS = process.env.BASIC_AUTH_PASSWORD;
 
 const SYSTEM_MESSAGE = `You are an applicant filterer.
 
@@ -44,12 +42,12 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
 
-async function flashRank(data: any) {
+async function flashRank(data: any, authHeader: any) {
     const previousApplicants = await fetch(`${BASE_URL}/api/flash-rank`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": 'Basic ' + Buffer.from(AUTH_USER + ":" + AUTH_PASS).toString('base64')
+            "Authorization": authHeader
         },
         body: JSON.stringify(data),
     });
@@ -59,6 +57,7 @@ async function flashRank(data: any) {
 
 export async function POST(req: NextRequest) {
     const data = await req.json();
+    const authHeader = headers().get('authorization') || headers().get('Authorization');
 
     const CURRENT_DATE = new Date().toDateString();
 
@@ -69,7 +68,7 @@ export async function POST(req: NextRequest) {
     const fromScratch = (previousApplicants.length === 0);
 
     if (fromScratch) {
-        previousApplicants = await flashRank(data);
+        previousApplicants = await flashRank(data, authHeader);
     }
 
     const queryText = data.queryText;

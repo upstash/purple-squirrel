@@ -1,13 +1,12 @@
 import OpenAI from "openai";
 import type { NextRequest } from 'next/server';
+import { headers } from 'next/headers'
 import BASE_URL from "@/app/utils/baseURL";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
 
-const AUTH_USER = process.env.BASIC_AUTH_USER;
-const AUTH_PASS = process.env.BASIC_AUTH_PASSWORD;
 
 const SYSTEM_MESSAGE = `You are a query interpreter in an applicant tracking system.
 
@@ -25,12 +24,12 @@ Values of filter and rank are strings. If not applicable, put null, do not retur
 During the partition and rephrasing try not to add commentary.
 `;
 
-async function flashRank(data: any) {
+async function flashRank(data: any, authHeader: any) {
     const flashRankResponse = await fetch(`${BASE_URL}/api/flash-rank`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": 'Basic ' + Buffer.from(AUTH_USER + ":" + AUTH_PASS).toString('base64')
+            "Authorization": authHeader
         },
         body: JSON.stringify(data),
     });
@@ -38,12 +37,12 @@ async function flashRank(data: any) {
     return flashRankData.topApplicants;
 }
 
-async function handPick(data: any) {
+async function handPick(data: any, authHeader: any) {
     const handPickResponse = await fetch(`${BASE_URL}/api/hand-pick`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": 'Basic ' + Buffer.from(AUTH_USER + ":" + AUTH_PASS).toString('base64')
+            "Authorization": authHeader
         },
         body: JSON.stringify(data),
     });
@@ -53,6 +52,7 @@ async function handPick(data: any) {
 
 export async function POST(req: NextRequest) {
     const data = await req.json();
+    const authHeader = headers().get('authorization') || headers().get('Authorization');
 
     const previousApplicants = data.previousApplicants;
     if (!Array.isArray(previousApplicants)) {
@@ -92,16 +92,16 @@ export async function POST(req: NextRequest) {
         if (interpretation.rank && typeof interpretation.rank === "string") {
             if (fromScratch) {
                 data.queryText = interpretation.rank;
-                const topApplicants = await flashRank(data);
+                const topApplicants = await flashRank(data, authHeader);
                 data.queryText = interpretation.filter;
                 data.previousApplicants = topApplicants;
-                filteredTopApplicants = await handPick(data);
+                filteredTopApplicants = await handPick(data, authHeader);
             } else {
                 const rankData = structuredClone(data);
                 const filterData = structuredClone(data);
                 rankData.queryText = interpretation.rank;
                 filterData.queryText = interpretation.filter;
-                const [topApplicants, filteredApplicants] = await Promise.all([flashRank(rankData), handPick(filterData)]);
+                const [topApplicants, filteredApplicants] = await Promise.all([flashRank(rankData, authHeader), handPick(filterData, authHeader)]);
                 if (!Array.isArray(topApplicants) || !Array.isArray(filteredApplicants)) {
                     return Response.json({ status: 500, message: "Error" });
                 }
@@ -110,12 +110,12 @@ export async function POST(req: NextRequest) {
             }
         } else {
             data.queryText = interpretation.filter;
-            filteredTopApplicants = await handPick(data);
+            filteredTopApplicants = await handPick(data, authHeader);
         }
     } else {
         if (interpretation.rank && typeof interpretation.rank === "string") {
             data.queryText = interpretation.rank;
-            filteredTopApplicants = await flashRank(data);
+            filteredTopApplicants = await flashRank(data, authHeader);
         } else {
             return Response.json({ status: 500, message: "No filtering or ranking performed", data: null });
         }
