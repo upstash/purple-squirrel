@@ -6,6 +6,9 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
 
+const AUTH_USER = process.env.BASIC_AUTH_USER;
+const AUTH_PASS = process.env.BASIC_AUTH_PASSWORD;
+
 const SYSTEM_MESSAGE = `You are a query interpreter in an applicant tracking system.
 
 You will return nothing but a JSON like this:
@@ -27,6 +30,7 @@ async function flashRank(data: any) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "Authorization": 'Basic ' + Buffer.from(AUTH_USER + ":" + AUTH_PASS).toString('base64')
         },
         body: JSON.stringify(data),
     });
@@ -39,6 +43,7 @@ async function handPick(data: any) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "Authorization": 'Basic ' + Buffer.from(AUTH_USER + ":" + AUTH_PASS).toString('base64')
         },
         body: JSON.stringify(data),
     });

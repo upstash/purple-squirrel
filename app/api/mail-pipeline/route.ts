@@ -5,6 +5,9 @@ import BASE_URL from '@/app/utils/baseURL';
 
 export const runtime = "edge";
 
+const AUTH_USER = process.env.BASIC_AUTH_USER;
+const AUTH_PASS = process.env.BASIC_AUTH_PASSWORD;
+
 const SYSTEM_MESSAGE = `You are a resume parser.
 You will be presented information in the following format:
 CURRENT_DATE
@@ -298,13 +301,13 @@ export async function POST() {
                     try {
                         console.log('PIPELINE: Mail Pipeline started');
                         console.log('PIPELINE: Starting /api/listen-inbox');
-                        await fetch(`${BASE_URL}/api/listen-inbox`, { method: "POST" });
+                        await fetch(`${BASE_URL}/api/listen-inbox`, { method: "POST", headers: { "Authorization": 'Basic ' + Buffer.from(AUTH_USER + ":" + AUTH_PASS).toString('base64') }});
                         const rawMailDataNum = await redis.llen("raw:mail:data:list");
                         const rawMailDataIndexList = Array.from(Array(rawMailDataNum).keys());
                         if (rawMailDataNum > 0) {
                             Promise.all(rawMailDataIndexList.map( async (index) => {
                                 console.log('PIPELINE: Starting /api/process-raw-mail-data');
-                                let processResponse = await fetch(`${BASE_URL}/api/process-raw-mail-data?index=${index}`, { method: "POST" });
+                                let processResponse = await fetch(`${BASE_URL}/api/process-raw-mail-data?index=${index}`, { method: "POST", headers: { "Authorization": 'Basic ' + Buffer.from(AUTH_USER + ":" + AUTH_PASS).toString('base64') } });
                                 let processResponseJson = await processResponse.json();
                                 if (processResponseJson.status !== 200) {
                                     console.log('PIPELINE: Error in /api/process-raw-mail-data');
@@ -405,7 +408,8 @@ export async function POST() {
                                 await fetch(`${BASE_URL}/api/create-applicant`, {
                                     method: "POST",
                                     headers: {
-                                        "Content-Type": "application/json"
+                                        "Content-Type": "application/json",
+                                        "Authorization": 'Basic ' + Buffer.from(AUTH_USER + ":" + AUTH_PASS).toString('base64')
                                     },
                                     body: JSON.stringify({ applicant: applicant, embeddings: embeddings })
                                 });

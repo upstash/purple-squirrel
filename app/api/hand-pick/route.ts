@@ -3,6 +3,9 @@ import OpenAI from "openai";
 import type { NextRequest } from 'next/server';
 import BASE_URL from '@/app/utils/baseURL';
 
+const AUTH_USER = process.env.BASIC_AUTH_USER;
+const AUTH_PASS = process.env.BASIC_AUTH_PASSWORD;
+
 const SYSTEM_MESSAGE = `You are an applicant filterer.
 
 You will be given data in the following format:
@@ -46,6 +49,7 @@ async function flashRank(data: any) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "Authorization": 'Basic ' + Buffer.from(AUTH_USER + ":" + AUTH_PASS).toString('base64')
         },
         body: JSON.stringify(data),
     });
