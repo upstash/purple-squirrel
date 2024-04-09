@@ -96,6 +96,9 @@ export default function ApplicantsTable({
   setDisplayCard,
   setCardScore,
 }) {
+  const cardIDRef = React.useRef(cardID);
+  cardIDRef.current = cardID;
+
   const [filterValue, setFilterValue] = React.useState("");
   const [selectedKeys, setSelectedKeys] = React.useState(new Set([]));
   const [visibleColumns, setVisibleColumns] = React.useState(new Set(INITIAL_VISIBLE_COLUMNS));
@@ -222,8 +225,7 @@ export default function ApplicantsTable({
             <Tooltip content="Delete Applicant" color={"danger"} delay={400} closeDelay={600}>
               <Button isIconOnly variant="light" aria-label="Delete Applicant" size="sm"
                 onPress={async () => {
-                  console.log(applicantID, cardID);
-                  if (applicantID === cardID) {
+                  if (applicantID === cardIDRef.current) {
                     setDisplayCard(false);
                   }
                   setLoadingText("Deleting Applicant...");
@@ -274,7 +276,7 @@ export default function ApplicantsTable({
       default:
         return "?";
     }
-  }, [tableInfo, setTableInfo, cardID, setCardID, setDisplayCard, setCardScore, setApplicantIDs, setIsLoading, setLoadingColor, setLoadingText]);
+  }, [tableInfo, setTableInfo, setCardID, setDisplayCard, setCardScore, setApplicantIDs, setIsLoading, setLoadingColor, setLoadingText]);
 
   const onRowsPerPageChange = React.useCallback((e) => {
     setRowsPerPage(Number(e.target.value));
