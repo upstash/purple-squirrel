@@ -47,7 +47,6 @@ You will give nothing but the JSON like below:
         "countryCode": "<country-code>"
     },
     "textData": {
-        "fullResumeText": "<full-resume-text>",
         "educationText": "<education-text>",
         "experienceText": "<experience-text>",
         "projectsText": "<projects-text>"
@@ -75,7 +74,6 @@ Below are information about the key value pairs.
 "countryCode" is the alpha-2 country code of the applicant such as "TR" for "Turkey".
 
 "textData" is  an object containing text sections from the resume. Given resume text may not be parsed correctly, you should format so it has meaningful spacing and capitalization. Do not change the meaning, lose information, or add comments in formatting.
-"fullResumeText" is the full text of the resume formatted according to the rules defined above.
 "educationText" is the text of the education section of the resume formatted according to the rules defined above. Another name for this section may be used in resume, just make sure to include the information from the corresponding formal education section not certificates etc.
 "experienceText" is the text of the experience section of the resume formatted according to the rules defined above. Another name for this section may be used in resume, just make sure to include the information from the corresponding work experience section not competitions etc.
 "projectsText" is the text of the projects section of the resume formatted according to the rules defined above.`;
@@ -113,7 +111,6 @@ You will give nothing but the JSON like below:
         "countryCode": "<country-code>"
     },
     "textData": {
-        "fullResumeText": "<full-resume-text>",
         "educationText": "<education-text>",
         "experienceText": "<experience-text>",
         "projectsText": "<projects-text>"
@@ -140,13 +137,12 @@ Below are information about the key value pairs.
 "countryCode" is the alpha-2 country code of the applicant such as "TR" for "Turkey".
 
 "textData" is  an object containing text sections from the resume. Given resume text may not be parsed correctly, you should format so it has meaningful spacing and capitalization. Do not change the meaning, lose information, or add comments in formatting.
-"fullResumeText" is the full text of the resume formatted according to the rules defined above.
 "educationText" is the text of the education section of the resume formatted according to the rules defined above. Another name for this section may be used in resume, just make sure to include the information from the corresponding formal education section not certificates etc.
 "experienceText" is the text of the experience section of the resume formatted according to the rules defined above. Another name for this section may be used in resume, just make sure to include the information from the corresponding work experience section not competitions etc.
 "projectsText" is the text of the projects section of the resume formatted according to the rules defined above.`;
 
 function mailDataToApplicant(processedMailData: any, parsedMailData: any) {
-    if (!parsedMailData.hasOwnProperty("basicInfo") || !parsedMailData.hasOwnProperty("textData")) {
+    if (!parsedMailData.hasOwnProperty("basicInfo")) {
         console.log('PIPELINE: OpenAI Parsing fields missing');
         return { applicant: null, texts: null, mapStatus: false };
     }
@@ -187,12 +183,11 @@ function mailDataToApplicant(processedMailData: any, parsedMailData: any) {
     let websiteUrl = parsedMailData.basicInfo.hasOwnProperty("websiteUrl") ? parsedMailData.basicInfo.websiteUrl : null;
     let linkedinUrl = parsedMailData.basicInfo.hasOwnProperty("linkedinUrl") ? parsedMailData.basicInfo.linkedinUrl : null;
     let githubUrl = parsedMailData.basicInfo.hasOwnProperty("githubUrl") ? parsedMailData.basicInfo.githubUrl : null;
-    let fullResumeText = parsedMailData.textData.hasOwnProperty("fullResumeText") ? parsedMailData.textData.fullResumeText : null;
     let educationText = parsedMailData.textData.hasOwnProperty("educationText") ? parsedMailData.textData.educationText : null;
     let experienceText = parsedMailData.textData.hasOwnProperty("experienceText") ? parsedMailData.textData.experienceText : null;
     let projectsText = parsedMailData.textData.hasOwnProperty("projectsText") ? parsedMailData.textData.projectsText : null;
     
-    if (!fullName || !fullResumeText) {
+    if (!fullName ) {
         console.log('PIPELINE: OpenAI Parsing fields missing');
         return { applicant: null, texts: null, mapStatus: false };
     }
@@ -251,11 +246,11 @@ function mailDataToApplicant(processedMailData: any, parsedMailData: any) {
                 "experience": experienceText ? true : false,
                 "projects": projectsText ? true : false
             },
-            "fullText": fullResumeText,
+            "fullText": processedMailData.resumeText,
         }
     };
     let texts = {
-        fullResumeText: fullResumeText,
+        fullResumeText: processedMailData.resumeText,
         educationText: educationText,
         experienceText: experienceText,
         projectsText: projectsText
@@ -303,7 +298,6 @@ export async function POST() {
                     try {
                         console.log('PIPELINE: Mail Pipeline started');
                         console.log('PIPELINE: Starting /api/listen-inbox');
-                        console.log(`${BASE_URL}/api/listen-inbox`);
                         await fetch(`${BASE_URL}/api/listen-inbox`, { method: "POST" });
                         const rawMailDataNum = await redis.llen("raw:mail:data:list");
                         const rawMailDataIndexList = Array.from(Array(rawMailDataNum).keys());
