@@ -23,6 +23,7 @@ export default function RecentQueries({
     setSavedQueries,
     emptyRecentQueries,
 }) {
+  
   const renderCell = React.useCallback((item, columnKey) => {
     const cellValue = item[columnKey];
 
@@ -85,7 +86,7 @@ export default function RecentQueries({
               </TableColumn>
             )}
           </TableHeader>
-          <TableBody emptyContent={emptyRecentQueries} items={recentQueries} isLoading={loadingRecentQueries} loadingContent={<Spinner className="h-full w-full bg-default-50/75" label="warning" color="warning" labelColor="warning" />}>
+          <TableBody emptyContent={emptyRecentQueries} items={recentQueries} isLoading={loadingRecentQueries} loadingContent={<Spinner className="h-full w-full bg-default-50/75" label="Loading recent queries..." color="warning" labelColor="warning" />}>
             {(item) => (
               <TableRow key={item.id}>
                 {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}

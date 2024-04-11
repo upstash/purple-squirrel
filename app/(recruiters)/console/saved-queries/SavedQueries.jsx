@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from 'react';
 import {  Table,  TableHeader,  TableBody,  TableColumn,  TableRow,  TableCell} from "@nextui-org/table";
 import {Tooltip} from "@nextui-org/tooltip";
 import ReplayOutlinedIcon from '@mui/icons-material/ReplayOutlined';
@@ -23,6 +23,7 @@ export default function SavedQueries({
     setVarColor,
     emptySavedQueries,
 }) {
+
   const renderCell = React.useCallback((item, columnKey) => {
     const cellValue = item[columnKey];
 
@@ -85,7 +86,7 @@ export default function SavedQueries({
               </TableColumn>
             )}
           </TableHeader>
-          <TableBody emptyContent={emptySavedQueries} items={savedQueries} isLoading={loadingSavedQueries} loadingContent={<Spinner className="h-full w-full bg-default-50/75" label="primary" color="primary" labelColor="primary" />}>
+          <TableBody emptyContent={emptySavedQueries} items={savedQueries} isLoading={loadingSavedQueries} loadingContent={<Spinner className="h-full w-full bg-default-50/75" label="Loading saved queries..." color="primary" labelColor="primary" />}>
             {(item) => (
               <TableRow key={item.id}>
                 {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
