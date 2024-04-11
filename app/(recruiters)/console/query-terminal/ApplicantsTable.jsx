@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 
 import {  Dropdown,  DropdownTrigger,  DropdownMenu,  DropdownSection,  DropdownItem} from "@nextui-org/dropdown";
 import {  Table,  TableHeader,  TableBody,  TableColumn,  TableRow,  TableCell} from "@nextui-org/table";
@@ -19,7 +19,7 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import StarOutlinedIcon from '@mui/icons-material/StarOutlined';
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
-import { card } from "@nextui-org/react";
+import NextWeekOutlinedIcon from '@mui/icons-material/NextWeekOutlined';
 
 const columns = [
   {name: "ID", uid: "id", sortable: true},
@@ -35,6 +35,7 @@ const columns = [
 ];
 
 const statusOptions = [
+  {name: "All", uid: "All"},
   {name: "New", uid: "newApply"},
   {name: "Screening", uid: "screening"},
   {name: "Assessment", uid: "assessment"},
@@ -44,6 +45,9 @@ const statusOptions = [
   {name: "Onboarding", uid: "onboarding"},
   {name: "Hired", uid: "hired"},
 ];
+
+const statusSet = new Set(statusOptions.map((status) => status.uid));
+statusSet.delete("All");
 
 const statusColorMap = {
   newApply: "default",
@@ -56,7 +60,10 @@ const statusColorMap = {
   hired: "success",
 };
 
+const statusArray = Object.keys(statusColorMap);
+
 const teamOptions = [
+  {name: "All", uid: "All"},
   {name: "Development", uid: "Development"},
   {name: "Design", uid: "Design"},
   {name: "Management", uid: "Management"},
@@ -68,6 +75,9 @@ const teamOptions = [
   {name: "Finance and Accounting", uid: "Finance and Accounting"},
 ];
 
+const teamSet = new Set(teamOptions.map((team) => team.uid));
+teamSet.delete("All");
+
 const starsOptions = [
   {name: "No Filter", uid: "No Filter"},
   {name: "1+", uid: "1"},
@@ -77,12 +87,20 @@ const starsOptions = [
   {name: "5+", uid: "5"},
 ];
 
+const starsSet = new Set(["No Filter"]);
 
-const INITIAL_VISIBLE_COLUMNS = ["score", "name", "role", "location", "stars", "status", "actions"];
+const eqSet = (xs, ys) =>
+    xs.size === ys.size &&
+    [...xs].every((x) => ys.has(x));
+
+const inSet = (xs, ys) =>
+    [...xs].every((x) => ys.has(x));
+
 
 export default function ApplicantsTable({
   applicantIDs,
   setApplicantIDs,
+  setFilteredApplicantIDs,
   tableInfo,
   setTableInfo,
   loadingColor,
@@ -96,22 +114,30 @@ export default function ApplicantsTable({
   setCardID,
   setDisplayCard,
   setCardScore,
+  filterValue,
+  setFilterValue,
+  selectedKeys,
+  setSelectedKeys,
+  visibleColumns,
+  setVisibleColumns,
+  statusFilter,
+  setStatusFilter,
+  teamFilter,
+  setTeamFilter,
+  starsFilter,
+  setStarsFilter,
+  rowsPerPage,
+  setRowsPerPage,
+  sortDescriptor,
+  setSortDescriptor,
+  tablePage,
+  setTablePage,
 }) {
+
+  const [childFilteredApplicantIDs, setChildFilteredApplicantIDs] = React.useState([]);
+
   const cardIDRef = React.useRef(cardID);
   cardIDRef.current = cardID;
-
-  const [filterValue, setFilterValue] = React.useState("");
-  const [selectedKeys, setSelectedKeys] = React.useState(new Set([]));
-  const [visibleColumns, setVisibleColumns] = React.useState(new Set(INITIAL_VISIBLE_COLUMNS));
-  const [statusFilter, setStatusFilter] = React.useState("all");
-  const [teamFilter, setTeamFilter] = React.useState("all");
-  const [starsFilter, setStarsFilter] = React.useState(new Set(["No Filter"]));
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const [sortDescriptor, setSortDescriptor] = React.useState({
-    column: "score",
-    direction: "descending",
-  });
-  const [page, setPage] = React.useState(1);
 
   const hasSearchFilter = Boolean(filterValue);
 
@@ -145,19 +171,24 @@ export default function ApplicantsTable({
         tableInfo[id].stars >= parseInt(insideStarsFilter),
       );
     }
+    setChildFilteredApplicantIDs((prev) => filteredApplicants.map((item) => ({id: item.id, score: item.score})));
     filteredApplicants = filteredApplicants.map(({id, score}) => ({id: id, score: score, info: {...tableInfo[id]}}));
 
     return filteredApplicants;
-  }, [filterValue, statusFilter, hasSearchFilter, applicantIDs, tableInfo, teamFilter, starsFilter]);
+  }, [filterValue, statusFilter, hasSearchFilter, applicantIDs, tableInfo, teamFilter, starsFilter, setChildFilteredApplicantIDs]);
 
+  useEffect(() => {
+    setFilteredApplicantIDs(childFilteredApplicantIDs);
+  }, [childFilteredApplicantIDs, setFilteredApplicantIDs]);
+  
   const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
   const items = React.useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
+    const start = (tablePage - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
     return filteredItems.slice(start, end);
-  }, [page, filteredItems, rowsPerPage]);
+  }, [tablePage, filteredItems, rowsPerPage]);
 
   const sortedItems = React.useMemo(() => {
     return [...items].sort((a, b) => {
@@ -210,7 +241,7 @@ export default function ApplicantsTable({
       case "status":
         const applicantStatus = info.status;
         return (
-          <Chip className="capitalize" color={statusColorMap[applicantStatus]} size="sm" variant="flat">
+          <Chip className="capitalize" color={statusColorMap[applicantStatus]} size="sm" variant="solid">
             {(applicantStatus === "newApply") ? "new" : applicantStatus}
           </Chip>
         );
@@ -256,7 +287,7 @@ export default function ApplicantsTable({
               </Button>
             </Tooltip>
             <Tooltip content="View Resume" color={"default"} delay={400} closeDelay={600}>
-              <Button isIconOnly as={Link} href={info.resumeUrl} target="_blank" rel="noreferrer" variant="light" aria-label="View Resume" size="sm">
+              <Button isIconOnly isExternal as={Link} href={info.resumeUrl} variant="light" aria-label="View Resume" size="sm">
                 <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
                   <InsertDriveFileOutlinedIcon />
                 </span>
@@ -283,22 +314,22 @@ export default function ApplicantsTable({
 
   const onRowsPerPageChange = React.useCallback((e) => {
     setRowsPerPage(Number(e.target.value));
-    setPage(1);
-  }, []);
+    setTablePage(1);
+  }, [setTablePage, setRowsPerPage]);
 
   const onSearchChange = React.useCallback((value) => {
     if (value) {
       setFilterValue(value);
-      setPage(1);
+      setTablePage(1);
     } else {
       setFilterValue("");
     }
-  }, []);
+  }, [setFilterValue, setTablePage]);
 
   const onClear = React.useCallback(()=>{
     setFilterValue("")
-    setPage(1)
-  },[])
+    setTablePage(1)
+  },[setFilterValue, setTablePage])
 
   const topContent = React.useMemo(() => {
     return (
@@ -312,12 +343,13 @@ export default function ApplicantsTable({
             onClear={() => onClear()}
             onValueChange={onSearchChange}
             size="sm"
+            radius="md"
             classNames={{inputWrapper: "h-10"}}
           />
           <div className="flex gap-3">
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
+                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat" color={teamFilter === "all" || inSet(teamSet, teamFilter) ? "default" : "secondary"}>
                   Team
                 </Button>
               </DropdownTrigger>
@@ -327,18 +359,53 @@ export default function ApplicantsTable({
                 closeOnSelect={false}
                 selectedKeys={teamFilter}
                 selectionMode="multiple"
-                onSelectionChange={setTeamFilter}
+                onSelectionChange={(keys) => {
+                  if (teamFilter === "all") {
+                    if (!keys.has("All")) {
+                      setTeamFilter((prev) => (new Set([])));
+                      return;
+                    } else {
+                      keys.delete("All");
+                      setTeamFilter((prev) => (keys));
+                      return;
+                    }
+                  }
+                  if (teamFilter.has("All")) {
+                    if (!keys.has("All")) {
+                      setTeamFilter((prev) => (new Set([])));
+                      return;
+                    } else {
+                      keys.delete("All");
+                      setTeamFilter((prev) => (keys));
+                      return;
+                    }
+                  }
+                  if (keys.has("All")) {
+                    setTeamFilter((prev) => {
+                      const newTeamSet = new Set(teamSet);
+                      newTeamSet.add("All");
+                      return newTeamSet;
+                    });
+                    return;
+                  } else {
+                    if (eqSet(keys, teamSet)) {
+                      keys.add("All");
+                    }
+                    setTeamFilter((prev) => (keys));
+                    return;
+                  }
+                }}
               >
                 {teamOptions.map((team) => (
-                  <DropdownItem key={team.uid} className="capitalize">
-                    {capitalize(team.name)}
+                  <DropdownItem key={team.uid} className={team.uid === "All" ? "capitalize text-danger" : "capitalize"} variant="bordered" >
+                    {(team.uid === "All") ? (teamFilter === "all" || teamFilter.has("All") ? "Deselect All" : "Select All") : capitalize(team.name)}
                   </DropdownItem>
                 ))}
               </DropdownMenu>
             </Dropdown>
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
+                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat" color={statusFilter === "all" || inSet(statusSet, statusFilter) ? "default" : "secondary"}>
                   Status
                 </Button>
               </DropdownTrigger>
@@ -348,18 +415,53 @@ export default function ApplicantsTable({
                 closeOnSelect={false}
                 selectedKeys={statusFilter}
                 selectionMode="multiple"
-                onSelectionChange={setStatusFilter}
+                onSelectionChange={(keys) => {
+                  if (statusFilter === "all") {
+                    if (!keys.has("All")) {
+                      setStatusFilter((prev) => (new Set([])));
+                      return;
+                    } else {
+                      keys.delete("All");
+                      setStatusFilter((prev) => (keys));
+                      return;
+                    }
+                  }
+                  if (statusFilter.has("All")) {
+                    if (!keys.has("All")) {
+                      setStatusFilter((prev) => (new Set([])));
+                      return;
+                    } else {
+                      keys.delete("All");
+                      setStatusFilter((prev) => (keys));
+                      return;
+                    }
+                  }
+                  if (keys.has("All")) {
+                    setStatusFilter((prev) => {
+                      const newStatusSet = new Set(statusSet);
+                      newStatusSet.add("All");
+                      return newStatusSet;
+                    });
+                    return;
+                  } else {
+                    if (eqSet(keys, statusSet)) {
+                      keys.add("All");
+                    }
+                    setStatusFilter((prev) => (keys));
+                    return;
+                  }
+                }}
               >
                 {statusOptions.map((status) => (
-                  <DropdownItem key={status.uid} className="capitalize">
-                    {capitalize(status.name)}
+                  <DropdownItem key={status.uid} className={status.uid === "All" ? "capitalize text-danger" : "capitalize"} variant="bordered">
+                    {(status.uid === "All") ? (statusFilter === "all" || statusFilter.has("All") ? "Deselect All" : "Select All") : capitalize(status.name)}
                   </DropdownItem>
                 ))}
               </DropdownMenu>
             </Dropdown>
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
+                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat" color={eqSet(starsFilter, starsSet) ? "default" : "secondary"}>
                   Stars
                 </Button>
               </DropdownTrigger>
@@ -372,7 +474,7 @@ export default function ApplicantsTable({
                 onSelectionChange={setStarsFilter}
               >
                 {starsOptions.map((stars) => (
-                  <DropdownItem key={stars.uid} className="capitalize">
+                  <DropdownItem key={stars.uid} className="capitalize" >
                     {capitalize(stars.name)}
                   </DropdownItem>
                 ))}
@@ -407,17 +509,21 @@ export default function ApplicantsTable({
     onClear,
     filterValue,
     statusFilter,
+    setStatusFilter,
     visibleColumns,
+    setVisibleColumns,
     onSearchChange,
     teamFilter,
+    setTeamFilter,
     starsFilter,
+    setStarsFilter,
   ]);
 
   const bottomContent = React.useMemo(() => {
     return (
       <div className="py-2 px-2 flex items-center">
-        <div className="flex-1">
-          <Tooltip content="Delete Selected Applicant" color={"danger"} delay={400} closeDelay={600}>
+        <div className="flex-1 flex items-center gap-2">
+          <Tooltip content="Delete Selected Applicants" color={"danger"} delay={400} closeDelay={600}>
             <Button isIconOnly variant="light" aria-label="Delete Applicant" size="sm"
               onPress={async () => {
                 if (selectedKeys.size === 0) {
@@ -451,12 +557,68 @@ export default function ApplicantsTable({
                 setIsLoading(false);
               }}
             >
-              <span className="text-lg text-danger-400 cursor-pointer active:opacity-50">
+              <span className="text-danger-400 cursor-pointer active:opacity-50">
                 <DeleteOutlinedIcon />
               </span>
             </Button>
           </Tooltip>
-          <span className="w-[30%] text-small text-default-40 w-full">
+          <Dropdown className="min-w-0 w-fit">
+            <DropdownTrigger>
+                <Button isIconOnly variant="light" aria-label="Change Applicants Status" size="sm">
+                  <Tooltip content="Change Status of Selected Applicants" color={"warning"} delay={400} closeDelay={600}>
+                    <span className="text-warning-400 cursor-pointer active:opacity-50">
+                      <NextWeekOutlinedIcon />
+                    </span>
+                  </Tooltip>
+                </Button>
+            </DropdownTrigger>
+            <DropdownMenu 
+                aria-label="Single selection example"
+                variant="flat"
+                selectionMode="single"
+                selectedKeys={new Set([])}
+                className="min-w-0 w-fit"
+                onSelectionChange={
+                    async (keys) => {
+                        if (!keys || keys.size !== 1 || selectedKeys.size === 0) {
+                          return;
+                        }
+                        const newKey = Array.from(keys)[0];
+                        let newSelectedKeys;
+                        if (selectedKeys === "all") {
+                          newSelectedKeys = applicantIDs.map((i) => i.id);
+                        } else {
+                          newSelectedKeys = [...selectedKeys];
+                        }
+
+                        await fetch(`/api/set-multiple-applicant-status`, {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ids: newSelectedKeys, status: newKey}),
+                          });
+
+                        setTableInfo((prevTableInfo) => {
+                            const updatedTableInfo = { ...prevTableInfo };
+                            newSelectedKeys.forEach((id) => {
+                                updatedTableInfo[id].status = newKey;
+                            });
+                            return updatedTableInfo;
+                        });
+                    }
+                }
+            >
+                {statusArray.map((key) => 
+                    <DropdownItem key={key} textValue={key === "newApply" ? "new" : key}>
+                        <Chip className="capitalize" color={statusColorMap[key]} size="sm" variant="solid">
+                            {key === "newApply" ? "New" : key}
+                        </Chip>
+                    </DropdownItem>
+                )}
+            </DropdownMenu>
+          </Dropdown>
+          <span className="whitespace-nowrap w-[30%] text-small text-default-40 w-full ml-2">
             {selectedKeys === "all"
               ? "All items selected"
               : `${selectedKeys.size} of ${filteredItems.length} items`}
@@ -468,9 +630,9 @@ export default function ApplicantsTable({
             showControls
             showShadow
             color="secondary"
-            page={page}
+            page={tablePage}
             total={pages}
-            onChange={setPage}
+            onChange={setTablePage}
           />
         </div>
         <label className="flex-1 flex items-center justify-end text-default-400 text-small w-full">
@@ -486,12 +648,13 @@ export default function ApplicantsTable({
           </label>
       </div>
     );
-  }, [onRowsPerPageChange, selectedKeys, page, pages, setIsLoading, setLoadingColor, setLoadingText, setTableInfo, setApplicantIDs, filteredItems, cardIDRef, setDisplayCard, applicantIDs]);
+  }, [onRowsPerPageChange, selectedKeys, tablePage, pages, setIsLoading, setLoadingColor, setLoadingText, setTableInfo, setApplicantIDs, filteredItems, cardIDRef, setDisplayCard, applicantIDs, setTablePage, setSelectedKeys]);
 
   return (
     <Table
       aria-label="Example table with custom cells, pagination and sorting"
       isHeaderSticky
+      radius="md"
       bottomContent={bottomContent}
       bottomContentPlacement="outside"
       className="h-full"
