@@ -12,9 +12,13 @@ export default function Page() {
     const [varColor, setVarColor] = useState("secondary")
     const [activeTab, setActiveTab] = useState("query-terminal");
 
+    const [searchSystem, setSearchSystem] = useState("basic");
+
     const [applicantIDs, setApplicantIDs] = useState([]);
+    const [filteredApplicantIDs, setFilteredApplicantIDs] = useState([]);
     const [tableInfo, setTableInfo] = useState({});
     const [isLoading, setIsLoading] = useState(true);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [searchSettings, setSearchSettings] = useState(null);
     const [loadingColor, setLoadingColor] = useState("default");
     const [loadingText, setLoadingText] = useState("Loading Search Settings...");
@@ -41,48 +45,65 @@ export default function Page() {
 
     const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
-    useEffect(() => {
-        fetch('/api/get-search-settings')
-          .then((res) => res.json())
-          .then((data) => {
-            setSearchSettings(data);
-            setTopK(data.topK);
-            setInitialMultiplier(data.multipliers.firstTopKMultiplier);
-            setRegularMultiplier(data.multipliers.regularTopKMultiplier);
-            setWeightedAverage(data.weights.newWeight);
-            setMainWeight(data.weights.mainWeight);
-            setEducationWeight(data.weights.educationWeight);
-            setExperienceWeight(data.weights.experienceWeight);
-            setProjectsWeight(data.weights.projectsWeight);
-            setIsLoading(false);
-            setEmptyContent("Enter a query to find applicants.");
-          })
-      }, [setEducationWeight, setEmptyContent, setExperienceWeight, setInitialMultiplier, setIsLoading, setMainWeight, setProjectsWeight, setRegularMultiplier, setSearchSettings, setTopK, setWeightedAverage]);
+    const INITIAL_VISIBLE_COLUMNS = ["score", "name", "role", "location", "stars", "status", "actions"];
+
+    const [filterValue, setFilterValue] = React.useState("");
+    const [selectedKeys, setSelectedKeys] = React.useState(new Set([]));
+    const [visibleColumns, setVisibleColumns] = React.useState(new Set(INITIAL_VISIBLE_COLUMNS));
+    const [statusFilter, setStatusFilter] = React.useState("all");
+    const [teamFilter, setTeamFilter] = React.useState("all");
+    const [starsFilter, setStarsFilter] = React.useState(new Set(["No Filter"]));
+    const [rowsPerPage, setRowsPerPage] = React.useState(10);
+    const [sortDescriptor, setSortDescriptor] = React.useState({
+      column: "score",
+      direction: "descending",
+    });
+    const [tablePage, setTablePage] = React.useState(1);
 
     useEffect(() => {
-        fetch('/api/get-recent-queries')
-          .then((res) => res.json())
-          .then((data) => {
-            setRecentQueries(data);
-            setLoadingRecentQueries(false);
-            setEmptyRecentQueries("No recent queries found.");
-          })
-      }, [setRecentQueries, setLoadingRecentQueries, setEmptyRecentQueries]);
-    
-    useEffect(() => {
-        fetch('/api/get-saved-queries')
-          .then((res) => res.json())
-          .then((data) => {
-            setSavedQueries(data);
-            setLoadingSavedQueries(false);
-            setEmptySavedQueries("No saved queries found.");
-          })
-      }, [setSavedQueries, setLoadingSavedQueries, setEmptySavedQueries]);
-    
+      fetch('/api/get-search-settings')
+        .then((res) => res.json())
+        .then((data) => {
+          setSearchSettings(data);
+          setTopK(data.topK);
+          setSearchSystem(data.searchSystem);
+          setInitialMultiplier(data.multipliers.firstTopKMultiplier);
+          setRegularMultiplier(data.multipliers.regularTopKMultiplier);
+          setWeightedAverage(data.weights.newWeight);
+          setMainWeight(data.weights.mainWeight);
+          setEducationWeight(data.weights.educationWeight);
+          setExperienceWeight(data.weights.experienceWeight);
+          setProjectsWeight(data.weights.projectsWeight);
+          setIsLoading(false);
+          setIsInitialLoading(false);
+          setEmptyContent("Enter a query to find applicants.");
+        })
+    }, [setEducationWeight, setEmptyContent, setExperienceWeight, setInitialMultiplier, setIsLoading, setMainWeight, setProjectsWeight, setRegularMultiplier, setSearchSettings, setTopK, setWeightedAverage]);
+
+  useEffect(() => {
+      fetch('/api/get-recent-queries')
+        .then((res) => res.json())
+        .then((data) => {
+          setRecentQueries(data);
+          setLoadingRecentQueries(false);
+          setEmptyRecentQueries("No recent queries found.");
+        })
+    }, [setRecentQueries, setLoadingRecentQueries, setEmptyRecentQueries]);
+  
+  useEffect(() => {
+      fetch('/api/get-saved-queries')
+        .then((res) => res.json())
+        .then((data) => {
+          setSavedQueries(data);
+          setLoadingSavedQueries(false);
+          setEmptySavedQueries("No saved queries found.");
+        })
+    }, [setSavedQueries, setLoadingSavedQueries, setEmptySavedQueries]);
+  
     return (
         <section className="flex flex-col box-border h-screen">
           <header className="flex-initial pt-unit-4 p-unit-4">
-            <div className="flex items-center bg-default-50 py-unit-2 px-unit-1 rounded-xl">
+            <div className="flex items-center bg-default-50 py-unit-2 px-unit-1 rounded-medium">
               <div className="flex-1 flex items-center justify-start">
                 <div className="text-secondary pl-unit-3 pr-unit-1">
                   <SquirrelIcon size={32} className="scale-x-[-1]" />
@@ -108,10 +129,13 @@ export default function Page() {
             {(activeTab === "query-terminal") ? <QueryTerminal 
                                                     applicantIDs={applicantIDs}
                                                     setApplicantIDs={setApplicantIDs}
+                                                    filteredApplicantIDs={filteredApplicantIDs}
+                                                    setFilteredApplicantIDs={setFilteredApplicantIDs}
                                                     tableInfo={tableInfo}
                                                     setTableInfo={setTableInfo}
                                                     isLoading={isLoading}
                                                     setIsLoading={setIsLoading}
+                                                    isInitialLoading={isInitialLoading}
                                                     searchSettings={searchSettings}
                                                     setSearchSettings={setSearchSettings}
                                                     loadingColor={loadingColor}
@@ -128,6 +152,8 @@ export default function Page() {
                                                     setCardID={setCardID}
                                                     cardScore={cardScore}
                                                     setCardScore={setCardScore}
+                                                    searchSystem={searchSystem}
+                                                    setSearchSystem={setSearchSystem}
                                                     TopK={TopK}
                                                     setTopK={setTopK}
                                                     initialMultiplier={initialMultiplier}
@@ -150,6 +176,24 @@ export default function Page() {
                                                     setSavedQueries={setSavedQueries}
                                                     settingsModalOpen={settingsModalOpen}
                                                     setSettingsModalOpen={setSettingsModalOpen}
+                                                    filterValue={filterValue}
+                                                    setFilterValue={setFilterValue}
+                                                    selectedKeys={selectedKeys}
+                                                    setSelectedKeys={setSelectedKeys}
+                                                    visibleColumns={visibleColumns}
+                                                    setVisibleColumns={setVisibleColumns}
+                                                    statusFilter={statusFilter}
+                                                    setStatusFilter={setStatusFilter}
+                                                    teamFilter={teamFilter}
+                                                    setTeamFilter={setTeamFilter}
+                                                    starsFilter={starsFilter}
+                                                    setStarsFilter={setStarsFilter}
+                                                    rowsPerPage={rowsPerPage}
+                                                    setRowsPerPage={setRowsPerPage}
+                                                    sortDescriptor={sortDescriptor}
+                                                    setSortDescriptor={setSortDescriptor}
+                                                    tablePage={tablePage}
+                                                    setTablePage={setTablePage}
                                                 />
             : ((activeTab === "recent-queries") ? <RecentQueries 
                                                     recentQueries={recentQueries}
