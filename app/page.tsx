@@ -6,7 +6,7 @@ import {Link} from "@nextui-org/link";
 export default function Page() {
     return (
       <div className="h-screen flex items-center justify-center">
-        <div className="flex flex-col gap-3 p-6 bg-default-50 rounded-xl">
+        <div className="flex flex-col gap-3 p-6 bg-default-50 rounded-medium">
           <div className="flex items-center justify-start gap-2">
             <div className="text-secondary">
               <SquirrelIcon size={72} className="scale-x-[-1]" />
