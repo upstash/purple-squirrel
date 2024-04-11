@@ -15,6 +15,9 @@ import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
 import {Chip} from "@nextui-org/chip";
 import {Input} from "@nextui-org/input";
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import ArrowDropDownOutlinedIcon from '@mui/icons-material/ArrowDropDownOutlined';
+import MailOutlineOutlinedIcon from '@mui/icons-material/MailOutlineOutlined';
 import { card } from "@nextui-org/react";
 import React, { use } from "react";
 import {  Dropdown,  DropdownTrigger,  DropdownMenu,  DropdownSection,  DropdownItem} from "@nextui-org/dropdown";
@@ -32,6 +35,39 @@ const statusColorMap = {
 
 const statusArray = Object.keys(statusColorMap);
 
+function checkGithubUrl(url) {
+    if (!url || typeof url !== "string") {
+        return false;
+    }
+    const regex = /^(https?:\/\/)?(www\.)?github.com\/.+$/;
+    return regex.test(url);
+}
+
+function checkLinkedInUrl(url) {
+    if (!url || typeof url !== "string") {
+        return false;
+    }
+    const regex = /^(https?:\/\/)?(www\.)?linkedin.com\/in\/.+$/;
+    return regex.test(url);
+}
+
+function checkWebsiteUrl(url) {
+    if (!url || typeof url !== "string") {
+        return false;
+    }
+    const regex = /^(https?:\/\/)?([A-Za-z0-9-]+\.)?[A-Za-z0-9-]+\.[A-Za-z0-9-]+(\/\S*)?$/;
+    return regex.test(url);
+}
+
+function checkMailAddress(email) {
+    if (!email || typeof email !== "string") {
+        return false;
+    }
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+
+}
+
 function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, setApplicantIDs}) {
     const applicantName = tableInfo[cardID].name;
     const applicantRole = tableInfo[cardID].role;
@@ -44,6 +80,7 @@ function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, s
     const applicantUniversity = tableInfo[cardID].university;
     const applicantEmail = tableInfo[cardID].email;
     const applicantPhone = tableInfo[cardID].phone;
+    const applicantResume = tableInfo[cardID].resumeUrl;
     const applicantWebsite = tableInfo[cardID].websiteUrl;
     const applicantLinkedIn = tableInfo[cardID].linkedinUrl;
     const applicantGithub = tableInfo[cardID].githubUrl;
@@ -51,7 +88,8 @@ function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, s
     const applicantStars = tableInfo[cardID].stars;
     const applicantNotes = tableInfo[cardID].notes;
     const applicantNotesSaved = tableInfo[cardID].notesSaved;
-
+    console.log(applicantWebsite)
+    console.log(checkWebsiteUrl(applicantWebsite))
     return (
         <Card className="max-w-[400px] h-full">
             <CardHeader className="flex gap-3">
@@ -71,19 +109,19 @@ function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, s
                     <div className="flex gap-2">
                         <div className="flex-auto flex flex-col gap-2">
                             <div className="flex gap-2 w-full">
-                                <div className="flex-inital border-default-300 border-2 rounded-xl py-1 px-3">
+                                <div className="flex-inital border-default-200 border-2 rounded-medium py-1 px-3">
                                     <div className="flex flex-col">
                                         <p className="text-xs text-default-300">Age</p>
                                         <p className="text-small text-bold">{applicantAge}</p>
                                     </div>
                                 </div>
-                                <div className="flex-initial border-default-300 border-2 rounded-xl py-1 px-3">
+                                <div className="flex-initial border-default-200 border-2 rounded-medium py-1 px-3">
                                     <div className="flex flex-col">
                                         <p className="text-xs text-default-300">YOE</p>
                                         <p className="text-small text-bold">{applicantYOE}</p>
                                     </div>
                                 </div>
-                                <div className="flex-auto border-default-300 border-2 rounded-xl py-1 px-3">
+                                <div className="flex-auto border-default-200 border-2 rounded-medium py-1 px-3">
                                     <div className="flex flex-col">
                                         <p className="text-xs text-default-300">Location</p>
                                         <p className="text-small text-bold">{applicantLocation}</p>
@@ -91,13 +129,13 @@ function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, s
                                 </div>
                             </div>
                             <div className="flex gap-2 items-end w-full">
-                                <div className="flex-inital border-default-300 border-2 rounded-xl py-1.5 px-3">
+                                <div className="flex-inital border-default-200 border-2 rounded-medium py-1.5 px-3">
                                     <div className="flex flex-col">
                                         <p className="text-small text-bold">{applicantDegree}</p>
                                     </div>
                                 </div>
                                 <h1 className="flex-inital">in</h1>
-                                <div className="flex-auto border-default-300 border-2 rounded-xl py-1.5 px-3">
+                                <div className="flex-auto border-default-200 border-2 rounded-medium py-1.5 px-3">
                                     <div className="flex flex-col">
                                         <p className="text-small text-bold">{applicantSubject}</p>
                                     </div>
@@ -105,14 +143,14 @@ function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, s
                             </div>
                             <div className="flex gap-2 items-end w-full">
                                 <h1 className="flex-inital pl-1">from</h1>
-                                <div className="flex-auto border-default-300 border-2 rounded-xl py-1.5 px-3">
+                                <div className="flex-auto border-default-200 border-2 rounded-medium py-1.5 px-3">
                                     <div className="flex flex-col">
                                         <p className="text-small text-bold">{applicantUniversity}</p>
                                     </div>
                                 </div>
                             </div>
                             <div className="flex gap-2 items-end w-full">
-                                <div className="flex-auto border-default-300 border-2 rounded-xl py-1 px-3">
+                                <div className="flex-auto border-default-200 border-2 rounded-medium py-1 px-3">
                                     <div className="flex min-h-3 flex-col">
                                         <p className="text-xs text-default-300">Email</p>
                                         <p className="text-small text-bold">{applicantEmail}</p>
@@ -120,7 +158,7 @@ function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, s
                                 </div>
                             </div>
                             <div className="flex gap-2 items-end w-full">
-                                <div className="flex-auto border-default-300 border-2 rounded-xl py-1 px-3">
+                                <div className="flex-auto border-default-200 border-2 rounded-medium py-1 px-3">
                                     <div className="flex flex-col">
                                         <p className="text-xs text-default-300">Phone</p>
                                         <p className="text-small text-bold">{applicantPhone}</p>
@@ -129,34 +167,64 @@ function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, s
                             </div>
                         </div>
                         <div className="flex-initial flex flex-col items-center gap-2">
-                            <Button isIconOnly className="bg-gradient-to-r from-primary to-primary-300"><LanguageOutlinedIcon /></Button>
-                            <Button isIconOnly>
-                                <LinkedInIcon size={28} />
-                            </Button>
-                            <Button isIconOnly>
-                                <MarkGithubIcon size={28} />
-                            </Button>
+                            {
+                                applicantResume
+                                ?
+                                    <Button isIconOnly isExternal href={applicantResume} as={Link} color="danger">
+                                        <InsertDriveFileOutlinedIcon size={28} />
+                                    </Button>
+                                :
+                                    null
+                            }
+                            {
+                                applicantEmail && checkMailAddress(applicantEmail)
+                                ?
+                                    <Button isIconOnly isExternal href={`mailto:${applicantEmail}`} as={Link} color="primary">
+                                        <MailOutlineOutlinedIcon size={28} />
+                                    </Button>
+                                :
+                                    null
+                            }
+                            {
+                                applicantWebsite && checkWebsiteUrl(applicantWebsite)
+                                ?
+                                    <Button isIconOnly isExternal href={`/external-ref?externalLink=${applicantWebsite}`} as={Link}><LanguageOutlinedIcon /></Button>
+                                :
+                                    null
+                            }
+                            {
+                                applicantLinkedIn && checkLinkedInUrl(applicantLinkedIn)
+                                ?
+                                    <Button isIconOnly isExternal href={applicantLinkedIn} as={Link}>
+                                        <LinkedInIcon size={28} />
+                                    </Button>
+                                :
+                                    null
+                            }
+                            {
+                                applicantGithub && checkGithubUrl(applicantGithub)
+                                ?
+                                    <Button isIconOnly isExternal href={applicantGithub} as={Link}>
+                                        <MarkGithubIcon size={28} />
+                                    </Button>
+                                :
+                                    null
+                            }
                         </div>
                     </div>
                 </div>
             </CardBody>
             <Divider/>
             <CardFooter>
-                <div className="flex flex-col h-full w-full">
+                <div className="flex flex-col h-full w-full gap-2">
                     <div className="flex items-center justify-between gap-unit-2">
-                        <Dropdown>
+                        <Dropdown className="min-w-0 w-fit">
                             <DropdownTrigger>
-                                <Button 
-                                    variant="light" 
-                                    radius="xl"
-                                    className="capitalize"
-                                    size="sm"
-                                    color="default"
-                                >
-                                    <Chip className="capitalize" color={statusColorMap[applicantStatus]} size="sm" variant="flat">
+                                <button>
+                                    <Chip className="capitalize" color={statusColorMap[applicantStatus]} size="sm" variant="solid" endContent={<ArrowDropDownOutlinedIcon/>}>
                                         {applicantStatus === "newApply" ? "New" : applicantStatus}
                                     </Chip>
-                                </Button>
+                                </button>
                             </DropdownTrigger>
                             <DropdownMenu 
                                 aria-label="Single selection example"
@@ -164,6 +232,7 @@ function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, s
                                 disallowEmptySelection
                                 selectionMode="single"
                                 selectedKeys={new Set([applicantStatus])}
+                                className="min-w-0 w-fit"
                                 onSelectionChange={
                                     async (keys) => {
                                         await fetch(`/api/set-applicant-status`, {
@@ -183,7 +252,7 @@ function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, s
                             >
                                 {statusArray.map((key) => 
                                     <DropdownItem key={key} textValue={key === "newApply" ? "new" : key}>
-                                        <Chip className="capitalize" color={statusColorMap[key]} size="sm" variant="flat">
+                                        <Chip className="capitalize" color={statusColorMap[key]} size="sm" variant="solid">
                                             {key === "newApply" ? "New" : key}
                                         </Chip>
                                     </DropdownItem>
@@ -233,6 +302,7 @@ function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, s
                             isDisabled={applicantNotesSaved}
                             label="Notes"
                             labelPlacement="outside"
+                            radius="md"
                             placeholder="Enter your description"
                             value={tableInfo[cardID].notes || ""}
                             onValueChange={(value) => {
@@ -317,7 +387,7 @@ function EmptyCard() {
                             </div>
                             <div className="h-4 w-40 bg-default-100 rounded-3xl"></div>
                         </div>
-                        <div className="h-14 w-16 bg-default-200 rounded-xl"></div>
+                        <div className="h-14 w-16 bg-default-200 rounded-medium"></div>
                     </div>
                 </div>
             </CardHeader>
@@ -327,46 +397,46 @@ function EmptyCard() {
                     <div className="flex gap-2 h-full">
                         <div className="flex-auto flex flex-col gap-2 h-full">
                             <div className="flex-[1_1_0%] flex gap-2 w-full">
-                                <div className="flex-[1_1_0%] bg-default-100 rounded-xl py-1 px-3 h-10">
+                                <div className="flex-[1_1_0%] bg-default-100 rounded-medium py-1 px-3 h-10">
 
                                 </div>
-                                <div className="flex-[1_1_0%] bg-default-100 rounded-xl py-1 px-3 h-10">
+                                <div className="flex-[1_1_0%] bg-default-100 rounded-medium py-1 px-3 h-10">
 
                                 </div>
-                                <div className="flex-[10_1_0%] bg-default-100 rounded-xl py-1 px-3 h-10">
+                                <div className="flex-[10_1_0%] bg-default-100 rounded-medium py-1 px-3 h-10">
 
                                 </div>
                             </div>
                             <div className="flex-[1_1_0%] flex gap-2 items-end w-full">
-                                <div className="flex-[2_1_0%] bg-default-100 rounded-xl py-1.5 px-3 h-10">
+                                <div className="flex-[2_1_0%] bg-default-100 rounded-medium py-1.5 px-3 h-10">
 
                                 </div>
                                 <div className="flex-[1_1_0%]"></div>
-                                <div className="flex-[4_1_0%] bg-default-100 rounded-xl py-1.5 px-3 h-10">
+                                <div className="flex-[4_1_0%] bg-default-100 rounded-medium py-1.5 px-3 h-10">
 
                                 </div>
                             </div>
                             <div className="flex-[1_1_0%] flex gap-2 items-end w-full">
                                 <div className="flex-[1_1_0%] pl-1"></div>
-                                <div className="flex-[5_1_0%] bg-default-100 rounded-xl py-1.5 px-3 h-10">
+                                <div className="flex-[5_1_0%] bg-default-100 rounded-medium py-1.5 px-3 h-10">
 
                                 </div>
                             </div>
                             <div className="flex-[1_1_0%] flex gap-2 items-end w-full">
-                                <div className="flex-auto bg-default-100 rounded-xl py-1 px-3 h-10">
+                                <div className="flex-auto bg-default-100 rounded-medium py-1 px-3 h-10">
 
                                 </div>
                             </div>
                             <div className="flex-[1_1_0%] flex gap-2 items-end w-full">
-                                <div className="flex-auto bg-default-100 rounded-xl py-1 px-3 h-10">
+                                <div className="flex-auto bg-default-100 rounded-medium py-1 px-3 h-10">
 
                                 </div>
                             </div>
                         </div>
                         <div className="flex-initial flex flex-col items-center gap-2 h-full">
-                            <div className="h-10 w-10 bg-default-200 rounded-xl"></div>
-                            <div className="h-10 w-10 bg-default-200 rounded-xl"></div>
-                            <div className="h-10 w-10 bg-default-200 rounded-xl"></div>
+                            <div className="h-10 w-10 bg-default-200 rounded-medium"></div>
+                            <div className="h-10 w-10 bg-default-200 rounded-medium"></div>
+                            <div className="h-10 w-10 bg-default-200 rounded-medium"></div>
                         </div>
                     </div>
                 </div>
@@ -375,7 +445,7 @@ function EmptyCard() {
             <CardFooter>
                 <div className="flex flex-col gap-3 h-full w-full">
                     <div className="flex items-center justify-between gap-unit-2 h-full w-full">
-                        <div className="h-5 w-20 bg-default-200 rounded-xl"></div>
+                        <div className="h-5 w-20 bg-default-200 rounded-medium"></div>
                         <div className="flex items-center">
                             {Array.from({ length: 5 }).map((_, index) =>
                                 <Button isIconOnly key={index} variant="light" size="sm">
@@ -385,11 +455,11 @@ function EmptyCard() {
                         </div>
                     </div>
                     <div className="flex flex-col gap-3 h-full w-full">
-                    <div className="flex-initial h-4 w-10 rounded-xl bg-default-100"></div>
-                        <div className="flex-initial h-20 w-full rounded-lg bg-default-100"></div>
+                    <div className="flex-initial h-4 w-10 rounded-medium bg-default-100"></div>
+                        <div className="flex-initial h-20 w-full rounded-medium bg-default-100"></div>
                         <div className="flex flex-initial gap-4 items-center justify-between w-full">
-                            <div className="flex-[1_1_0%] h-10 w-10 bg-default-200 rounded-xl"></div>
-                            <div className="flex-[1_1_0%] h-10 w-10 bg-default-200 rounded-xl"></div>
+                            <div className="flex-[1_1_0%] h-10 w-10 bg-default-200 rounded-medium"></div>
+                            <div className="flex-[1_1_0%] h-10 w-10 bg-default-200 rounded-medium"></div>
                         </div>
                     </div>
                 </div>
