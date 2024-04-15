@@ -321,11 +321,98 @@ export default function QueryTerminal({
                   searchSystem === "advanced"
                   ?
                     <div className="flex-initial px-unit-1">
-                      <Tooltip content="Bump-Up" color="warning" delay={400} closeDelay={600}>
+                      <Tooltip content="Deep-Rank" color={"warning"} delay={400} closeDelay={600}>
                         <Button
                           isIconOnly
                           color="warning"
                           size="md"
+                          onPress={async () => {
+                            if (queryText === "" || isLoading) {
+                              return;
+                            }
+                            setEmptyContent(" ");
+                            setIsLoading(true);
+                            setLoadingColor("warning");
+                            setLoadingText("Ranking Applicants...");
+                            try {
+                              const data = {
+                                queryText: queryText,
+                                searchSettings: searchSettings,
+                                previousApplicants: filteredApplicantIDs,
+                              }
+                              const queryID = uuidv4();
+                              setRecentQueries([{id: queryID, query: queryText}, ...recentQueries]);
+                              const [deepRankResponse, redisResponse] = await Promise.all([fetch("/api/deep-rank", {
+                                method: "POST",
+                                headers: {
+                                  "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify(data)
+                              }), fetch("/api/push-recent-query", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({id: queryID, query: queryText})
+                              })]);
+                              const deepRankResponseData = await deepRankResponse.json();
+                              if (deepRankResponseData.status === 200) {
+                                if (applicantIDs.length === 0) {
+                                  const getInfoResponse = await fetch("/api/get-info", {
+                                    method: "POST",
+                                    headers: {
+                                      "Content-Type": "application/json"
+                                    },
+                                    body: JSON.stringify({ids: deepRankResponseData.deepRankedApplicants})
+                                  })
+                                  const getInfoResponseData = await getInfoResponse.json();
+                                  if (getInfoResponseData.status === 200) {
+                                    setApplicantIDs(deepRankResponseData.deepRankedApplicants);
+                                    const displayPairArray = deepRankResponseData.deepRankedApplicants.filter((pair) => pair.id === cardID);
+                                    if (displayPairArray.length > 0) {
+                                      setCardScore(Math.round(displayPairArray[0].score * 100));
+                                      setDisplayCard(true);
+                                    } else {
+                                      setDisplayCard(false);
+                                    }
+                                    setTableInfo(getInfoResponseData.tableInfo);
+                                    setQueryText("");
+                                    setIsLoading(false);
+                                  } else if (getInfoResponseData.status === 500) {
+                                    console.error(getInfoResponseData.message);
+                                  } else {
+                                    console.error("Unknown error");
+                                  }
+                                } else {
+                                  setApplicantIDs(deepRankResponseData.deepRankedApplicants);
+                                  const displayPairArray = deepRankResponseData.deepRankedApplicants.filter((pair) => pair.id === cardID);
+                                    if (displayPairArray.length > 0) {
+                                        setCardScore(Math.round(displayPairArray[0].score * 100));
+                                        setDisplayCard(true);
+                                    } else {
+                                        setDisplayCard(false);
+                                    }
+                                  setTableInfo(deepRankResponseData.deepRankedApplicants.reduce((acc, val) => {
+                                    acc[val.id] = tableInfo[val.id];
+                                    return acc;
+                                  }, {}));
+                                  setQueryText("");
+                                  setIsLoading(false);
+                                }
+                              } else if (deepRankResponseData.status === 500) {
+                                console.error(deepRankResponseData.message);
+                              } else {
+                                console.error("Unknown error");
+                              }
+                              setIsLoading(false);
+                              setEmptyContent("No applicants found");
+                            } catch (error) {
+                              console.error(error);
+                              setIsLoading(false);
+                              setEmptyContent("No applicants found");
+                            }
+                          }}
+
                         >
                           <KeyboardDoubleArrowUpOutlinedIcon />
                         </Button>
