@@ -30,7 +30,7 @@ export default function Page() {
     const [TopK, setTopK] = useState(10);
     const [initialMultiplier, setInitialMultiplier] = useState(2);
     const [regularMultiplier, setRegularMultiplier] = useState(2);
-    const [weightedAverage, setWeightedAverage] = useState(0.5);
+    const [weightedAverage, setWeightedAverage] = useState(0.2);
     const [mainWeight, setMainWeight] = useState(0.9);
     const [educationWeight, setEducationWeight] = useState(0.4);
     const [experienceWeight, setExperienceWeight] = useState(0.7);
