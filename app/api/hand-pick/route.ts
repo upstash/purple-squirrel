@@ -43,7 +43,7 @@ const openai = new OpenAI({
 });
 
 async function flashRank(data: any, authHeader: any) {
-    const previousApplicants = await fetch(`${BASE_URL}/api/flash-rank`, {
+    const flashRankResponse = await fetch(`${BASE_URL}/api/flash-rank`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -51,7 +51,8 @@ async function flashRank(data: any, authHeader: any) {
         },
         body: JSON.stringify(data),
     });
-    return previousApplicants;
+    const flashRankResponseData = await flashRankResponse.json();
+    return flashRankResponseData.topApplicants;
 }
 
 
@@ -108,7 +109,7 @@ export async function POST(req: NextRequest) {
         
 
     })).catch((error) => {
-        return Response.json({ status: 500, message: "Error in flash-rank: " + error });
+        return Response.json({ status: 500, message: "Error in hand-pick: " + error });
     });
     if (filterResults instanceof Response) {
         return filterResults;
