@@ -1,70 +1,78 @@
 export type Applicant = {
-    id: number | null;
+  id: number | null;
 
-    applicantInfo: {
-      name: string;
-      age: number;
-      yoe: number;
-      contact: {
-        email: string;
-        phone: string;
-      }
-      location: string;
-      countryCode: string;
-      latestEducation: {
-        ongoing: boolean;
-        degree: string;
-        subject: string;
-        university: string;
-        graduation: {
-          month: number;
-          year: number;
-        }
-      }
-      urls: {
-        website: string;
-        linkedin: string;
-        github: string;
+  applicantInfo: {
+    name: string;
+    age: number;
+    yoe: number;
+    contact: {
+      email: string;
+      phone: string;
+    }
+    countryCode: string;
+    latestEducation: {
+      degree: string;
+      subject: string;
+      university: string;
+      graduation: {
+        month: number;
+        year: number;
       }
     }
-
-    recruitmentInfo: {
-      stars: number | null;
-      notes: string | null;
-      status:
-        | "newApply"
-        | "screening"
-        | "assessment"
-        | "interview"
-        | "consideration"
-        | "offer"
-        | "onboarding"
-        | "hired";
+    urls: {
+      website: string;
+      linkedin: string;
+      github: string;
     }
+  }
 
-    applicationInfo: {
+  recruitmentInfo: {
+    stars: number | null;
+    notes: string | null;
+    status:
+      | "newApply"
+      | "screening"
+      | "assessment"
+      | "interview"
+      | "shortlisted"
+      | "offer"
+      | "onboarding"
+      | "hired";
+  }
+
+  applicationInfo: {
+    date: Date;
+    method: "mail" | "upload";
+    position: string;
+    mailInfo?: {
       date: Date;
-      method: "mail" | "upload";
-      team: string;
-      role: string;
-      mailInfo?: {
-        date: Date;
-        from: string;
-        subject: string;
-        body: string;
-      }
+      from: string;
+      subject: string;
+      body: string;
     }
+  }
 
-    resumeInfo: {
-      uploadthing: {
-        key: string;
-        url: string;
-      }
-      partExists: {
-        education: boolean;
-        experience: boolean;
-        projects: boolean;
-      }
-      fullText: string;
+  resumeInfo: {
+    uploadthing: {
+      key: string;
+      url: string;
     }
+    fullText: string;
+  }
+};
+
+export type Filter = {
+  positionFilter: string[];
+  countryCodeFilter: string[];
+  statusFilter: string[];
+  starsFilter: number;
+  yoeFilter: {
+    min: number;
+    max: number;
   };
+  degreeFilter: string[];
+  graduationDateFilter: {
+    min: { year: number, month: number };
+    max: { year: number, month: number };
+  };
+};
