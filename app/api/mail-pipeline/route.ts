@@ -3,14 +3,22 @@ import OpenAI from "openai";
 import type { Applicant } from '@/types/types';
 import { headers } from 'next/headers'
 import BASE_URL from '@/app/utils/baseURL';
-
+import { locationLookup } from "@/app/utils/locations";
+const levenshtein = require('js-levenshtein');
+ 
 export const runtime = "edge";
+
+const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL as string,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN as string,
+});
+
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+});
 
 const SYSTEM_MESSAGE = `You are a resume parser.
 You will be presented information in the following format:
-CURRENT_DATE
-<current-date>
-
 MAIL_SUBJECT
 <mail-subject>
 
@@ -26,63 +34,47 @@ RESUME_TEXT
 You will give nothing but the JSON like below:
 {
     "basicInfo": {
-        "fullName": "<full-name>",
-        "role": "<role>",
-        "location": "<location>",
+        "fullName": <full-name>,
         "age": <age>,
-        "university": "<university>",
-        "email": "<email>",
-        "phone": "<phone>",
-        "websiteUrl": "<website-url>",
-        "linkedinUrl": "<linkedin-url>",
-        "githubUrl": "<github-url>"
+        "university": <university>,
+        "email": <email>,
+        "phone": <phone>,
+        "websiteUrl": <website-url>,
+        "linkedinUrl": <linkedin-url>,
+        "githubUrl": <github-url>
     },
     "manualFilters": {
         "yoe": <yoe>,
-        "highestDegree": "<highest-degree>",
-        "degreeSubject": "<degree-subject>",
+        "position": <position>,
+        "country": <country>,
+        "highestDegree": <highest-degree>,
+        "degreeSubject": <degree-subject>,
         "graduationYear": <graduation-year>,
-        "graduationMonth": <graduation-month>,
-        "ongoing": <ongoing>,
-        "team": "<team>",
-        "countryCode": "<country-code>"
-    },
-    "textData": {
-        "educationText": "<education-text>",
-        "experienceText": "<experience-text>",
-        "projectsText": "<projects-text>"
+        "graduationMonth": <graduation-month>
     }
 }
 Some information can be taken from the email information along with the resume.
-All the values are strings except age and yoe.
+All the values are strings except age, yoe, graduation-year and graduation-month which are integers.
 If the information is not available in the text, put null.
 Below are information about the key value pairs.
 
 "basicInfo" is an object consisting of basic information about the applicant. You can format the information when you put them here with correct capitalization.
 "fullName", "age", "email", "phone", "websiteUrl", "linkedinUrl", "githubUrl" are self explanatory.
-"role" is the role of the applicant, such as Senior Software Engineer, you can put the latest or the best describing role.
-"location" is where the applicant lives, you can guess it based on the resume.
 "university" is the latest university that the applicant got their degree in.
 
 "manualFilters" are critical information that the applicant will be filtered on.
 "yoe" is the years of experience of the applicant in an industrial sense. For example: work experience and research experience should be counted but personal hobby projects or education should not be counted. If the information is already presented it in the resume take it, otherwise calculate yourself.
-"highestDegree" is highest degree applicant achieved or pursuing. It can be "Associate's", "Bachelor's", "Master's" or "Doctoral".
+"position" is the position the applicant is applying to such as Senior Software Engineer. If it exists in the MAIL_SUBJECT, take it directly from there. If not, you can put the latest or the best describing position.
+"countryCode" is the Alpha-2 code of the country in which the applicant lives, you can guess it based on the resume. Do not put more than one country code since it will be exact matched.
+"highestDegree" is highest degree applicant achieved or pursuing. It can be "Unknown", "No Degree", "Associate's", "Bachelor's", "Master's" or "Doctoral".
 "degreeSubject" is the subject of the highest degree such as Computer Science.
 "graduationYear" is the year the applicant graduated or will graduate.
-"graduationMonth" is the month the applicant graduated or will graduate. It can be "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November" or "December".
-"ongoing" is a boolean value indicating if the applicant's latest education is still ongoing. It can be derived from the graduation year, graduation month and the CURRENT_DATE provided.
-"team" can either be "Development", "Design", "Management", "HR", "Sales and Marketing", "Customer Support", "Quality Assurance", "Operations" or "Finance and Accounting".
-"countryCode" is the alpha-2 country code of the applicant such as "TR" for "Turkey".
-
-"textData" is  an object containing text sections from the resume. Given resume text may not be parsed correctly, you should format so it has meaningful spacing and capitalization. Do not change the meaning, lose information, or add comments in formatting.
-"educationText" is the text of the education section of the resume formatted according to the rules defined above. Another name for this section may be used in resume, just make sure to include the information from the corresponding formal education section not certificates etc.
-"experienceText" is the text of the experience section of the resume formatted according to the rules defined above. Another name for this section may be used in resume, just make sure to include the information from the corresponding work experience section not competitions etc.
-"projectsText" is the text of the projects section of the resume formatted according to the rules defined above.`;
+"graduationMonth" is the month the applicant graduated or will graduate. It must be an integer between 1 and 12 inclusive representing the month.`;
 
 const TEST_MESSAGE = `You are a resume parser.
 You will be presented information in the following format:
-CURRENT_DATE
-<current-date>
+MAIL_SUBJECT
+<mail-subject>
 
 RESUME_TEXT
 <resume-text>
@@ -90,109 +82,120 @@ RESUME_TEXT
 You will give nothing but the JSON like below:
 {
     "basicInfo": {
-        "fullName": "<full-name>",
-        "role": "<role>",
-        "location": "<location>",
+        "fullName": <full-name>,
         "age": <age>,
-        "university": "<university>",
-        "email": "<email>",
-        "phone": "<phone>",
-        "websiteUrl": "<website-url>",
-        "linkedinUrl": "<linkedin-url>",
-        "githubUrl": "<github-url>"
+        "university": <university>,
+        "email": <email>,
+        "phone": <phone>,
+        "websiteUrl": <website-url>,
+        "linkedinUrl": <linkedin-url>,
+        "githubUrl": <github-url>
     },
     "manualFilters": {
         "yoe": <yoe>,
-        "highestDegree": "<highest-degree>",
-        "degreeSubject": "<degree-subject>",
+        "position": <position>,
+        "countryCode": <country-code>,
+        "highestDegree": <highest-degree>,
+        "degreeSubject": <degree-subject>,
         "graduationYear": <graduation-year>,
-        "graduationMonth": <graduation-month>,
-        "ongoing": <ongoing>,
-        "team": "<team>",
-        "countryCode": "<country-code>"
-    },
-    "textData": {
-        "educationText": "<education-text>",
-        "experienceText": "<experience-text>",
-        "projectsText": "<projects-text>"
+        "graduationMonth": <graduation-month>
     }
 }
-All the values are strings except age and yoe.
+Some information can be taken from the email information along with the resume.
+All the values are strings except age, yoe, graduation-year and graduation-month which are integers.
 If the information is not available in the text, put null.
 Below are information about the key value pairs.
 
 "basicInfo" is an object consisting of basic information about the applicant. You can format the information when you put them here with correct capitalization.
 "fullName", "age", "email", "phone", "websiteUrl", "linkedinUrl", "githubUrl" are self explanatory.
-"role" is the role of the applicant, such as Senior Software Engineer, you can put the latest or the best describing role.
-"location" is where the applicant lives, you can guess it based on the resume.
 "university" is the latest university that the applicant got their degree in.
 
 "manualFilters" are critical information that the applicant will be filtered on.
 "yoe" is the years of experience of the applicant in an industrial sense. For example: work experience and research experience should be counted but personal hobby projects or education should not be counted. If the information is already presented it in the resume take it, otherwise calculate yourself.
-"highestDegree" is highest degree applicant achieved or pursuing. It can be "Associate's", "Bachelor's", "Master's" or "Doctoral".
+"position" is the position the applicant is applying to such as Senior Software Engineer. If it exists in the MAIL_SUBJECT, take it directly from there. If not, you can put the latest or the best describing position.
+"countryCode" is the Alpha-2 code of the country in which the applicant lives, you can guess it based on the resume. Do not put more than one country code since it will be exact matched.
+"highestDegree" is highest degree applicant achieved or pursuing. It can be "Unknown", "No Degree", "Associate's", "Bachelor's", "Master's" or "Doctoral".
 "degreeSubject" is the subject of the highest degree such as Computer Science.
 "graduationYear" is the year the applicant graduated or will graduate.
-"graduationMonth" is the month the applicant graduated or will graduate. It can be "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November" or "December".
-"ongoing" is a boolean value indicating if the applicant's latest education is still ongoing. It can be derived from the graduation year, graduation month and the CURRENT_DATE provided.
-"team" can either be "Development", "Design", "Management", "HR", "Sales and Marketing", "Customer Support", "Quality Assurance", "Operations" or "Finance and Accounting".
-"countryCode" is the alpha-2 country code of the applicant such as "TR" for "Turkey".
+"graduationMonth" is the month the applicant graduated or will graduate. It must be an integer between 1 and 12 inclusive representing the month.`;
 
-"textData" is  an object containing text sections from the resume. Given resume text may not be parsed correctly, you should format so it has meaningful spacing and capitalization. Do not change the meaning, lose information, or add comments in formatting.
-"educationText" is the text of the education section of the resume formatted according to the rules defined above. Another name for this section may be used in resume, just make sure to include the information from the corresponding formal education section not certificates etc.
-"experienceText" is the text of the experience section of the resume formatted according to the rules defined above. Another name for this section may be used in resume, just make sure to include the information from the corresponding work experience section not competitions etc.
-"projectsText" is the text of the projects section of the resume formatted according to the rules defined above.`;
+function positionMatch(position: string, positions: any) {
+    const trimmedPosition = position.toLowerCase().trim();
+    const exactMatch = positions.find((pos: any) => {pos.name.toLowerCase().trim() === trimmedPosition});
+    if (exactMatch) {
+        if (exactMatch.status === "open") {
+            return exactMatch.name;
+        } else {
+            return "General Application";
+        }
+    }
 
-function mailDataToApplicant(processedMailData: any, parsedMailData: any) {
+    let bestMatch = positions[0];
+    let bestMatchDistance = levenshtein(positions[0].name, position);
+    for (let i = 1; i < positions.length; i++) {
+        const distance = levenshtein(positions[i].name, position);
+        if (distance < bestMatchDistance) {
+            bestMatch = positions[i];
+            bestMatchDistance = distance;
+        }
+    }
+    if (bestMatch.status === "open") {
+        return bestMatch.name;
+    } else {
+        return "General Application";
+    }
+}
+
+function countryCodeMatch(countryCode: string) {
+    if (!countryCode || countryCode.length !== 2 || !locationLookup.hasOwnProperty(countryCode)) {
+        return "unknown";
+    }
+    return countryCode;
+}
+
+function mailDataToApplicant(processedMailData: any, parsedMailData: any, positions: any, date: Date) {
     if (!parsedMailData.hasOwnProperty("basicInfo")) {
         console.log('PIPELINE: OpenAI Parsing fields missing');
-        return { applicant: null, texts: null, mapStatus: false };
+        return { applicant: null, fullResumeText: null, mapStatus: false };
     }
     let yoe;
+    let position;
+    let countryCode;
     let highestDegree;
     let degreeSubject;
     let graduationYear;
     let graduationMonth;
-    let ongoing;
-    let team;
-    let countryCode;
     if (parsedMailData.hasOwnProperty("manualFilters")) {
         yoe = parsedMailData.manualFilters.hasOwnProperty("yoe") ? parsedMailData.manualFilters.yoe : null;
+        position = parsedMailData.manualFilters.hasOwnProperty("position") ? parsedMailData.manualFilters.position : null;
+        countryCode = parsedMailData.manualFilters.hasOwnProperty("countryCode") ? parsedMailData.manualFilters.countryCode : null;
         highestDegree = parsedMailData.manualFilters.hasOwnProperty("highestDegree") ? parsedMailData.manualFilters.highestDegree : null;
         degreeSubject = parsedMailData.manualFilters.hasOwnProperty("degreeSubject") ? parsedMailData.manualFilters.degreeSubject : null;
         graduationYear = parsedMailData.manualFilters.hasOwnProperty("graduationYear") ? parsedMailData.manualFilters.graduationYear : null;
         graduationMonth = parsedMailData.manualFilters.hasOwnProperty("graduationMonth") ? parsedMailData.manualFilters.graduationMonth : null;
-        ongoing = parsedMailData.manualFilters.hasOwnProperty("ongoing") ? parsedMailData.manualFilters.ongoing : null;
-        team = parsedMailData.manualFilters.hasOwnProperty("team") ? parsedMailData.manualFilters.team : null;
-        countryCode = parsedMailData.manualFilters.hasOwnProperty("countryCode") ? parsedMailData.manualFilters.countryCode : null;
     } else {
         yoe = null;
+        position = null;
+        countryCode = null;
         highestDegree = null;
         degreeSubject = null;
         graduationYear = null;
         graduationMonth = null;
-        ongoing = null;
-        team = null;
-        countryCode = null;
     }
-    let fullName = parsedMailData.basicInfo.hasOwnProperty("fullName") ? parsedMailData.basicInfo.fullName : null;
-    let role = parsedMailData.basicInfo.hasOwnProperty("role") ? parsedMailData.basicInfo.role : null;
-    let location = parsedMailData.basicInfo.hasOwnProperty("location") ? parsedMailData.basicInfo.location : null;
-    let age = parsedMailData.basicInfo.hasOwnProperty("age") ? parsedMailData.basicInfo.age : null;
-    let university = parsedMailData.basicInfo.hasOwnProperty("university") ? parsedMailData.basicInfo.university : null;
-    let email = parsedMailData.basicInfo.hasOwnProperty("email") ? parsedMailData.basicInfo.email : null;
-    let phone = parsedMailData.basicInfo.hasOwnProperty("phone") ? parsedMailData.basicInfo.phone : null;
-    let websiteUrl = parsedMailData.basicInfo.hasOwnProperty("websiteUrl") ? parsedMailData.basicInfo.websiteUrl : null;
-    let linkedinUrl = parsedMailData.basicInfo.hasOwnProperty("linkedinUrl") ? parsedMailData.basicInfo.linkedinUrl : null;
-    let githubUrl = parsedMailData.basicInfo.hasOwnProperty("githubUrl") ? parsedMailData.basicInfo.githubUrl : null;
-    let educationText = parsedMailData.textData.hasOwnProperty("educationText") ? parsedMailData.textData.educationText : null;
-    let experienceText = parsedMailData.textData.hasOwnProperty("experienceText") ? parsedMailData.textData.experienceText : null;
-    let projectsText = parsedMailData.textData.hasOwnProperty("projectsText") ? parsedMailData.textData.projectsText : null;
+    const fullName = parsedMailData.basicInfo.hasOwnProperty("fullName") ? parsedMailData.basicInfo.fullName : null;
+    const age = parsedMailData.basicInfo.hasOwnProperty("age") ? parsedMailData.basicInfo.age : null;
+    const university = parsedMailData.basicInfo.hasOwnProperty("university") ? parsedMailData.basicInfo.university : null;
+    const email = parsedMailData.basicInfo.hasOwnProperty("email") ? parsedMailData.basicInfo.email : null;
+    const phone = parsedMailData.basicInfo.hasOwnProperty("phone") ? parsedMailData.basicInfo.phone : null;
+    const websiteUrl = parsedMailData.basicInfo.hasOwnProperty("websiteUrl") ? parsedMailData.basicInfo.websiteUrl : null;
+    const linkedinUrl = parsedMailData.basicInfo.hasOwnProperty("linkedinUrl") ? parsedMailData.basicInfo.linkedinUrl : null;
+    const githubUrl = parsedMailData.basicInfo.hasOwnProperty("githubUrl") ? parsedMailData.basicInfo.githubUrl : null;
     
     if (!fullName ) {
         console.log('PIPELINE: OpenAI Parsing fields missing');
-        return { applicant: null, texts: null, mapStatus: false };
+        return { applicant: null, fullResumeText: null, mapStatus: false };
     }
-    let applicant: Applicant = {
+    const applicant: Applicant = {
         "id": null,
         "applicantInfo": {
             "name": fullName,
@@ -202,11 +205,9 @@ function mailDataToApplicant(processedMailData: any, parsedMailData: any) {
                 "email": email,
                 "phone": phone,
             },
-            "location": location,
-            "countryCode": countryCode,
+            "countryCode": (countryCode && typeof countryCode === "string") ? countryCodeMatch(countryCode) : "unknown",
             "latestEducation": {
-                "ongoing": ongoing,
-                "degree": highestDegree,
+                "degree": (["Unknown", "No Degree", "Associate's", "Bachelor's", "Master's", "Doctoral"].includes(highestDegree)) ? highestDegree : "Unknown",
                 "subject": degreeSubject,
                 "university": university,
                 "graduation": {
@@ -226,12 +227,11 @@ function mailDataToApplicant(processedMailData: any, parsedMailData: any) {
             "status": "newApply"
         },
         "applicationInfo": {
-            "date": new Date(),
+            "date": date,
             "method": "mail",
-            "team": team,
-            "role": role,
+            "position": (position && typeof position === "string") ? positionMatch(position, positions) : "General Application",
             "mailInfo": {
-                "date": new Date(),
+                "date": date,
                 "from": processedMailData.mailFrom,
                 "subject": processedMailData.mailSubject,
                 "body": processedMailData.mailBody
@@ -242,48 +242,23 @@ function mailDataToApplicant(processedMailData: any, parsedMailData: any) {
                 "url": processedMailData.resumeUrl,
                 "key": processedMailData.resumeKey
             },
-            "partExists": {
-                "education": educationText ? true : false,
-                "experience": experienceText ? true : false,
-                "projects": projectsText ? true : false
-            },
             "fullText": processedMailData.resumeText,
         }
     };
-    let texts = {
-        fullResumeText: processedMailData.resumeText,
-        educationText: educationText,
-        experienceText: experienceText,
-        projectsText: projectsText
-    }
-    return { applicant: applicant, texts: texts, mapStatus: true };
+    return { applicant: applicant, fullResumeText: processedMailData.resumeText, mapStatus: true };
 }
-
-function sleep(time: number) {
-    return new Promise((resolve) => {
-        setTimeout(resolve, time)
-    })
-  }
-
-const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL as string,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN as string,
-});
 
 export async function POST() {
     const authHeader = headers().get('authorization') || headers().get('Authorization');
 
-    const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY
-    });
+    const date = new Date();
 
-    const CURRENT_DATE = new Date().toDateString();
+    const positionsResponse = await redis.lrange("positions", 0, -1);
+    const positions = (positionsResponse.length === 0) ? [{name: "General Application", status: "open"}] : positionsResponse;
     
     try {
         const encoder = new TextEncoder()
         const decoder = new TextDecoder()
-
-        let completion = ''
 
         const stream = new ReadableStream({
             async start(controller) {
@@ -307,26 +282,30 @@ export async function POST() {
                         if (rawMailDataNum > 0) {
                             Promise.all(rawMailDataIndexList.map( async (index) => {
                                 console.log('PIPELINE: Starting /api/process-raw-mail-data');
-                                let processResponse = await fetch(`${BASE_URL}/api/process-raw-mail-data?index=${index}`, { method: "POST", headers: { "Authorization": authHeader as string } });
-                                let processResponseJson = await processResponse.json();
+                                const processResponse = await fetch(`${BASE_URL}/api/process-raw-mail-data?index=${index}`, { method: "POST", headers: { "Authorization": authHeader as string } });
+                                const processResponseJson = await processResponse.json();
                                 if (processResponseJson.status !== 200) {
                                     console.log('PIPELINE: Error in /api/process-raw-mail-data');
                                     return;
                                 }
-                                let processedMailData = processResponseJson.processedMailData;
+                                const processedMailData = processResponseJson.processedMailData;
 
                                 console.log('PIPELINE: Fetching OpenAI Parsing Response');
                                 
-                                let userMessage = `CURRENT_DATE\n${CURRENT_DATE}\n\nMAIL_SUBJECT\n${processedMailData.mailSubject}\n\nMAIL_FROM\n${processedMailData.mailFrom}\n\nMAIL_BODY\n${processedMailData.mailBody}\n\nRESUME_TEXT\n${processedMailData.resumeText}`;
-                                let test_mode = true;
+                                const prodUserMessage = `MAIL_SUBJECT\n${processedMailData.mailSubject}\n\nMAIL_FROM\n${processedMailData.mailFrom}\n\nMAIL_BODY\n${processedMailData.mailBody}\n\nRESUME_TEXT\n${processedMailData.resumeText}`;
+                                const testUserMessage = `MAIL_SUBJECT\n${processedMailData.mailSubject}\n\nRESUME_TEXT\n${processedMailData.resumeText}`;
+                                const test_mode = true;
                                 let systemMessage;
+                                let userMessage;
                                 if (test_mode) {
                                     systemMessage = TEST_MESSAGE;
+                                    userMessage = testUserMessage;
                                     console.log('PIPELINE: Test Mode Active');
                                 } else {
                                     systemMessage = SYSTEM_MESSAGE;
+                                    userMessage = prodUserMessage;
                                 }
-                                let completion = await openai.chat.completions.create({
+                                const completion = await openai.chat.completions.create({
                                     messages: [
                                     {
                                         role: "system",
@@ -346,63 +325,33 @@ export async function POST() {
                                     return;
                                 }
 
-                                let parsedMailData = JSON.parse(completion.choices[0].message.content);
+                                const parsedMailData = JSON.parse(completion.choices[0].message.content);
                                 
-                                let mapResult = mailDataToApplicant(processedMailData, parsedMailData);
-                                let mapStatus = mapResult.mapStatus;
+                                const mapResult = mailDataToApplicant(processedMailData, parsedMailData, positions, date);
+                                const mapStatus = mapResult.mapStatus;
                                 if (!mapStatus) {
                                     console.log('PIPELINE: OpenAI Parsed Data Does Not Fit Applicant Schema');
                                     return;
                                 }
-                                let applicant = mapResult.applicant;
+                                const applicant = mapResult.applicant;
                                 if (!applicant) {
                                     console.log('PIPELINE: OpenAI Parsed Data Error');
                                     return;
                                 }
-                                let texts = mapResult.texts;
-                                if (!texts) {
+                                const fullResumeText = mapResult.fullResumeText;
+                                if (!fullResumeText) {
                                     console.log('PIPELINE: OpenAI Parsed Data Error');
                                     return;
                                 }
                                 
                                 console.log('PIPELINE: Fetching OpenAI Embedding Response');
-                                let mainEmbedding = await openai.embeddings.create({
+                                const resumeEmbeddingResponse = await openai.embeddings.create({
                                     model: "text-embedding-3-small",
-                                    input: texts.fullResumeText,
+                                    input: fullResumeText,
                                     encoding_format: "float",
                                 });
 
-                                let embeddings: {
-                                    mainEmbedding: any,
-                                    educationEmbedding?: any,
-                                    experienceEmbedding?: any,
-                                    projectsEmbedding?: any,
-                                } = { mainEmbedding: mainEmbedding.data[0].embedding };
-
-                                if (applicant.resumeInfo.partExists.education) {
-                                    let educationEmbedding = await openai.embeddings.create({
-                                        model: "text-embedding-3-small",
-                                        input: texts.educationText,
-                                        encoding_format: "float",
-                                    });
-                                    embeddings.educationEmbedding = educationEmbedding.data[0].embedding;
-                                }
-                                if (applicant.resumeInfo.partExists.experience) {
-                                    let experienceEmbedding = await openai.embeddings.create({
-                                        model: "text-embedding-3-small",
-                                        input: texts.experienceText,
-                                        encoding_format: "float",
-                                    });
-                                    embeddings.experienceEmbedding = experienceEmbedding.data[0].embedding;
-                                }
-                                if (applicant.resumeInfo.partExists.projects) {
-                                    let projectsEmbedding = await openai.embeddings.create({
-                                        model: "text-embedding-3-small",
-                                        input: texts.projectsText,
-                                        encoding_format: "float",
-                                    });
-                                    embeddings.projectsEmbedding = projectsEmbedding.data[0].embedding;
-                                }
+                                const resumeEmbedding = resumeEmbeddingResponse.data[0].embedding;
 
                                 console.log('PIPELINE: Starting /api/create-applicant');
                                 await fetch(`${BASE_URL}/api/create-applicant`, {
@@ -411,7 +360,7 @@ export async function POST() {
                                         "Content-Type": "application/json",
                                         "Authorization": authHeader as string
                                     },
-                                    body: JSON.stringify({ applicant: applicant, embeddings: embeddings })
+                                    body: JSON.stringify({ applicant: applicant, resumeEmbedding: resumeEmbedding })
                                 });
                             })).then( async () => {
                                 console.log('PIPELINE: Purging raw:mail:data:list');
