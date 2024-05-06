@@ -31,14 +31,16 @@ export async function POST() {
             console.log('Pushed processedMailData to Redis');
         })).then(async () => {
             console.log('Processed all raw mail data');
-            const res = await client.publishJSON({
-                url: `${BASE_URL}/api/create-applicant-orchestrator`,
-                method: "POST",
-                headers: {
-                  Authorization: authHeader
-                },
-                retries: 0,
-              });
+            if (process.env.NODE_ENV === "production") {
+                const res = await client.publishJSON({
+                    url: `${BASE_URL}/api/create-applicant-orchestrator`,
+                    method: "POST",
+                    headers: {
+                    Authorization: authHeader
+                    },
+                    retries: 0,
+                });
+            }
         }).catch((error) => {
             console.log('Error in raw mail data orchestration:', error);
         });
