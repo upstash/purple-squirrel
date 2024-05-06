@@ -8,15 +8,16 @@ const client = new Client({ token: process.env.QSTASH_TOKEN as string });
 
 export async function POST(req: NextRequest) {
     const data = await req.json();
+    const scheduling = data.scheduling;
     const authHeader = headers().get('authorization') || headers().get('Authorization');
 
     let cron;
-    switch (data.routineDigestionInterval) {
+    switch (scheduling.routineDigestionInterval) {
         case "minutes":
-            cron = `*/${data.routineDigestionNum} * * * *`;
+            cron = `*/${scheduling.routineDigestionNum} * * * *`;
             break;
         case "hours":
-            cron = `0 */${data.routineDigestionNum} * * *`;
+            cron = `0 */${scheduling.routineDigestionNum} * * *`;
             break;
     }
     
