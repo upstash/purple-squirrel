@@ -58,7 +58,7 @@ export async function POST() {
                 const res = await client.publishJSON({
                   url: `${BASE_URL}/api/listen-inbox`,
                   headers: { "Authorization": authHeader},
-                  delay: (scheduling.emptyDigestionInterval === "minutes" ? `${scheduling.emptyDigestionNum}m` : `${scheduling.emptyDigestionNum}h`),
+                  delay: (scheduling.emptyDigestionInterval === "minutes" ? scheduling.emptyDigestionNum * 60 : scheduling.emptyDigestionNum * 3600),
                   retries: 0,
                 });
               }
@@ -70,14 +70,14 @@ export async function POST() {
                 const res = await client.publishJSON({
                   url: `${BASE_URL}/api/listen-inbox`,
                   headers: { "Authorization": authHeader},
-                  delay: (scheduling.fullDigestionInterval === "minutes" ? `${scheduling.fullDigestionNum}m` : `${scheduling.fullDigestionNum}h`),
+                  delay: (scheduling.emptyDigestionInterval === "minutes" ? scheduling.emptyDigestionNum * 60 : scheduling.emptyDigestionNum * 3600),
                   retries: 0,
                 });
               } else {
                 const res = await client.publishJSON({
                   url: `${BASE_URL}/api/listen-inbox`,
                   headers: { "Authorization": authHeader},
-                  delay: (scheduling.emptyDigestionInterval === "minutes" ? `${scheduling.emptyDigestionNum}m` : `${scheduling.emptyDigestionNum}h`),
+                  delay: (scheduling.emptyDigestionInterval === "minutes" ? scheduling.emptyDigestionNum * 60 : scheduling.emptyDigestionNum * 3600),
                   retries: 0,
                 });
               }
