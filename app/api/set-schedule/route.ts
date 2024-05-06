@@ -10,6 +10,9 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     const scheduling = data.scheduling;
     const authHeader = headers().get('authorization') || headers().get('Authorization');
+    console.log(scheduling);
+    console.log(scheduling.routineDigestionInterval);
+    console.log(scheduling.routineDigestionNum);
 
     let cron;
     switch (scheduling.routineDigestionInterval) {
@@ -20,6 +23,7 @@ export async function POST(req: NextRequest) {
             cron = `0 */${scheduling.routineDigestionNum} * * *`;
             break;
     }
+    console.log(cron);
     
     const schedules = client.schedules;
     const allSchedules = await schedules.list();
