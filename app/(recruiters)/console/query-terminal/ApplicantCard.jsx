@@ -18,16 +18,20 @@ import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import ArrowDropDownOutlinedIcon from '@mui/icons-material/ArrowDropDownOutlined';
 import MailOutlineOutlinedIcon from '@mui/icons-material/MailOutlineOutlined';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import {Tooltip} from "@nextui-org/tooltip";
+import {ScrollShadow} from "@nextui-org/scroll-shadow";
 import { card } from "@nextui-org/react";
 import React, { use } from "react";
 import {  Dropdown,  DropdownTrigger,  DropdownMenu,  DropdownSection,  DropdownItem} from "@nextui-org/dropdown";
+import { locationLookup } from "@/app/utils/locations";
 
 const statusColorMap = {
     newApply: "default",
     screening: "warning",
     assessment: "warning",
     interview: "warning",
-    consideration: "danger",
+    shortlisted: "danger",
     offer: "secondary",
     onboarding: "success",
     hired: "success",
@@ -68,43 +72,46 @@ function checkMailAddress(email) {
 
 }
 
-function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, setApplicantIDs}) {
-    const applicantName = tableInfo[cardID].name;
-    const applicantRole = tableInfo[cardID].role;
-    const applicantTeam = tableInfo[cardID].team;
-    const applicantAge = tableInfo[cardID].age;
-    const applicantYOE = tableInfo[cardID].yoe;
-    const applicantLocation = tableInfo[cardID].location;
-    const applicantDegree = tableInfo[cardID].degree;
-    const applicantSubject = tableInfo[cardID].subject;
-    const applicantUniversity = tableInfo[cardID].university;
-    const applicantEmail = tableInfo[cardID].email;
-    const applicantPhone = tableInfo[cardID].phone;
-    const applicantResume = tableInfo[cardID].resumeUrl;
-    const applicantWebsite = tableInfo[cardID].websiteUrl;
-    const applicantLinkedIn = tableInfo[cardID].linkedinUrl;
-    const applicantGithub = tableInfo[cardID].githubUrl;
-    const applicantStatus = tableInfo[cardID].status;
-    const applicantStars = tableInfo[cardID].stars;
-    const applicantNotes = tableInfo[cardID].notes;
-    const applicantNotesSaved = tableInfo[cardID].notesSaved;
-    console.log(applicantWebsite)
-    console.log(checkWebsiteUrl(applicantWebsite))
+function InfoCard({
+    setApplicants,
+    cardState,
+    setCardState,
+}) {
+    const applicantID = cardState.id;
+    const applicantScore = Math.round(cardState.score * 100);
+    const applicantDoc = cardState.doc;
+    const applicantName = applicantDoc.name;
+    const applicantPosition = applicantDoc.position;
+    const applicantAge = applicantDoc.age;
+    const applicantYOE = applicantDoc.yoe;
+    const applicantLocation = locationLookup[applicantDoc.countryCode];
+    const applicantDegree = applicantDoc.degree;
+    const applicantSubject = applicantDoc.subject;
+    const applicantUniversity = applicantDoc.university;
+    const applicantEmail = applicantDoc.email;
+    const applicantPhone = applicantDoc.phone;
+    const applicantResume = applicantDoc.resumeUrl;
+    const applicantWebsite = applicantDoc.websiteUrl;
+    const applicantLinkedIn = applicantDoc.linkedinUrl;
+    const applicantGithub = applicantDoc.githubUrl;
+    const applicantStatus = applicantDoc.status;
+    const applicantStars = applicantDoc.stars;
+    const applicantNotes = applicantDoc.notes;
     return (
-        <Card className="max-w-[400px] h-full">
-            <CardHeader className="flex gap-3">
+        <Card className="max-w-[400px] h-full flex flex-col shadow-none">
+            <CardHeader className="flex-initial flex gap-3">
                 <div className="flex flex-col w-full">
                     <div className="flex justify-between items-center w-full">
                         <div className="flex flex-col">
                             <p className="text-2xl">{applicantName}</p>
-                            <p className="text-small text-default-400">{applicantRole} - {applicantTeam}</p>
+                            <p className="text-small text-default-400">{applicantPosition}</p>
                         </div>
-                        <p className={(cardScore > 89) ? "text-bold text-6xl bg-gradient-to-r from-secondary to-secondary-400 bg-clip-text text-transparent" : (cardScore > 79) ? "text-bold text-6xl bg-gradient-to-r from-success to-success-300 bg-clip-text text-transparent" : (cardScore > 49) ? "text-bold text-6xl bg-gradient-to-r from-warning to-warning-300 bg-clip-text text-transparent" : "text-bold text-6xl bg-gradient-to-r from-danger to-danger-300 bg-clip-text text-transparent"}>{cardScore}</p>
+                        <p className={(applicantScore > 89) ? "text-bold text-6xl bg-gradient-to-r from-secondary to-secondary-400 bg-clip-text text-transparent" : (applicantScore > 79) ? "text-bold text-6xl bg-gradient-to-r from-success to-success-300 bg-clip-text text-transparent" : (applicantScore > 49) ? "text-bold text-6xl bg-gradient-to-r from-warning to-warning-300 bg-clip-text text-transparent" : "text-bold text-6xl bg-gradient-to-r from-danger to-danger-300 bg-clip-text text-transparent"}>{applicantScore}</p>
                     </div>
                 </div>
             </CardHeader>
-            <Divider/>
-            <CardBody>
+            <Divider className="flex-initial"/>
+            <CardBody className="flex-auto">
                 <div className="flex flex-col gap-3 h-full">
                     <div className="flex gap-2">
                         <div className="flex-auto flex flex-col gap-2">
@@ -166,57 +173,85 @@ function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, s
                                 </div>
                             </div>
                         </div>
-                        <div className="flex-initial flex flex-col items-center gap-2">
-                            {
-                                applicantResume
-                                ?
-                                    <Button isIconOnly isExternal href={applicantResume} as={Link} color="danger">
-                                        <InsertDriveFileOutlinedIcon size={28} />
-                                    </Button>
-                                :
-                                    null
-                            }
-                            {
-                                applicantEmail && checkMailAddress(applicantEmail)
-                                ?
-                                    <Button isIconOnly isExternal href={`mailto:${applicantEmail}`} as={Link} color="primary">
-                                        <MailOutlineOutlinedIcon size={28} />
-                                    </Button>
-                                :
-                                    null
-                            }
-                            {
-                                applicantWebsite && checkWebsiteUrl(applicantWebsite)
-                                ?
-                                    <Button isIconOnly isExternal href={`/external-ref?externalLink=${applicantWebsite}`} as={Link}><LanguageOutlinedIcon /></Button>
-                                :
-                                    null
-                            }
-                            {
-                                applicantLinkedIn && checkLinkedInUrl(applicantLinkedIn)
-                                ?
-                                    <Button isIconOnly isExternal href={applicantLinkedIn} as={Link}>
-                                        <LinkedInIcon size={28} />
-                                    </Button>
-                                :
-                                    null
-                            }
-                            {
-                                applicantGithub && checkGithubUrl(applicantGithub)
-                                ?
-                                    <Button isIconOnly isExternal href={applicantGithub} as={Link}>
-                                        <MarkGithubIcon size={28} />
-                                    </Button>
-                                :
-                                    null
-                            }
+                        <div className="flex-initial flex flex-col items-center justify-between">
+                            <div className="flex-initial flex flex-col items-center gap-2">
+                                {
+                                    applicantResume
+                                    ?
+                                        <Button isIconOnly isExternal href={applicantResume} as={Link} color="danger">
+                                            <InsertDriveFileOutlinedIcon size={28} />
+                                        </Button>
+                                    :
+                                        null
+                                }
+                                {
+                                    applicantEmail && checkMailAddress(applicantEmail)
+                                    ?
+                                        <Button isIconOnly isExternal href={`mailto:${applicantEmail}`} as={Link} color="primary">
+                                            <MailOutlineOutlinedIcon size={28} />
+                                        </Button>
+                                    :
+                                        null
+                                }
+                                {
+                                    applicantWebsite && checkWebsiteUrl(applicantWebsite)
+                                    ?
+                                        <Button isIconOnly isExternal href={`/external-ref?externalLink=${applicantWebsite}`} as={Link}><LanguageOutlinedIcon /></Button>
+                                    :
+                                        null
+                                }
+                                {
+                                    applicantLinkedIn && checkLinkedInUrl(applicantLinkedIn)
+                                    ?
+                                        <Button isIconOnly isExternal href={applicantLinkedIn} as={Link}>
+                                            <LinkedInIcon size={28} />
+                                        </Button>
+                                    :
+                                        null
+                                }
+                                {
+                                    applicantGithub && checkGithubUrl(applicantGithub)
+                                    ?
+                                        <Button isIconOnly isExternal href={applicantGithub} as={Link}>
+                                            <MarkGithubIcon size={28} />
+                                        </Button>
+                                    :
+                                        null
+                                }
+                            </div>
+                            <Tooltip content="Delete Applicant" color={"danger"} delay={400} closeDelay={600}>
+                                <Button isIconOnly color="danger" variant="bordered" size="md"
+                                    onPress={async () => {
+                                        await fetch(`/api/delete-applicants`, {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({ids: [cardID]}),
+                                        });
+                                        if (cardState.doc && cardState.doc.notes) {
+                                            await fetch(`/api/set-applicant-notes`, {
+                                                method: "POST",
+                                                headers: {
+                                                "Content-Type": "application/json",
+                                                },
+                                                body: JSON.stringify({id: cardState.id, notes: cardState.doc.notes}),
+                                            });
+                                        }
+                                        setCardState((prev) => {return {...prev, display: false};});
+                                        setApplicants((prev) => {return prev.filter((triplet) => triplet.id !== applicantID);});
+                                    }}
+                                >
+                                    <DeleteOutlinedIcon />
+                                </Button>
+                            </Tooltip>
                         </div>
                     </div>
                 </div>
             </CardBody>
-            <Divider/>
-            <CardFooter>
-                <div className="flex flex-col h-full w-full gap-2">
+            <Divider className="flex-initial"/>
+            <CardFooter className="flex-initial">
+                <div className="flex flex-col h-full w-full gap-4">
                     <div className="flex items-center justify-between gap-unit-2">
                         <Dropdown className="min-w-0 w-fit">
                             <DropdownTrigger>
@@ -297,77 +332,25 @@ function InfoCard({cardID, tableInfo, setTableInfo, cardScore, setDisplayCard, s
                             )}
                         </div>
                     </div>
-                    <div className="flex flex-col gap-3">
-                        <Textarea
-                            isDisabled={applicantNotesSaved}
-                            label="Notes"
-                            labelPlacement="outside"
-                            radius="md"
-                            placeholder="Enter your description"
-                            value={tableInfo[cardID].notes || ""}
-                            onValueChange={(value) => {
-                                setTableInfo((prevTableInfo) => {
-                                    const updatedTableInfo = { ...prevTableInfo };
-                                    updatedTableInfo[cardID].notes = value;
-                                    return updatedTableInfo;
+                    <Textarea
+                        label="Notes"
+                        radius="md"
+                        placeholder="Enter notes..."
+                        value={applicantNotes || ""}
+                        onValueChange={(value) => {
+                            cardState.doc.notes = value;
+                            setApplicants((prevApplicants) => {
+                                return prevApplicants.map((applicant) => {
+                                    if (applicant.id === applicantID) {
+                                        return { ...applicant, notes: value };
+                                    }
+                                    return applicant;
                                 });
-                            }}
-                            className="w-full h-full"
+                            });
+                        }}
+                        className="w-full h-full"
 
-                            />
-                        <div className="flex gap-4 items-center justify-between w-full">
-                            {
-                                applicantNotesSaved
-                                ? <Button color="success" variant="bordered" className="flex-1 w-full" startContent={<CreateOutlinedIcon/>}
-                                    onPress={() => {
-                                        setTableInfo((prevTableInfo) => {
-                                            const updatedTableInfo = { ...prevTableInfo };
-                                            updatedTableInfo[cardID].notesSaved = false;
-                                            return updatedTableInfo;
-                                        })
-                                    }}>
-                                    Take Notes
-                                    </Button>
-                                : <Button color="success" className="flex-1 w-full" startContent={<CheckOutlinedIcon/>}
-                                    onPress={async () => {
-                                        await fetch(`/api/set-applicant-notes`, {
-                                            method: "POST",
-                                            headers: {
-                                              "Content-Type": "application/json",
-                                            },
-                                            body: JSON.stringify({id: cardID, notes: tableInfo[cardID].notes}),
-                                          });
-                                        setTableInfo((prevTableInfo) => {
-                                            const updatedTableInfo = { ...prevTableInfo };
-                                            updatedTableInfo[cardID].notesSaved = true;
-                                            return updatedTableInfo;
-                                        })
-                                    }}>
-                                    Save Notes
-                                    </Button>
-                            }
-                            <Button color="danger" variant="bordered" className="flex-1" startContent={<PersonOffOutlinedIcon/>}
-                                onPress={async () => {
-                                    await fetch(`/api/delete-applicants`, {
-                                      method: "POST",
-                                      headers: {
-                                        "Content-Type": "application/json",
-                                      },
-                                      body: JSON.stringify({ids: [cardID]}),
-                                    });
-                                    setDisplayCard(false);
-                                    setApplicantIDs((prevApplicantIDs) => prevApplicantIDs.filter((pair) => pair.id !== cardID));
-                                    setTableInfo(prevTableInfo => {
-                                        const updatedTableInfo = { ...prevTableInfo };
-                                        delete updatedTableInfo[cardID];
-                                        return updatedTableInfo;
-                                    });
-                                  }}
-                            >
-                                Delete Applicant
-                            </Button>
-                        </div>
-                    </div>
+                        />
                 </div>
             </CardFooter>
         </Card>
@@ -468,10 +451,20 @@ function EmptyCard() {
     );
 }
 
-export default function ApplicantCard({displayCard, setDisplayCard, cardID, tableInfo, setTableInfo, cardScore, setApplicantIDs}) {
+export default function ApplicantCard({
+    setApplicants,
+    cardState,
+    setCardState,
+}) {
     return (
-        <div>
-            {displayCard ? <InfoCard cardID={cardID} tableInfo={tableInfo} setTableInfo={setTableInfo} cardScore={cardScore} setDisplayCard={setDisplayCard} setApplicantIDs={setApplicantIDs} /> : <EmptyCard/>}
+        <div className="h-full">
+            {cardState.display
+                ? <InfoCard
+                    setApplicants={setApplicants}
+                    cardState={cardState}
+                    setCardState={setCardState}
+                    />
+                : <EmptyCard />}
         </div>
     );
 }

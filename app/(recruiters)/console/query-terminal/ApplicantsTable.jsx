@@ -7,27 +7,27 @@ import {  Table,  TableHeader,  TableBody,  TableColumn,  TableRow,  TableCell} 
 import {Spinner} from "@nextui-org/spinner";
 import {Button} from "@nextui-org/button";
 import {Link} from "@nextui-org/link";
-import {Input} from "@nextui-org/input";
 import {Chip} from "@nextui-org/chip";
 import {Tooltip} from "@nextui-org/tooltip";
 import {Pagination} from "@nextui-org/pagination";
 
-import {ChevronDownIcon} from "./ChevronDownIcon";
-import {capitalize} from "./utils";
+import {capitalize} from "@/app/utils/utils";
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import StarOutlinedIcon from '@mui/icons-material/StarOutlined';
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
 import NextWeekOutlinedIcon from '@mui/icons-material/NextWeekOutlined';
+
+import { locations, locationLookup } from "@/app/utils/locations";
+
+import { CSVLink } from "react-csv";
 
 const columns = [
   {name: "ID", uid: "id", sortable: true},
   {name: "SCORE", uid: "score", sortable: true},
   {name: "NAME", uid: "name", sortable: true},
   {name: "AGE", uid: "age", sortable: true},
-  {name: "ROLE", uid: "role"},
-  {name: "TEAM", uid: "team"},
+  {name: "POSITION", uid: "position"},
   {name: "LOCATION", uid: "location"},
   {name: "STATUS", uid: "status", sortable: true},
   {name: "STARS", uid: "stars", sortable: true},
@@ -40,7 +40,7 @@ const statusOptions = [
   {name: "Screening", uid: "screening"},
   {name: "Assessment", uid: "assessment"},
   {name: "Interview", uid: "interview"},
-  {name: "Consideration", uid: "consideration"},
+  {name: "Shortlisted", uid: "shortlisted"},
   {name: "Offer", uid: "offer"},
   {name: "Onboarding", uid: "onboarding"},
   {name: "Hired", uid: "hired"},
@@ -54,7 +54,7 @@ const statusColorMap = {
   screening: "warning",
   assessment: "warning",
   interview: "warning",
-  consideration: "danger",
+  shortlisted: "danger",
   offer: "secondary",
   onboarding: "success",
   hired: "success",
@@ -62,70 +62,15 @@ const statusColorMap = {
 
 const statusArray = Object.keys(statusColorMap);
 
-const teamOptions = [
-  {name: "All", uid: "All"},
-  {name: "Development", uid: "Development"},
-  {name: "Design", uid: "Design"},
-  {name: "Management", uid: "Management"},
-  {name: "HR", uid: "HR"},
-  {name: "Sales and Marketing", uid: "Sales and Marketing"},
-  {name: "Customer Support", uid: "Customer Support"},
-  {name: "Quality Assurance", uid: "Quality Assurance"},
-  {name: "Operations", uid: "Operations"},
-  {name: "Finance and Accounting", uid: "Finance and Accounting"},
-];
-
-const teamSet = new Set(teamOptions.map((team) => team.uid));
-teamSet.delete("All");
-
-const starsOptions = [
-  {name: "No Filter", uid: "No Filter"},
-  {name: "1+", uid: "1"},
-  {name: "2+", uid: "2"},
-  {name: "3+", uid: "3"},
-  {name: "4+", uid: "4"},
-  {name: "5+", uid: "5"},
-];
-
-const starsSet = new Set(["No Filter"]);
-
-const eqSet = (xs, ys) =>
-    xs.size === ys.size &&
-    [...xs].every((x) => ys.has(x));
-
-const inSet = (xs, ys) =>
-    [...xs].every((x) => ys.has(x));
-
-
 export default function ApplicantsTable({
-  applicantIDs,
-  setApplicantIDs,
-  setFilteredApplicantIDs,
-  tableInfo,
-  setTableInfo,
-  loadingColor,
-  setLoadingColor,
-  loadingText,
-  setLoadingText,
-  isLoading,
-  setIsLoading,
-  emptyContent,
-  cardID,
-  setCardID,
-  setDisplayCard,
-  setCardScore,
-  filterValue,
-  setFilterValue,
+  applicants,
+  setApplicants,
+  tableLoading,
+  setTableLoading,
+  cardState,
+  setCardState,
   selectedKeys,
   setSelectedKeys,
-  visibleColumns,
-  setVisibleColumns,
-  statusFilter,
-  setStatusFilter,
-  teamFilter,
-  setTeamFilter,
-  starsFilter,
-  setStarsFilter,
   rowsPerPage,
   setRowsPerPage,
   sortDescriptor,
@@ -133,53 +78,17 @@ export default function ApplicantsTable({
   tablePage,
   setTablePage,
 }) {
-
-  const [childFilteredApplicantIDs, setChildFilteredApplicantIDs] = React.useState([]);
-
-  const cardIDRef = React.useRef(cardID);
-  cardIDRef.current = cardID;
-
-  const hasSearchFilter = Boolean(filterValue);
+  const cardIDRef = React.useRef(cardState.id);
+  cardIDRef.current = cardState.id;
 
   const headerColumns = React.useMemo(() => {
-    if (visibleColumns === "all") return columns;
-
-    return columns.filter((column) => Array.from(visibleColumns).includes(column.uid));
-  }, [visibleColumns]);
+    return columns.filter((column) => ["score", "name", "position", "location", "stars", "status", "actions"].includes(column.uid));
+  }, []);
 
   const filteredItems = React.useMemo(() => {
-    let filteredApplicants = [...applicantIDs];
-
-    if (hasSearchFilter) {
-      filteredApplicants = filteredApplicants.filter(({id, score}) =>
-        tableInfo[id].name.toLowerCase().includes(filterValue.toLowerCase()),
-      );
-    }
-    if (statusFilter !== "all" && Array.from(statusFilter).length !== statusOptions.length) {
-      filteredApplicants = filteredApplicants.filter(({id, score}) =>
-        Array.from(statusFilter).includes(tableInfo[id].status),
-      );
-    }
-    if (teamFilter !== "all" && Array.from(teamFilter).length !== teamOptions.length) {
-      filteredApplicants = filteredApplicants.filter(({id, score}) =>
-        Array.from(teamFilter).includes(tableInfo[id].team),
-      );
-    }
-    const [insideStarsFilter] = starsFilter;
-    if (insideStarsFilter !== "No Filter") {
-      filteredApplicants = filteredApplicants.filter(({id, score}) =>
-        tableInfo[id].stars >= parseInt(insideStarsFilter),
-      );
-    }
-    setChildFilteredApplicantIDs((prev) => filteredApplicants.map((item) => ({id: item.id, score: item.score})));
-    filteredApplicants = filteredApplicants.map(({id, score}) => ({id: id, score: score, info: {...tableInfo[id]}}));
-
+    let filteredApplicants = [...applicants];
     return filteredApplicants;
-  }, [filterValue, statusFilter, hasSearchFilter, applicantIDs, tableInfo, teamFilter, starsFilter, setChildFilteredApplicantIDs]);
-
-  useEffect(() => {
-    setFilteredApplicantIDs(childFilteredApplicantIDs);
-  }, [childFilteredApplicantIDs, setFilteredApplicantIDs]);
+  }, [applicants]);
   
   const pages = Math.ceil(filteredItems.length / rowsPerPage);
 
@@ -202,7 +111,7 @@ export default function ApplicantsTable({
 
   const renderCell = React.useCallback((applicant, columnKey) => {
     const applicantID = applicant.id;
-    const info = applicant.info;
+    const applicantDoc = applicant.applicantDoc;
     switch (columnKey) {
       case "score":
         const applicantScore = Math.round(applicant.score * 100);
@@ -213,22 +122,18 @@ export default function ApplicantsTable({
         );
       case "name":
         return (
-          <p className="text-bold text-sm capitalize">{info.name}</p>
+          <p className="text-bold text-sm capitalize">{applicantDoc.name}</p>
         );
-      case "team":
+      case "position":
         return (
-          <p className="text-bold text-sm capitalize">{info.team}</p>
-        );
-      case "role":
-        return (
-          <p className="text-bold text-sm capitalize">{info.role}</p>
+          <p className="text-bold text-sm capitalize">{applicantDoc.position}</p>
         );
       case "location":
         return (
-          <p className="text-bold text-sm capitalize">{info.location}</p>
+          <p className="text-bold text-sm capitalize">{locationLookup[applicantDoc.countryCode]}</p>
         );
       case "stars":
-        const applicantStars = info.stars;
+        const applicantStars = applicantDoc.stars;
         return (
           <div>
             <span className="flex text-large cursor-pointer active:opacity-50">
@@ -239,7 +144,7 @@ export default function ApplicantsTable({
           </div>
         );
       case "status":
-        const applicantStatus = info.status;
+        const applicantStatus = applicantDoc.status;
         return (
           <Chip className="capitalize" color={statusColorMap[applicantStatus]} size="sm" variant="solid">
             {(applicantStatus === "newApply") ? "new" : applicantStatus}
@@ -247,7 +152,7 @@ export default function ApplicantsTable({
         );
       case "age":
         return (
-          <p className="text-bold text-sm capitalize">{info.age}</p>
+          <p className="text-bold text-sm capitalize">{applicantDoc.age}</p>
         );
       case "id":
         return (
@@ -260,11 +165,18 @@ export default function ApplicantsTable({
               <Button isIconOnly variant="light" aria-label="Delete Applicant" size="sm"
                 onPress={async () => {
                   if (applicantID === cardIDRef.current) {
-                    setDisplayCard(false);
+                    if (applicantDoc && applicantDoc.notes) {
+                      await fetch(`/api/set-applicant-notes`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({id: applicantID, notes: applicantDoc.notes}),
+                      });
+                    }
+                    setCardState((prev) => ({...prev, display: false}));
                   }
-                  setLoadingText("Deleting Applicant...");
-                  setLoadingColor("danger");
-                  setIsLoading(true);
+                  setTableLoading(() => {return {status: true, color: "danger", text: "Deleting Applicant..."};});
                   await fetch(`/api/delete-applicants`, {
                     method: "POST",
                     headers: {
@@ -272,13 +184,9 @@ export default function ApplicantsTable({
                     },
                     body: JSON.stringify({ids: [applicantID]}),
                   });
-                  setApplicantIDs((prevApplicantIDs) => prevApplicantIDs.filter((pair) => pair.id !== applicantID));
-                  setTableInfo(prevTableInfo => {
-                    const updatedTableInfo = { ...prevTableInfo };
-                    delete updatedTableInfo[applicantID];
-                    return updatedTableInfo;
-                  });
-                  setIsLoading(false);
+
+                  setApplicants((prev) => {return prev.filter((triplet) => triplet.id !== applicantID);});
+                  setTableLoading((prev) => {return {...prev, status: false};});
                 }}
               >
                 <span className="text-lg text-danger-400 cursor-pointer active:opacity-50">
@@ -287,21 +195,9 @@ export default function ApplicantsTable({
               </Button>
             </Tooltip>
             <Tooltip content="View Resume" color={"default"} delay={400} closeDelay={600}>
-              <Button isIconOnly isExternal as={Link} href={info.resumeUrl} variant="light" aria-label="View Resume" size="sm">
+              <Button isIconOnly isExternal as={Link} href={applicantDoc.resumeUrl} variant="light" aria-label="View Resume" size="sm">
                 <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
                   <InsertDriveFileOutlinedIcon />
-                </span>
-              </Button>
-            </Tooltip>
-            <Tooltip content="View Applicant" color={"default"} delay={400} closeDelay={600}>
-              <Button isIconOnly variant="light" aria-label="View Applicant" size="sm"
-                onPress={() => {
-                  setCardID(applicantID);
-                  setCardScore(Math.round(applicant.score * 100));
-                  setDisplayCard(true);
-                }}>
-                <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                  <VisibilityOutlinedIcon />
                 </span>
               </Button>
             </Tooltip>
@@ -310,214 +206,26 @@ export default function ApplicantsTable({
       default:
         return "?";
     }
-  }, [setTableInfo, setCardID, setDisplayCard, setCardScore, setApplicantIDs, setIsLoading, setLoadingColor, setLoadingText]);
+  }, [setApplicants, setTableLoading, setCardState, cardIDRef]);
 
   const onRowsPerPageChange = React.useCallback((e) => {
     setRowsPerPage(Number(e.target.value));
     setTablePage(1);
   }, [setTablePage, setRowsPerPage]);
 
-  const onSearchChange = React.useCallback((value) => {
-    if (value) {
-      setFilterValue(value);
-      setTablePage(1);
-    } else {
-      setFilterValue("");
+  const handleRowAction = React.useCallback(async (key) => {
+    const applicant = applicants.find((applicant) => applicant.id === key);
+    if (cardState.doc && cardState.doc.notes) {
+      await fetch(`/api/set-applicant-notes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({id: cardState.id, notes: cardState.doc.notes}),
+      });
     }
-  }, [setFilterValue, setTablePage]);
-
-  const onClear = React.useCallback(()=>{
-    setFilterValue("")
-    setTablePage(1)
-  },[setFilterValue, setTablePage])
-
-  const topContent = React.useMemo(() => {
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="flex justify-between gap-3 items-end">
-          <Input
-            isClearable
-            className="w-full sm:max-w-[44%]"
-            placeholder="Search by name..."
-            value={filterValue}
-            onClear={() => onClear()}
-            onValueChange={onSearchChange}
-            size="sm"
-            radius="md"
-            classNames={{inputWrapper: "h-10"}}
-          />
-          <div className="flex gap-3">
-            <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat" color={teamFilter === "all" || inSet(teamSet, teamFilter) ? "default" : "secondary"}>
-                  Team
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Table Columns"
-                closeOnSelect={false}
-                selectedKeys={teamFilter}
-                selectionMode="multiple"
-                onSelectionChange={(keys) => {
-                  if (teamFilter === "all") {
-                    if (!keys.has("All")) {
-                      setTeamFilter((prev) => (new Set([])));
-                      return;
-                    } else {
-                      keys.delete("All");
-                      setTeamFilter((prev) => (keys));
-                      return;
-                    }
-                  }
-                  if (teamFilter.has("All")) {
-                    if (!keys.has("All")) {
-                      setTeamFilter((prev) => (new Set([])));
-                      return;
-                    } else {
-                      keys.delete("All");
-                      setTeamFilter((prev) => (keys));
-                      return;
-                    }
-                  }
-                  if (keys.has("All")) {
-                    setTeamFilter((prev) => {
-                      const newTeamSet = new Set(teamSet);
-                      newTeamSet.add("All");
-                      return newTeamSet;
-                    });
-                    return;
-                  } else {
-                    if (eqSet(keys, teamSet)) {
-                      keys.add("All");
-                    }
-                    setTeamFilter((prev) => (keys));
-                    return;
-                  }
-                }}
-              >
-                {teamOptions.map((team) => (
-                  <DropdownItem key={team.uid} className={team.uid === "All" ? "capitalize text-danger" : "capitalize"} variant="bordered" >
-                    {(team.uid === "All") ? (teamFilter === "all" || teamFilter.has("All") ? "Deselect All" : "Select All") : capitalize(team.name)}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-            <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat" color={statusFilter === "all" || inSet(statusSet, statusFilter) ? "default" : "secondary"}>
-                  Status
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Table Columns"
-                closeOnSelect={false}
-                selectedKeys={statusFilter}
-                selectionMode="multiple"
-                onSelectionChange={(keys) => {
-                  if (statusFilter === "all") {
-                    if (!keys.has("All")) {
-                      setStatusFilter((prev) => (new Set([])));
-                      return;
-                    } else {
-                      keys.delete("All");
-                      setStatusFilter((prev) => (keys));
-                      return;
-                    }
-                  }
-                  if (statusFilter.has("All")) {
-                    if (!keys.has("All")) {
-                      setStatusFilter((prev) => (new Set([])));
-                      return;
-                    } else {
-                      keys.delete("All");
-                      setStatusFilter((prev) => (keys));
-                      return;
-                    }
-                  }
-                  if (keys.has("All")) {
-                    setStatusFilter((prev) => {
-                      const newStatusSet = new Set(statusSet);
-                      newStatusSet.add("All");
-                      return newStatusSet;
-                    });
-                    return;
-                  } else {
-                    if (eqSet(keys, statusSet)) {
-                      keys.add("All");
-                    }
-                    setStatusFilter((prev) => (keys));
-                    return;
-                  }
-                }}
-              >
-                {statusOptions.map((status) => (
-                  <DropdownItem key={status.uid} className={status.uid === "All" ? "capitalize text-danger" : "capitalize"} variant="bordered">
-                    {(status.uid === "All") ? (statusFilter === "all" || statusFilter.has("All") ? "Deselect All" : "Select All") : capitalize(status.name)}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-            <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat" color={eqSet(starsFilter, starsSet) ? "default" : "secondary"}>
-                  Stars
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Table Columns"
-                closeOnSelect={true}
-                selectedKeys={starsFilter}
-                selectionMode="single"
-                onSelectionChange={setStarsFilter}
-              >
-                {starsOptions.map((stars) => (
-                  <DropdownItem key={stars.uid} className="capitalize" >
-                    {capitalize(stars.name)}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-            <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
-                  View
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Table Columns"
-                closeOnSelect={false}
-                selectedKeys={visibleColumns}
-                selectionMode="multiple"
-                onSelectionChange={setVisibleColumns}
-              >
-                {columns.map((column) => (
-                  <DropdownItem key={column.uid} className="capitalize">
-                    {capitalize(column.name)}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-        </div>
-      </div>
-    );
-  }, [
-    onClear,
-    filterValue,
-    statusFilter,
-    setStatusFilter,
-    visibleColumns,
-    setVisibleColumns,
-    onSearchChange,
-    teamFilter,
-    setTeamFilter,
-    starsFilter,
-    setStarsFilter,
-  ]);
+    setCardState((prev) => ({display: true, id: key, score: applicant.score, doc: applicant.applicantDoc}));
+  }, [applicants, cardState, setCardState]);
 
   const bottomContent = React.useMemo(() => {
     return (
@@ -530,11 +238,19 @@ export default function ApplicantsTable({
                   return;
                 }
                 if (selectedKeys === "all" || selectedKeys.has(cardIDRef.current)) {
-                  setDisplayCard(false);
+                  const cardApplicant = applicants.find((applicant) => applicant.id === cardIDRef.current);
+                  if (cardApplicant.doc && cardApplicant.doc.notes) {
+                    await fetch(`/api/set-applicant-notes`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({id: cardApplicant.id, notes: cardApplicant.doc.notes}),
+                    });
+                  }
+                  setCardState((prev) => ({...prev, display: false}));
                 }
-                setLoadingText("Deleting Selected Applicants...");
-                setLoadingColor("danger");
-                setIsLoading(true);
+                setTableLoading((prev) => {return {status: true, color: "danger", text: "Deleting Selected Applicants..."};});
                 await fetch(`/api/delete-applicants`, {
                   method: "POST",
                   headers: {
@@ -542,19 +258,9 @@ export default function ApplicantsTable({
                   },
                   body: JSON.stringify({ids: (selectedKeys === "all" ? applicantIDs.map((i) => i.id) : [...selectedKeys])}),
                 });
-                setApplicantIDs((prevApplicantIDs) => prevApplicantIDs.filter((pair) => (selectedKeys === "all" ? false : !selectedKeys.has(pair.id))));
-                setTableInfo(prevTableInfo => {
-                  if (selectedKeys === "all") {
-                    return {};
-                  }
-                  const updatedTableInfo = { ...prevTableInfo };
-                  selectedKeys.forEach((id) => {
-                    delete updatedTableInfo[id];
-                  });
-                  return updatedTableInfo;
-                });
+                setApplicants((prev) => prev.filter((triplet) => (selectedKeys === "all" ? false : !selectedKeys.has(triplet.id))));
                 setSelectedKeys(new Set([]));
-                setIsLoading(false);
+                setTableLoading((prev) => ({...prev, status: false}));
               }}
             >
               <span className="text-danger-400 cursor-pointer active:opacity-50">
@@ -598,13 +304,14 @@ export default function ApplicantsTable({
                             },
                             body: JSON.stringify({ids: newSelectedKeys, status: newKey}),
                           });
-
-                        setTableInfo((prevTableInfo) => {
-                            const updatedTableInfo = { ...prevTableInfo };
-                            newSelectedKeys.forEach((id) => {
-                                updatedTableInfo[id].status = newKey;
+                        
+                        setApplicants((prev) => {
+                            return prev.map((triplet) => {
+                              if (newSelectedKeys.includes(triplet.id)) {
+                                return {...triplet, applicantDoc: {...triplet.applicantDoc, status: newKey}};
+                              }
+                              return triplet;
                             });
-                            return updatedTableInfo;
                         });
                     }
                 }
@@ -618,6 +325,23 @@ export default function ApplicantsTable({
                 )}
             </DropdownMenu>
           </Dropdown>
+          {
+            applicants.length > 0
+            ?
+                <CSVLink data={applicants.map((applicant) => {
+                  return {
+                    ID: applicant.id,
+                    SCORE: Math.round(applicant.score * 100),
+                    NAME: applicant.applicantDoc.name,
+                    POSITION: applicant.applicantDoc.position,
+                    LOCATION: locationLookup[applicant.applicantDoc.countryCode],
+                    STATUS: applicant.applicantDoc.status === "newApply" ? "New" : capitalize(applicant.applicantDoc.status),
+                    STARS: applicant.applicantDoc.stars,
+                  };
+                })} className="text-success ml-1" filename={"applicants.csv"}>CSV</CSVLink>
+            :
+                <div className="text-success ml-1">CSV</div>
+          }
           <span className="whitespace-nowrap w-[30%] text-small text-default-40 w-full ml-2">
             {selectedKeys === "all"
               ? "All items selected"
@@ -626,7 +350,6 @@ export default function ApplicantsTable({
         </div>
         <div className="flex-[3_1_0%] flex justify-center items-center w-full">
           <Pagination
-            isCompact
             showControls
             showShadow
             color="secondary"
@@ -648,7 +371,7 @@ export default function ApplicantsTable({
           </label>
       </div>
     );
-  }, [onRowsPerPageChange, selectedKeys, tablePage, pages, setIsLoading, setLoadingColor, setLoadingText, setTableInfo, setApplicantIDs, filteredItems, cardIDRef, setDisplayCard, applicantIDs, setTablePage, setSelectedKeys]);
+  }, [setApplicants, setTableLoading, onRowsPerPageChange, selectedKeys, tablePage, pages, filteredItems, cardIDRef, setCardState, setTablePage, setSelectedKeys, applicants]);
 
   return (
     <Table
@@ -656,18 +379,17 @@ export default function ApplicantsTable({
       isHeaderSticky
       radius="md"
       bottomContent={bottomContent}
-      bottomContentPlacement="outside"
-      className="h-full"
+      bottomContentPlacement="inside"
+      className="h-full w-full"
       classNames={{
-        wrapper: "max-h-[calc(100vh-21rem)] flex-auto",
+        wrapper: "flex-auto w-full",
       }}
       selectedKeys={selectedKeys}
       selectionMode="multiple"
       sortDescriptor={sortDescriptor}
-      topContent={topContent}
-      topContentPlacement="outside"
       onSelectionChange={setSelectedKeys}
       onSortChange={setSortDescriptor}
+      onRowAction={handleRowAction}
     >
       <TableHeader columns={headerColumns}>
         {(column) => (
@@ -681,7 +403,7 @@ export default function ApplicantsTable({
           </TableColumn>
         )}
       </TableHeader>
-      <TableBody emptyContent={emptyContent} items={sortedItems} isLoading={isLoading} loadingContent={<Spinner className="h-full w-full bg-default-50/75" label={loadingText} color={loadingColor} labelColor={loadingColor} size="lg" />}>
+      <TableBody emptyContent={(tableLoading.status ? " " : "Run a query to find applicants...")} items={sortedItems} isLoading={tableLoading.status} loadingContent={<Spinner className="h-full w-full bg-default-50/75" label={tableLoading.text} color={tableLoading.color} labelColor={tableLoading.color} size="lg" />}>
         {(item) => (
           <TableRow key={item.id}>
             {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
