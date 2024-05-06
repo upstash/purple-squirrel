@@ -1,42 +1,36 @@
-import { Redis } from '@upstash/redis';
 import OpenAI from "openai";
 import type { NextRequest } from 'next/server';
 import { headers } from 'next/headers'
 import BASE_URL from '@/app/utils/baseURL';
+import { sort } from 'fast-sort';
 
-const SYSTEM_MESSAGE = `You are an applicant filterer.
-
-You will be given data in the following format:
+const SYSTEM_MESSAGE = `You are an applicant examiner in an Applicant Tracking System.
+You will be given an input like this:
 CURRENT_DATE
 <current-date>
 
-QUERY
-<query>
+QUALITY_ARRAY
+[<quality-1>, <quality-2>, ...]
 
 RESUME_TEXT
 <resume-text>
 
 You will return nothing but a JSON like this:
 {
-    "filterPass": <filter-pass>,
+    <quality-1>: <pass-1>,
+    <quality-2>: <pass-2>, 
+    ...
 }
+Quality array is an array of strings.
 
-<current-date> is the date when the query is made, this information may be useful in graduation information or other things.
+Quality is a desired property about the applicant the user entered. It may be keyword or a complete sentence or anything in between. It may be related to skills, education, experience, projects, basic information such as location or any other information about the applicant.
 
-<query> contains desired qualities about the applicant, if the applicant conforms to all of the qualities, "filterPass" should be true. If the applicant doesn't conform any of the qualities, "filterPass" should be false.
+Your job is to determine if the applicant possesses a desired quality. If the applicant possesses it, its corresponding pass should be true, otherwise it should be false. It should be boolean.
 
-Important cases:
-If there is no <query>, "filterPass" should be true.
-If there is no <resume-text>, "filterPass" should be true.
-If there is at least one quality the applicant doesn't conform, "filterPass" should be false.
+Information about the applicant can be found in the resume text part of the input, you can also use current date if needed. One example would be "Graduated" quality.
 
-"filterPass" must be boolean. It shouldn't be null, you shouldn't return a JSON without this key.
+Do not be strict, if a quality can be inferred from the resume assume the applicant possesses it.
 `;
-
-const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL as string,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN as string,
-});
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
@@ -52,7 +46,7 @@ async function flashRank(data: any, authHeader: any) {
         body: JSON.stringify(data),
     });
     const flashRankResponseData = await flashRankResponse.json();
-    return flashRankResponseData.topApplicants;
+    return flashRankResponseData.flashRankedApplicants;
 }
 
 
@@ -62,32 +56,29 @@ export async function POST(req: NextRequest) {
 
     const CURRENT_DATE = new Date().toDateString();
 
-    let previousApplicants = data.previousApplicants;
-    if (!Array.isArray(previousApplicants)) {
-        return Response.json({ status: 500, message: "Previous applicants is not an array" });
+    const deepWeigth = data.searchSettings.deepWeight;
+
+    const flashRankedApplicants = await flashRank(data, authHeader);
+
+    if (flashRankedApplicants instanceof Response) {
+        return flashRankedApplicants;
     }
-    const fromScratch = (previousApplicants.length === 0);
-    if (fromScratch) {
-        previousApplicants = await flashRank(data, authHeader);
-    }
-    if (previousApplicants instanceof Response) {
-        return previousApplicants;
-    }
-    if (!Array.isArray(previousApplicants)) {
-        return Response.json({ status: 500, message: "Error in deep-rank: Previous applicants is not an array" });
+    if (!Array.isArray(flashRankedApplicants)) {
+        return Response.json({ status: 500, message: "Error in deep-rank: Flash Ranked applicants is not an array" });
     }
 
-    const queryText = data.queryText;
+    const tags = data.tags;
 
-    const filterResults = await Promise.all(previousApplicants.map(async (pair: any) => {
-        if (!pair || !pair.id || typeof pair.id !== "string" || !pair.score || typeof pair.score !== "number") {
+    const deepScoredApplicants = await Promise.all(flashRankedApplicants.map(async (quartet: any) => {
+        if (!quartet || !quartet.id || typeof quartet.id !== "string" || !quartet.hasOwnProperty("score") || typeof quartet.score !== "number") {
+            console.log(quartet);
             throw new TypeError("Error in deep-rank: Invalid element");
         }
-        const fullResumeText = await redis.json.get(`applicant#${pair.id}`, "$.resumeInfo.fullText");
+        const fullResumeText = quartet.fullResumeText;
         if (!fullResumeText) {
             throw new Error("Error in deep-rank: No full resume text");
         }
-        const userMessage = `CURRENT_DATE\n${CURRENT_DATE}\n\nQUERY\n${queryText}\n\nRESUME_TEXT\n${fullResumeText}`;
+        const userMessage = `CURRENT_DATE\n${CURRENT_DATE}\n\nQUALITY_ARRAY\n['${tags.join("', '")}']\n\nRESUME_TEXT\n${fullResumeText}`;
         let completion = await openai.chat.completions.create({
             messages: [
             {
@@ -106,25 +97,17 @@ export async function POST(req: NextRequest) {
             throw new Error('deep-rank: OpenAI Filter No Content Error');
         }
 
-        const filterJSON = JSON.parse(completion.choices[0].message.content);
-        if (!filterJSON || !filterJSON.hasOwnProperty("filterPass") || typeof filterJSON.filterPass !== "boolean") {
-            throw new Error('deep-rank: OpenAI Filter Error');
-        }
-        return filterJSON.filterPass;
-        
-
+        const responseJSON = JSON.parse(completion.choices[0].message.content);
+        const passes = Object.values(responseJSON);
+        const deepScore = (passes.reduce((acc: number, val) => acc + ((typeof val === "boolean" && val) ? 1 : 0), 0) / passes.length) * deepWeigth + quartet.score * (1 - deepWeigth);
+        return { id: quartet.id, score: deepScore, applicantDoc: quartet.applicantDoc };
     })).catch((error) => {
         return Response.json({ status: 500, message: "Error in deep-rank: " + error });
     });
-    if (filterResults instanceof Response) {
-        return filterResults;
+    if (deepScoredApplicants instanceof Response) {
+        return deepScoredApplicants;
     }
-    const weights = data.searchSettings.weights;
-    const newWeight = weights.newWeight;
-    const oldWeight = weights.oldWeight;
-    const deepRankedApplicants = previousApplicants.map((pair: any, index: any) => {
-        return {id: pair.id, score: (filterResults[index]) ? (pair.score * oldWeight + newWeight) / (oldWeight + newWeight)  : pair.score * oldWeight / (oldWeight + newWeight)};
-    });
+    const deepRankedApplicants = sort(deepScoredApplicants).desc(a => a.score);
     return Response.json({ status: 200, message: "Success", deepRankedApplicants: deepRankedApplicants });
 }
 

@@ -2,6 +2,12 @@ import OpenAI from "openai";
 import { Index } from "@upstash/vector";
 import type { NextRequest } from 'next/server';
 import { sort } from 'fast-sort';
+import { Redis } from '@upstash/redis';
+
+const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL as string,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN as string,
+});
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
@@ -12,102 +18,102 @@ const index = new Index({
     token: process.env.UPSTASH_VECTOR_REST_TOKEN as string,
 })
 
-async function gatherResults(vector: number[], inverse: number[], extendedTopK: number) {
-    const results = await Promise.all([
-        index.query({ topK: extendedTopK, vector: vector, includeMetadata: false, includeVectors: false, filter: "title = 'main'" }),
-        index.query({ topK: extendedTopK, vector: vector, includeMetadata: false, includeVectors: false, filter: "title = 'education'" }),
-        index.query({ topK: extendedTopK, vector: vector, includeMetadata: false, includeVectors: false, filter: "title = 'experience'" }),
-        index.query({ topK: extendedTopK, vector: vector, includeMetadata: false, includeVectors: false, filter: "title = 'projects'" }),
-        index.query({ topK: 1, vector: inverse, includeMetadata: false, includeVectors: false, filter: "title = 'main'" }),
-        index.query({ topK: 1, vector: inverse, includeMetadata: false, includeVectors: false, filter: "title = 'education'" }),
-        index.query({ topK: 1, vector: inverse, includeMetadata: false, includeVectors: false, filter: "title = 'experience'" }),
-        index.query({ topK: 1, vector: inverse, includeMetadata: false, includeVectors: false, filter: "title = 'projects'" }),
-    ]);
+async function gatherResults(tagsEmbedding: number[], inverseEmbedding: number[], topK: number, filter: string) {
+    let results;
+    if (filter === "") {
+        results = await Promise.all([
+            index.query({ topK: topK, vector: tagsEmbedding, includeMetadata: false, includeVectors: false }),
+            index.query({ topK: 1, vector: inverseEmbedding, includeMetadata: false, includeVectors: false }),
+        ]);
+    } else {
+        results = await Promise.all([
+            index.query({ topK: topK, vector: tagsEmbedding, includeMetadata: false, includeVectors: false, filter: filter }),
+            index.query({ topK: 1, vector: inverseEmbedding, includeMetadata: false, includeVectors: false }),
+        ]);
+    }
     return results;
 }
 
 export async function POST(req: NextRequest) {
     const data = await req.json();
 
-    const queryText = data.queryText;
+    const tags = data.tags;
+    const filter = data.filter;
     const embeddingResponse = await openai.embeddings.create({
         model: "text-embedding-3-small",
-        input: queryText,
+        input: tags.join(", "),
         encoding_format: "float",
     });
-    const queryEmbedding = embeddingResponse.data[0].embedding;
+    const tagsEmbedding = embeddingResponse.data[0].embedding;
 
-    const topK = data.searchSettings.topK;
-    const multipliers = data.searchSettings.multipliers;
-    const weights = data.searchSettings.weights;
-    const previousApplicants = data.previousApplicants;
-    if (!Array.isArray(previousApplicants)) {
-        return Response.json({ status: 500, message: "Previous applicants is not an array" });
+    const topK = (data.rankType === "flash") ? data.searchSettings.flashTopK : data.searchSettings.deepTopK;
+
+    const inverseEmbedding = tagsEmbedding.map(function(x) { return x * -1; });
+    const results = await gatherResults(tagsEmbedding, inverseEmbedding, topK, filter);
+
+    const [directResults, inverseResults] = results;
+
+    if (!Array.isArray(directResults) || !Array.isArray(inverseResults)) {
+        return Response.json({ status: 500, message: "Error in unified-rank: Invalid results" });
     }
-    const fromScratch = (previousApplicants.length === 0);
-    const extendedTopK = (fromScratch) ? topK * multipliers.firstTopKMultiplier : topK * multipliers.regularTopKMultiplier;
 
-    const inverse = queryEmbedding.map(function(x) { return x * -1; });
-    const results = await gatherResults(queryEmbedding, inverse, extendedTopK);
-    const [mainResults, educationResults, experienceResults, projectsResults,
-        inverseMainResults, inverseEducationResults, inverseExperienceResults, inverseProjectsResults] = results;
+    if (directResults.length === 0 || inverseResults.length === 0) {
+        return Response.json({ status: 200, message: "Success", flashRankedApplicants: [] });
+    }
 
-    const [mainMax, educationMax, experienceMax, projectsMax] = [mainResults, educationResults, experienceResults, projectsResults].map((x) => (x.length === 0) ? 0 : x[0].score);
-    const [mainMin, educationMin, experienceMin, projectsMin] = [inverseMainResults, inverseEducationResults, inverseExperienceResults, inverseProjectsResults].map((x) => (x.length === 0) ? 0 : 1 - x[0].score);
+    const maxScore = directResults[0].score;
+    const minScore = 1 - inverseResults[0].score;
 
-    const mainResultSet = (fromScratch) ? null : mainResults.reduce((acc: Record<string, number>, val) => {
-        acc[val.id] = val.score;
-        return acc;
-    }, {});
-    const educationResultSet = educationResults.reduce((acc: Record<string, number>, val) => {
-        acc[val.id] = val.score;
-        return acc;
-    }, {});
-    const experienceResultSet = experienceResults.reduce((acc: Record<string, number>, val) => {
-        acc[val.id] = val.score;
-        return acc;
-    }, {});
-    const projectsResultSet = projectsResults.reduce((acc: Record<string, number>, val) => {
-        acc[val.id] = val.score;
-        return acc;
-    }, {});
-    const keyApplicants = (fromScratch) ? mainResults : previousApplicants;
-    const applicantScores = await Promise.all(keyApplicants.map(async (pair) => {
-        if (!pair || !pair.id || typeof pair.id !== "string" || !pair.score || typeof pair.score !== "number") {
+    const flashScoredApplicants = await Promise.all(directResults.map(async (pair) => {
+        if (!pair || !pair.id || typeof pair.id !== "string" || !pair.hasOwnProperty("score") || typeof pair.score !== "number") {
             throw new TypeError("Error in flash-rank: Invalid element");
         }
-        const id = (fromScratch) ? pair.id.split("_")[0] : pair.id;
-        const mainID = `${id}_main`;
-        const educationID = `${id}_education`;
-        const experienceID = `${id}_experience`;
-        const projectsID = `${id}_projects`;
-        let mainScore;
-        if (fromScratch) {
-            mainScore = pair.score;
-        } else {
-            if (!mainResultSet) {
-                throw new TypeError("Error in flash-rank: main set creation failed");
-            }
-            mainScore = mainResultSet[mainID] || mainMin;
+        const id = pair.id.split("_")[0];
+
+        const score = (maxScore === minScore) ? 1 : (pair.score - minScore) / (maxScore - minScore);
+
+        const applicantData = await redis.json.get(`applicant#${id}`, "$"); 
+        if (!applicantData || !Array.isArray(applicantData) || applicantData.length !== 1) {
+            throw new Error("Error in flash-rank: No applicant data");
         }
-        const educationScore = educationResultSet[educationID] || educationMin;
-        const experienceScore = experienceResultSet[experienceID] || experienceMin;
-        const projectsScore = projectsResultSet[projectsID] || projectsMin;
-        const normalMainScore = (mainMax === mainMin) ? 0.5 : (mainScore - mainMin) / (mainMax - mainMin);
-        const normalEducationScore = (educationMax === educationMin) ? 0.5 : (educationScore - educationMin) / (educationMax - educationMin);
-        const normalExperienceScore = (experienceMax === experienceMin) ? 0.5 : (experienceScore - experienceMin) / (experienceMax - experienceMin);
-        const normalProjectsScore = (projectsMax === projectsMin) ? 0.5 : (projectsScore - projectsMin) / (projectsMax - projectsMin);
-        const newScore = (weights.mainWeight * normalMainScore + weights.educationWeight * normalEducationScore + weights.experienceWeight * normalExperienceScore + weights.projectsWeight * normalProjectsScore) / (weights.mainWeight + weights.educationWeight + weights.experienceWeight + weights.projectsWeight);
-        const score = (fromScratch) ? newScore : (weights.oldWeight * pair.score + weights.newWeight * newScore) / (weights.oldWeight + weights.newWeight);
-        return { id, score };
+        const applicantDoc = {
+            name: applicantData[0].applicantInfo.name,
+            position: applicantData[0].applicationInfo.position,
+            status: applicantData[0].recruitmentInfo.status,
+            age: applicantData[0].applicantInfo.age,
+            countryCode: applicantData[0].applicantInfo.countryCode,
+            stars: applicantData[0].recruitmentInfo.stars,
+            resumeUrl: applicantData[0].resumeInfo.uploadthing.url,
+            websiteUrl: applicantData[0].applicantInfo.urls.website,
+            linkedinUrl: applicantData[0].applicantInfo.urls.linkedin,
+            githubUrl: applicantData[0].applicantInfo.urls.github,
+            notes: applicantData[0].recruitmentInfo.notes,
+            email: applicantData[0].applicantInfo.contact.email,
+            phone: applicantData[0].applicantInfo.contact.phone,
+            yoe: applicantData[0].applicantInfo.yoe,
+            degree: applicantData[0].applicantInfo.latestEducation.degree,
+            subject: applicantData[0].applicantInfo.latestEducation.subject,
+            university: applicantData[0].applicantInfo.latestEducation.university,
+            notesSaved: true,
+        };
+        if (data.rankType === "flash") {
+            return {id, score, applicantDoc};
+        } else {
+            const fullResumeText = applicantData[0].resumeInfo.fullText;
+            return {id, score, applicantDoc, fullResumeText};
+        }
     })).catch((error) => {
-        return Response.json({ status: 500, message: "Error in flash-rank: " + error });
+        return Response.json({ status: 500, message: "Error in unified-rank: " + error });
     });
-    if (applicantScores instanceof Response) {
-        return applicantScores;
+    if (flashScoredApplicants instanceof Response) {
+        return flashScoredApplicants;
     }
-    const topApplicants = sort(applicantScores).desc(a => a.score).slice(0, topK);
-    return Response.json({ status: 200, message: "Success", topApplicants: topApplicants });
+    if (data.rankType === "flash") {
+        const flashRankedApplicants = sort(flashScoredApplicants).desc(a => a.score);
+        return Response.json({ status: 200, message: "Success", flashRankedApplicants: flashRankedApplicants });
+    } else {
+        return Response.json({ status: 200, message: "Success", flashRankedApplicants: flashScoredApplicants });
+    }
 }
 
 export const dynamic = "force-dynamic";
