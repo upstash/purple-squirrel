@@ -1,11 +1,9 @@
 'use client'
 
-import { Divider } from '@nextui-org/react'
 import {SquirrelIcon} from '@primer/octicons-react'
 import {Button} from "@nextui-org/button";
 import {Link} from "@nextui-org/link";
 import KeyboardBackspaceOutlinedIcon from '@mui/icons-material/KeyboardBackspaceOutlined';
-import { link } from 'fs';
 
 export default function Page({
     searchParams,
