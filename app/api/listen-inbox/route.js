@@ -3,6 +3,12 @@ inspect = require('util').inspect;
 var fs = require('fs');
 const {simpleParser} = require('mailparser');
 import { Redis } from '@upstash/redis';
+import { headers } from 'next/headers'
+
+import { Client } from "@upstash/qstash";
+import BASE_URL from '@/app/utils/baseURL';
+
+const client = new Client({ token: process.env.QSTASH_TOKEN });
 
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
@@ -10,6 +16,7 @@ const redis = new Redis({
 });
 
 export async function POST() {
+    const authHeader = headers().get('authorization') || headers().get('Authorization');
     var imap = new Imap({
       user: process.env.IMAP_USERNAME,
       password: process.env.IMAP_PASSWORD,
@@ -32,20 +39,50 @@ export async function POST() {
     let currentStatus = 200;
     let currentMessage = "Success";
 
+    const scheduling = await redis.json.get("scheduling", "$");
+
+    const currentTime = Date.now();
+    await redis.set("last:inbox:check", currentTime);
+    await redis.del("raw:mail:data:list");
+
 
     imap.once('ready', function() {
       console.log("Connection ready");
       console.log("Opening inbox");
       try{ 
         imap.openBox('INBOX', false, function (err, box) {
-          imap.search([ 'UNSEEN' ], function(err, results) {
+          imap.search([ 'UNSEEN' ], async function(err, results) {
             if(!results || !results.length){
               console.log("No new emails")
+              if (process.env.NODE_ENV === "production") {
+                const res = await client.publishJSON({
+                  url: `${BASE_URL}/api/listen-inbox`,
+                  headers: { "Authorization": authHeader},
+                  delay: (scheduling.emptyDigestionInterval === "minutes" ? `${scheduling.emptyDigestionNum}m` : `${scheduling.emptyDigestionNum}h`),
+                  retries: 0,
+                });
+              }
               imap.end();
               return;
             }    
-
-            Promise.all(results.map((result) => {
+            if (process.env.NODE_ENV === "production") {
+              if (results.length > scheduling.applicantCount) {
+                const res = await client.publishJSON({
+                  url: `${BASE_URL}/api/listen-inbox`,
+                  headers: { "Authorization": authHeader},
+                  delay: (scheduling.fullDigestionInterval === "minutes" ? `${scheduling.fullDigestionNum}m` : `${scheduling.fullDigestionNum}h`),
+                  retries: 0,
+                });
+              } else {
+                const res = await client.publishJSON({
+                  url: `${BASE_URL}/api/listen-inbox`,
+                  headers: { "Authorization": authHeader},
+                  delay: (scheduling.emptyDigestionInterval === "minutes" ? `${scheduling.emptyDigestionNum}m` : `${scheduling.emptyDigestionNum}h`),
+                  retries: 0,
+                });
+              }
+            }
+            Promise.all(results.slice(0, scheduling.applicantCount).map((result) => {
               return new Promise((resolve, reject) => {
                 let f = imap.fetch(result, {
                   bodies: '',
@@ -127,7 +164,19 @@ export async function POST() {
 
     return new Promise((resolve, reject) => {
       imap.once('close', async function () { //maybe, someone asking whether to use end or close and the author of the module says that close is always emitted so you should use that.
-        resolve(Response.json({ status: currentStatus, message: currentMessage }));
+        if (process.env.NODE_ENV === "production") {
+          const res = await client.publishJSON({
+            url: `${BASE_URL}/api/process-raw-mail-data-orchestrator`,
+            method: "POST",
+            headers: {
+              Authorization: authHeader
+            },
+            retries: 0,
+          });
+          resolve(Response.json({ status: currentStatus, message: currentMessage }));
+        } else {
+          resolve(Response.json({ status: currentStatus, message: currentMessage }));
+        }
       });
     })
   }
