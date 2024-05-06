@@ -265,8 +265,6 @@ export async function POST(req: NextRequest) {
 
     const processedMailData = await redis.lindex("processed:mail:data:list", parseInt(processedIndex));
 
-    const data = await req.json();
-
     const date = new Date();
 
     const positionsResponse = await redis.lrange("positions", 0, -1);
