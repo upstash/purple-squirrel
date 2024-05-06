@@ -14,7 +14,8 @@ export async function POST(req) {
 
     const lastInboxCheck = await redis.get("last:inbox:check");
 
-    const scheduling = await redis.json.get("scheduling", "$");
+    const schedulingResponse = await redis.json.get("scheduling", "$");
+    const scheduling = schedulingResponse[0];
 
     if (lastInboxCheck && typeof lastInboxCheck === "number") {
 

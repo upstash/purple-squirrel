@@ -39,7 +39,8 @@ export async function POST() {
     let currentStatus = 200;
     let currentMessage = "Success";
 
-    const scheduling = await redis.json.get("scheduling", "$");
+    const schedulingResponse = await redis.json.get("scheduling", "$");
+    const scheduling = schedulingResponse[0];
 
     const currentTime = Date.now();
     await redis.set("last:inbox:check", currentTime);
