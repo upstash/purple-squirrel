@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
             destination: `${BASE_URL}/api/routine-digestion`,
             headers: { "Authorization": authHeader as string},
             cron: cron,
+            retries: 0,
         });
     }
 
