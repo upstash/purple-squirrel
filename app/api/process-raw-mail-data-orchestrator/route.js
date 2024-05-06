@@ -45,6 +45,7 @@ export async function POST() {
     } else {
         console.log("No raw mail data to process");
     }
+    return Response.json({ status: 200, message: "Success" });
 }
 
 export const dynamic = "force-dynamic";
