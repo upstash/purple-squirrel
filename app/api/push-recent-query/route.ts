@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
 
     await redis.lpush("recent:queries", data); 
-    await redis.ltrim("recent:queries", 0, 49); 
+    await redis.ltrim("recent:queries", 0, 29); 
 
     return Response.json({ status: 200, message: "Success" });
 }
