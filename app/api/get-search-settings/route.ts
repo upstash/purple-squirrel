@@ -9,7 +9,7 @@ export async function GET() {
     const value = await redis.json.get("search:settings", "$");
     
     if (!value || !Array.isArray(value) || value.length !== 1) {
-        return Response.json({topK: 10, searchSystem: "basic", multipliers: {firstTopKMultiplier: 2, regularTopKMultiplier: 2}, weights: {mainWeight: 0.9, educationWeight: 0.4, experienceWeight: 0.7, projectsWeight: 0.1, oldWeight: 0.8, newWeight: 0.2}});
+        return Response.json({deepTopK: 10, flashTopK: 20, deepWeight: 0.5, flash: false});
     }
 
     return Response.json(value[0]);
