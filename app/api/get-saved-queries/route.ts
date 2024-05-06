@@ -7,11 +7,6 @@ const redis = new Redis({
 
 export async function GET() {
     const queries = await redis.lrange("saved:queries", 0, 49); 
-    
-    if (!queries) {
-        return Response.json([]);
-    }
-
     return Response.json(queries);
 }
 
