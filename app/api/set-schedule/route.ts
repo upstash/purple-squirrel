@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         if (!cron) {
             return Response.json({ status: 400, message: "Invalid cron" });
         }
-        
+        /*
         const schedules = client.schedules;
         const allSchedules = await schedules.list();
         for (let i = 0; i < allSchedules.length; i++) {
@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
             cron: cron,
             retries: 0,
         });
+        */
     }
 
     return Response.json({ status: 200, message: "Success" });

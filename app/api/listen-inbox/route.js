@@ -55,6 +55,7 @@ export async function POST() {
           imap.search([ 'UNSEEN' ], async function(err, results) {
             if(!results || !results.length){
               console.log("No new emails")
+              /*
               if (process.env.NODE_ENV === "production") {
                 const res = await client.publishJSON({
                   url: `${BASE_URL}/api/listen-inbox`,
@@ -63,9 +64,11 @@ export async function POST() {
                   retries: 0,
                 });
               }
+              */
               imap.end();
               return;
             }    
+            /*
             if (process.env.NODE_ENV === "production") {
               if (results.length > scheduling.applicantCount) {
                 const res = await client.publishJSON({
@@ -83,6 +86,7 @@ export async function POST() {
                 });
               }
             }
+            */
             Promise.all(results.slice(0, scheduling.applicantCount).map((result) => {
               return new Promise((resolve, reject) => {
                 let f = imap.fetch(result, {
