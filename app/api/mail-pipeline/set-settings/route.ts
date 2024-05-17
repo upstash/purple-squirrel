@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
         })
           
         await queue.upsert({
-            parallelism: 5,
+            parallelism: 2,
         })
 
         let cron;
