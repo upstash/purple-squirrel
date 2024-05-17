@@ -97,8 +97,10 @@ export async function POST(req: Request) {
                                         retries: 0,
                                       });
                                     console.log('processedMailData created');
+                                    imap.end();
                                 } catch (error) {
                                     console.log('Error in parsing PDF', error);
+                                    imap.end();
                                 }
                             } else {
                                 console.log('Error in uploading file');
@@ -111,12 +113,14 @@ export async function POST(req: Request) {
                     } else {
                         console.log('No attachments');
                     }
+                    imap.end();
                 });
             });
             f.once('error', (error: Error) => {
                 if (error) {
                     console.log('Error in fetching', error);
                 }
+                imap.end();
             });
         });
     });

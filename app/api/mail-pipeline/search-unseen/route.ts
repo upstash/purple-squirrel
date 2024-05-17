@@ -65,6 +65,7 @@ export async function POST() {
                     const res = await client.batchJSON(msgs);
                     console.log("Batch response: ", res);
                 }
+                imap.end();
             })
         });
       });
