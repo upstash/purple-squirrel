@@ -29,11 +29,11 @@ function getTabColor(tab) {
 
 function getDisabledKeys(tab) {
     if (tab === "start") {
-        return ["complete"];
+        return ["complete", "scheduling"];
     } else if (tab === "positions") {
-        return ["complete"];
+        return ["complete", "scheduling"];
     } else if (tab === "scheduling") {
-        return ["complete"];
+        return ["start", "positions", "complete"];
     } else if (tab === "complete") {
         return ["start", "positions", "scheduling"];
     }
@@ -141,9 +141,7 @@ export default function Page() {
                             ?
                                 <div className="bg-default-50 rounded-medium px-unit-2 py-unit-3 h-full flex flex-col border-1">
                                     <div className="flex items-center justify-between gap-2 pl-unit-1 text-default-900">
-                                        <Button color="secondary" size="md" radius="md" startContent={<WestOutlinedIcon />} onPress={() => setActiveTab("positions")}>
-                                            Positions
-                                        </Button>
+                                        <div className="w-32"></div>
                                         <div>
                                             <h2>Setup your mail inbox listening schedule here. You can change it later at Admin Dashboard.</h2>
                                         </div>
