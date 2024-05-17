@@ -20,6 +20,11 @@ const client = new Client({ token: process.env.QSTASH_TOKEN as string});
 
 export async function POST(req: Request) {
     const authHeader = headers().get('authorization') || headers().get('Authorization');
+    if (!authHeader) {
+        return new Response('Unauthorized', {
+            status: 401,
+            });
+    }
     const data = await req.json();
     const mailID = data.mailID;
     var imap = new Imap({
