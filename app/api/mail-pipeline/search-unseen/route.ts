@@ -61,6 +61,7 @@ export async function POST() {
                     }
                 });
                 if (process.env.NODE_ENV === "production") {
+                    // @ts-ignore
                     const res = await client.batchJSON(msgs);
                     console.log("Batch response: ", res);
                 }
