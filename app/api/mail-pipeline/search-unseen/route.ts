@@ -64,7 +64,7 @@ export async function POST() {
                 if (process.env.NODE_ENV === "production") {
                     const res = await fetch("https://qstash.upstash.io/v2/batch", {
                         headers: {
-                            Authorization: process.env.QSTASH_TOKEN as string,
+                            Authorization: `Bearer ${process.env.QSTASH_TOKEN as string}`,
                         },
                         method: "POST",
                         body: JSON.stringify(msgs)
