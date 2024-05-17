@@ -78,7 +78,7 @@ export async function POST() {
       
       imap.connect();
   
-      return new Promise((resolve, reject) => {
+      return new Promise<Response>((resolve, reject) => {
           imap.once('close', async function () { //maybe, someone asking whether to use end or close and the author of the module says that close is always emitted so you should use that.
               resolve(new Response('OK', {
                     status: 200,
