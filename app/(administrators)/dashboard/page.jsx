@@ -33,10 +33,9 @@ export default function Page() {
     const [tablePage, setTablePage] = React.useState(1);
     const [selectedKeys, setSelectedKeys] = React.useState(new Set([]));
 
-    const [schedulingNum, setSchedulingNum] = useState(10);
-    const [schedulingIntervalSet, setSchedulingIntervalSet] = useState(new Set(["minutes"]));
+    const [scheduling, setScheduling] = useState({});
+
     const [schedulingLoading, setSchedulingLoading] = useState(true);
-    const [inputError, setInputError] = useState(false);
 
     const [schedulingDone, setSchedulingDone] = useState(false);
 
@@ -49,15 +48,14 @@ export default function Page() {
           })
       }, [setPositions, setPositionsLoading]);
 
-    useEffect(() => {
-        fetch('/api/get-scheduling')
+      useEffect(() => {
+        fetch('/api/mail-pipeline/get-settings')
             .then((res) => res.json())
             .then((data) => {
-                setSchedulingNum(data.num);
-                setSchedulingIntervalSet((prev) => new Set([data.interval]));
+                setScheduling(data);
                 setSchedulingLoading(false);
             })
-    }, [setSchedulingNum, setSchedulingIntervalSet, setSchedulingLoading]);
+    }, [setScheduling, setSchedulingLoading]);
 
     return (
         <section className="flex flex-col box-border h-screen">
@@ -127,13 +125,10 @@ export default function Page() {
                     </div>
                 :
                     <Scheduling 
-                        schedulingNum={schedulingNum}
-                        setSchedulingNum={setSchedulingNum}
-                        schedulingIntervalSet={schedulingIntervalSet}
-                        setSchedulingIntervalSet={setSchedulingIntervalSet}
+                        scheduling={scheduling}
+                        setScheduling={setScheduling}
                         schedulingLoading={schedulingLoading}
-                        inputError={inputError}
-                        setInputError={setInputError}
+                        setSchedulingLoading={setSchedulingLoading}
                         schedulingDone={schedulingDone}
                         setSchedulingDone={setSchedulingDone}
                     />
