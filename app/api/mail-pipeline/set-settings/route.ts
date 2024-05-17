@@ -16,17 +16,29 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     const scheduling = data.scheduling;
     const authHeader = headers().get('authorization') || headers().get('Authorization');
+    if (!authHeader) {
+        return Response.json({ status: 401, message: "Unauthorized" });
+    }
 
     await redis.json.set("mail:pipeline:settings", "$", data.scheduling);
 
     if (process.env.NODE_ENV === "production") {
         const queue = client.queue({
-            queueName: "mail:queue"
+            queueName: "mail-fetch-queue"
         })
           
         await queue.upsert({
             parallelism: 2,
         })
+
+        await client.publishJSON({
+            url: `${BASE_URL}/api/mail-pipeline/search-unseen`,
+            method: "POST",
+            headers: {
+              Authorization: authHeader
+            },
+            retries: 0,
+        });
 
         let cron;
         switch (scheduling.schedulingInterval) {
