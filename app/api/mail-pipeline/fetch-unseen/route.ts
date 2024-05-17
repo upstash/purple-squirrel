@@ -10,9 +10,11 @@ import Connection, { ImapMessage } from 'node-imap';
 
 import { Blob } from "buffer";
 import { utapi } from "@/app/utils/uploadthing/server/uploadthing";
-import pdf from 'pdf-parse/lib/pdf-parse'
+//import pdf from 'pdf-parse/lib/pdf-parse'
+const pdf = require('pdf-parse');
 
 import { FileEsque } from "uploadthing/types";
+import PdfParse from "pdf-parse";
 
 const client = new Client({ token: process.env.QSTASH_TOKEN as string});
 
@@ -67,7 +69,7 @@ export async function POST(req: Request) {
                                 console.log('File uploaded successfully');
 
                                 try {
-                                    const parsedPDF = await pdf(parsed.attachments[0].content);
+                                    const parsedPDF: PdfParse.Result = await pdf(parsed.attachments[0].content);
                                     console.log('PDF parsed successfully');
                                     let mailData = {
                                         "mailDate": parsed.date,
