@@ -16,6 +16,7 @@
     "@nextui-org/react": "^2.2.9",
     "@primer/octicons-react": "^19.8.0",
     "@types/node-imap": "^0.9.3",
+    "@types/pdf-parse": "^1.1.4",
     "@uploadthing/react": "^6.2.4",
     "@upstash/qstash": "^2.5.0",
     "@upstash/redis": "^1.29.0",
