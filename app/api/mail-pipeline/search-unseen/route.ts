@@ -50,6 +50,30 @@ export async function POST() {
                 const msgs = results.map((result) => {
                     return {
                         queue: "mail-fetch-queue",
+                        destination: `${BASE_URL}/api/mail-pipeline/fetch-unseen`,
+                        headers: {
+                            Authorization: authHeader,
+                            "Content-type": "application/json",
+                            "Upstash-Retries": 0,
+                        },
+                        body: {
+                            mailID: result
+                        }
+                    }
+                })
+                if (process.env.NODE_ENV === "production") {
+                    const res = await fetch("https://qstash.upstash.io/v2/batch", {
+                        headers: {
+                            Authorization: process.env.QSTASH_TOKEN as string,
+                        },
+                        method: "POST",
+                        body: JSON.stringify(msgs)
+                    })
+                }
+                /*
+                const msgs = results.map((result) => {
+                    return {
+                        queue: "mail-fetch-queue",
                         url: `${BASE_URL}/api/mail-pipeline/fetch-unseen`,
                         headers: {
                             Authorization: authHeader
@@ -65,6 +89,7 @@ export async function POST() {
                     const res = await client.batchJSON(msgs);
                     console.log("Batch response: ", res);
                 }
+                */
                 imap.end();
             })
         });
