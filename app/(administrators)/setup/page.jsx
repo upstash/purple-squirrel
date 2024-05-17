@@ -54,8 +54,6 @@ export default function Page() {
 
     const [scheduling, setScheduling] = useState({});
 
-    const [schedulingDefault, setSchedulingDefault] = useState(true);
-
     const [schedulingLoading, setSchedulingLoading] = useState(true);
 
     const [schedulingDone, setSchedulingDone] = useState(false);
@@ -70,7 +68,7 @@ export default function Page() {
       }, [setPositions, setPositionsLoading]);
 
     useEffect(() => {
-        fetch('/api/get-scheduling')
+        fetch('/api/mail-pipeline/get-settings')
             .then((res) => res.json())
             .then((data) => {
                 setScheduling(data);
@@ -157,9 +155,14 @@ export default function Page() {
                                                 },
                                                 body: JSON.stringify(true)
                                             });
-                                            await fetch("/api/listen-inbox", {
+                                            await client.publishJSON({
+                                                url: `${BASE_URL}/api/mail-pipeline/search-unseen`,
                                                 method: "POST",
-                                            })
+                                                headers: {
+                                                  Authorization: authHeader
+                                                },
+                                                retries: 0,
+                                            });
                                             setActiveTab("complete");
                                         }}>
                                             Complete
@@ -232,8 +235,6 @@ export default function Page() {
                                 setSchedulingLoading={setSchedulingLoading}
                                 schedulingDone={schedulingDone}
                                 setSchedulingDone={setSchedulingDone}
-                                schedulingDefault={schedulingDefault}
-                                setSchedulingDefault={setSchedulingDefault}
                             />
                         :
                             null
