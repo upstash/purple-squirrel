@@ -11,6 +11,10 @@ import Connection from 'node-imap';
 
 const client = new Client({ token: process.env.QSTASH_TOKEN as string});
 
+const queue = client.queue({
+    queueName: "mail-fetch-queue"
+  })
+
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL as string,
   token: process.env.UPSTASH_REDIS_REST_TOKEN as string,
@@ -18,6 +22,12 @@ const redis = new Redis({
 
 export async function POST() {
     const authHeader = headers().get('authorization') || headers().get('Authorization');
+    if (!authHeader) {
+        return new Response('Unauthorized', {
+            status: 401,
+        });
+    }
+
     var imap = new Imap({
         user: process.env.IMAP_USERNAME,
         password: process.env.IMAP_PASSWORD,
@@ -49,27 +59,20 @@ export async function POST() {
                 }
                 const msgs = results.map((result) => {
                     return {
-                        queue: "mail-fetch-queue",
-                        destination: `${BASE_URL}/api/mail-pipeline/fetch-unseen`,
+                        url: `${BASE_URL}/api/mail-pipeline/fetch-unseen`,
                         headers: {
-                            Authorization: authHeader,
-                            "Content-type": "application/json",
-                            "Upstash-Retries": 0,
+                            Authorization: authHeader
                         },
                         body: {
                             mailID: result
-                        }
+                        },
+                        retries: 0,
                     }
                 })
                 if (process.env.NODE_ENV === "production") {
-                    const res = await fetch("https://qstash.upstash.io/v2/batch", {
-                        headers: {
-                            Authorization: `Bearer ${process.env.QSTASH_TOKEN as string}`,
-                        },
-                        method: "POST",
-                        body: JSON.stringify(msgs)
-                    })
-                    console.log("Batch response: ", res);
+                    await Promise.all(msgs.map(async (msg) => {
+                        await queue.enqueueJSON(msg);
+                    }))
                 }
                 /*
                 const msgs = results.map((result) => {
