@@ -155,14 +155,6 @@ export default function Page() {
                                                 },
                                                 body: JSON.stringify(true)
                                             });
-                                            await client.publishJSON({
-                                                url: `${BASE_URL}/api/mail-pipeline/search-unseen`,
-                                                method: "POST",
-                                                headers: {
-                                                  Authorization: authHeader
-                                                },
-                                                retries: 0,
-                                            });
                                             setActiveTab("complete");
                                         }}>
                                             Complete
