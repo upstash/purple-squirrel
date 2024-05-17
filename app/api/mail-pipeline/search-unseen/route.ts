@@ -69,6 +69,7 @@ export async function POST() {
                         method: "POST",
                         body: JSON.stringify(msgs)
                     })
+                    console.log("Batch response: ", res);
                 }
                 /*
                 const msgs = results.map((result) => {
