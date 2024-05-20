@@ -10,7 +10,6 @@ import SavedQueries from "./saved-queries/SavedQueries";
 import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import {Button} from "@nextui-org/button";
 import {Link} from "@nextui-org/link";
-import {  Modal,   ModalContent,   ModalHeader,   ModalBody,   ModalFooter} from "@nextui-org/modal";
 
 function getTabColor(tab) {
   if (tab === "query-terminal") {
@@ -31,7 +30,7 @@ export default function Page() {
     const [queryBarLoading, setQueryBarLoading] = useState(true);
 
     const [filter, setFilter] = useState({
-      positionFilter: [],
+      positionFilter: null,
       countryCodeFilter: [],
       statusFilter: [],
       starsFilter: -1,
@@ -75,9 +74,7 @@ export default function Page() {
 
     const [locationSearchText, setLocationSearchText] = React.useState("");
 
-    const [positionFilterWarningMade, setPositionFilterWarningMade] = React.useState(false);
-
-    const [warningModelOpen, setWarningModelOpen] = React.useState(false);
+    const [settingsTab, setSettingsTab] = React.useState("filters");
 
     useEffect(() => {
       fetch('/api/get-search-settings')
@@ -183,10 +180,8 @@ export default function Page() {
                                                   setFilterModalOpen={setFilterModalOpen}
                                                   locationSearchText={locationSearchText}
                                                   setLocationSearchText={setLocationSearchText}
-                                                  positionFilterWarningMade={positionFilterWarningMade}
-                                                  setPositionFilterWarningMade={setPositionFilterWarningMade}
-                                                  warningModelOpen={warningModelOpen}
-                                                  setWarningModelOpen={setWarningModelOpen}
+                                                  settingsTab={settingsTab}
+                                                  setSettingsTab={setSettingsTab}
                                                 />
             : ((activeTab === "recent-queries") ? <RecentQueries 
                 recentQueriesState={recentQueriesState}
@@ -204,30 +199,6 @@ export default function Page() {
                 setActiveTab={setActiveTab}
             />)}
           </div>
-          <Modal isOpen={warningModelOpen} onOpenChange={() => {setWarningModelOpen((prev) => {return !prev;})}}>
-            <ModalContent>
-              {(onClose) => (
-                <>
-                  <ModalHeader className="flex w-full justify-center text-2xl text-primary-400">{"Don't Forget Filters!"}</ModalHeader>
-                  <ModalBody>
-                    <p> 
-                      It is highly recommended to set the <b className='text-primary-700'>position</b> filter before searching.
-                    </p>
-                  </ModalBody>
-                  <ModalFooter>
-                    <Button color="primary" onPress={
-                      () => {
-                        setWarningModelOpen(false);
-                        setFilterModalOpen(true);
-                      }
-                    }>
-                      Set Filters
-                    </Button>
-                  </ModalFooter>
-                </>
-              )}
-            </ModalContent>
-          </Modal>
         </section>
     )
   }
