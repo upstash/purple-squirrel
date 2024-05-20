@@ -45,10 +45,8 @@ export default function QueryTerminal({
   setFilterModalOpen,
   locationSearchText,
   setLocationSearchText,
-  positionFilterWarningMade,
-  setPositionFilterWarningMade,
-  warningModelOpen,
-  setWarningModelOpen,
+  settingsTab,
+  setSettingsTab,
   }) {
     return (
       <div className="flex flex-col h-full">
@@ -81,10 +79,8 @@ export default function QueryTerminal({
                 setFilterModalOpen={setFilterModalOpen}
                 locationSearchText={locationSearchText}
                 setLocationSearchText={setLocationSearchText}
-                positionFilterWarningMade={positionFilterWarningMade}
-                setPositionFilterWarningMade={setPositionFilterWarningMade}
-                warningModelOpen={warningModelOpen}
-                setWarningModelOpen={setWarningModelOpen}
+                settingsTab={settingsTab}
+                setSettingsTab={setSettingsTab}
           />
         </div>
         <div className="flex-auto flex h-full">
