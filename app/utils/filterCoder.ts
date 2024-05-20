@@ -2,9 +2,8 @@ import { Filter } from '@/types/types';
 
 export default function filterCoder(filter: Filter) {
     const filterQuery = [];
-    if (filter.positionFilter && filter.positionFilter.length > 0) {
-        const positions = filter.positionFilter.map((position) => `'${position}'`).join(", ");
-        filterQuery.push(`position IN (${positions})`);
+    if (filter.positionFilter) {
+        filterQuery.push(`position = '${filter.positionFilter}'`);
     }
     if (filter.countryCodeFilter && filter.countryCodeFilter.length > 0) {
         const countryCodes = filter.countryCodeFilter.map((countryCode) => `'${countryCode}'`).join(", ");

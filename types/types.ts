@@ -62,7 +62,7 @@ export type Applicant = {
 };
 
 export type Filter = {
-  positionFilter: string[];
+  positionFilter: string | null;
   countryCodeFilter: string[];
   statusFilter: string[];
   starsFilter: number;
