@@ -52,16 +52,7 @@ export default function Page() {
                   </div>
               }
               <Divider />
-              {
-                !setupStatus
-                ?
-                  <Button size="lg" variant="solid" color="secondary" className="w-full text-large mt-2" as={Link} href="/setup" startContent={<InputOutlinedIcon />}>Application Setup</Button>
-                :
-                  <div className="flex flex-col mt-2 gap-2">
-                    <Button size="lg" variant="solid" color="secondary" className="w-full text-large" as={Link} href="/console" startContent={<TerminalOutlinedIcon />}>Recruiter Console</Button>
-                    <Button size="lg" variant="bordered" color="secondary" className="w-full text-large" as={Link} href="/dashboard" startContent={<AdminPanelSettingsOutlinedIcon />}>Admin Dashboard</Button>
-                  </div>
-              }
+                  <Button size="lg" variant="solid" color="secondary" className="w-full text-large mt-2" as={Link} href="/recruiters" startContent={<InputOutlinedIcon />}>Recruiters</Button>
             </div>
         }
       </div>
