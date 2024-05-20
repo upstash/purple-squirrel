@@ -41,29 +41,22 @@ export default function SavedQueries({
                       </div>
                   );
               })}
-              {item.filter.positionFilter.map((position) => {
-                  const filterTagID = uuidv4();
-                  return (
-                      <div key={filterTagID} className="px-1">
-                          <Chip color="danger" size="sm" variant="dot" onClose={() => {setFilter((prev) => {
-                              return {...prev, positionFilter: prev.positionFilter.filter((id) => {
-                                  return id !== position;
-                              })};
-                          })}}>
-                              {position}
-                          </Chip>
-                      </div>
-                  );
-              })}
+              { item.filter.positionFilter && 
+                  <div key={uuidv4()} className="px-1">
+                      <Chip
+                          color="danger"
+                          size="sm"
+                          variant="dot"
+                          >
+                      {item.filter.positionFilter}
+                      </Chip>
+                  </div>
+              }
               {item.filter.countryCodeFilter.map((countryCode) => {
                   const filterTagID = uuidv4();
                   return (
                       <div key={filterTagID} className="px-1">
-                          <Chip color="danger" size="sm" variant="dot" onClose={() => {setFilter((prev) => {
-                              return {...prev, countryCodeFilter: prev.countryCodeFilter.filter((id) => {
-                                  return id !== countryCode;
-                              })};
-                          })}}>
+                          <Chip color="danger" size="sm" variant="dot">
                               {locationLookup[countryCode]}
                           </Chip>
                       </div>
@@ -73,11 +66,7 @@ export default function SavedQueries({
                   const filterTagID = uuidv4();
                   return (
                       <div key={filterTagID} className="px-1">
-                          <Chip className="capitalize" color="danger" size="sm" variant="dot" onClose={() => {setFilter((prev) => {
-                              return {...prev, statusFilter: prev.statusFilter.filter((id) => {
-                                  return id !== status;
-                              })};
-                          })}}>
+                          <Chip className="capitalize" color="danger" size="sm" variant="dot">
                               {status === "newApply" ? "New" : status}
                           </Chip>
                       </div>
@@ -85,18 +74,14 @@ export default function SavedQueries({
               })}
               {item.filter.starsFilter !== -1 &&
                   <div className="px-1">
-                      <Chip color="danger" size="sm" variant="dot" onClose={() => {setFilter((prev) => {
-                          return {...prev, starsFilter: -1};
-                      })}}>
+                      <Chip color="danger" size="sm" variant="dot">
                           {`${item.filter.starsFilter}+`}
                       </Chip>
                   </div>
               }
               {(item.filter.yoeFilter.min !== -1 || item.filter.yoeFilter.max !== -1) &&
                   <div className="px-1">
-                      <Chip color="danger" size="sm" variant="dot" onClose={() => {setFilter((prev) => {
-                          return {...prev, yoeFilter: {min: -1, max: -1}};
-                      })}}>
+                      <Chip color="danger" size="sm" variant="dot">
                           {(item.filter.yoeFilter.min === -1 ? `YOE <= ${item.filter.yoeFilter.max}` : (item.filter.yoeFilter.max === -1 ? `YOE >= ${item.filter.yoeFilter.min}` : `${item.filter.yoeFilter.min} <= YOE <= ${item.filter.yoeFilter.max}`))}
                       </Chip>
                   </div>
@@ -105,11 +90,7 @@ export default function SavedQueries({
                   const filterTagID = uuidv4();
                   return (
                       <div key={filterTagID} className="px-1">
-                          <Chip color="danger" size="sm" variant="dot" onClose={() => {setFilter((prev) => {
-                              return {...prev, degreeFilter: prev.degreeFilter.filter((id) => {
-                                  return id !== degree;
-                              })};
-                          })}}>
+                          <Chip color="danger" size="sm" variant="dot">
                               {degree}
                           </Chip>
                       </div>
@@ -117,9 +98,7 @@ export default function SavedQueries({
               })}
               {(item.filter.graduationDateFilter.min.year !== -1 || item.filter.graduationDateFilter.max.year !== -1) &&
                   <div className="px-1">
-                      <Chip color="danger" size="sm" variant="dot" onClose={() => {setFilter((prev) => {
-                          return {...prev, graduationDateFilter: {min: {year: -1, month: -1}, max: {year: -1, month: -1}}};
-                      })}}>
+                      <Chip color="danger" size="sm" variant="dot">
                           {`Graduation: ${item.filter.graduationDateFilter.min.year === -1 ? "Any" : (item.filter.graduationDateFilter.min.month === -1 ? item.filter.graduationDateFilter.min.year : item.filter.graduationDateFilter.min.month + "." + item.filter.graduationDateFilter.min.year)} - ${item.filter.graduationDateFilter.max.year === -1 ? "Any" : (item.filter.graduationDateFilter.max.month === -1 ? item.filter.graduationDateFilter.max.year : item.filter.graduationDateFilter.max.month + "." + item.filter.graduationDateFilter.max.year)}`}
                       </Chip>
                   </div>
