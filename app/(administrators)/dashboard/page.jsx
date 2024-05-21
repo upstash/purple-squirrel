@@ -1,5 +1,7 @@
 'use client'
 
+import { useUser } from "@clerk/clerk-react";
+import { redirect } from "next/navigation";
 import { Divider } from '@nextui-org/react'
 import React, { useState, useEffect } from 'react';
 import {SquirrelIcon} from '@primer/octicons-react'
