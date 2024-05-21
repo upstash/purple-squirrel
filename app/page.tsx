@@ -52,7 +52,8 @@ export default function Page() {
                   </div>
               }
               <Divider />
-                  <Button size="lg" variant="solid" color="secondary" className="w-full text-large mt-2" as={Link} href="/recruiters" startContent={<InputOutlinedIcon />}>Recruiters</Button>
+                  <Button size="lg" variant="solid" color="secondary" className="w-full text-large mt-2" as={Link} href="/home" startContent={<InputOutlinedIcon />}>Applicants</Button>
+                  <Button size="lg" variant="solid" color="secondary" className="w-full text-large mt-2" as={Link} href="/home" startContent={<InputOutlinedIcon />}>Recruiters</Button>
             </div>
         }
       </div>
