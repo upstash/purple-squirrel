@@ -12,9 +12,6 @@ export default function RootLayout({
       <html lang="en" className='dark'>
         <body>
           <Providers>
-            <header>
-              <SignOutButton />
-            </header>
             <main>
               {children}
             </main>
