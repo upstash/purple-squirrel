@@ -21,8 +21,9 @@ import ArrowDropDownOutlinedIcon from '@mui/icons-material/ArrowDropDownOutlined
 
 
 const columns = [
-  {name: "NAME", uid: "name", sortable: true},
-  {name: "STATUS", uid: "status", sortable: true},
+  {name: "ID", uid: "id", sortable: true},
+  {name: "POSITION", uid: "position", sortable: true},
+  {name: "STATUS", uid: "status"},
   {name: "ACTIONS", uid: "actions"},
 ];
 
@@ -102,12 +103,23 @@ export default function PositionTable({
 
   const renderCell = React.useCallback((position, columnKey) => {
     switch (columnKey) {
-      case "name":
+      case "id":
+        return (
+          <p className="text-bold text-sm">{position.id}</p>
+        );
+      case "position":
         return (
           <p className="text-bold text-sm capitalize">{position.name}</p>
         );
       case "status":
         const positionStatus = position.status;
+        if (position.id === 1) {
+          return (
+            <Chip color="primary" size="sm" variant="solid" className="capitalize">
+              {positionStatus}
+            </Chip>
+          );
+        }
         return (
             <Dropdown className="min-w-0 w-fit">
                 <DropdownTrigger>
@@ -126,27 +138,26 @@ export default function PositionTable({
                     className="min-w-0 w-fit"
                     onSelectionChange={
                         async (keys) => {
-                            console.log(keys);
-                            /*
-                            await fetch(`/api/set-applicant-status`, {
+                            const res = await fetch(`/api/positions/set-positions-status`, {
                                 method: "POST",
                                 headers: {
                                 "Content-Type": "application/json",
                                 },
-                                body: JSON.stringify({id: cardID, status: Array.from(keys)[0]}),
+                                body: JSON.stringify({positions: [position], status: Array.from(keys)[0]}),
                             });
-                            
-                            setTableInfo((prevTableInfo) => {
-                                const updatedTableInfo = { ...prevTableInfo };
-                                updatedTableInfo[cardID].status = Array.from(keys)[0];
-                                return updatedTableInfo;
-                            });*/
-                            setPositions((prev) => {
-                                const newPositions = [...prev];
-                                const positionIndex = newPositions.findIndex((pos) => {return pos.name === position.name;});
-                                newPositions[positionIndex].status = Array.from(keys)[0];
-                                return newPositions;
-                            });
+
+                            if (res.status !== 200) {
+                                console.error("Failed to set position status");
+                            } else {
+                              setPositions((prev) => {
+                                return prev.map((pair) => {
+                                    if (pair.id === position.id) {
+                                        return {...pair, status: Array.from(keys)[0]};
+                                    }
+                                    return pair;
+                                  })
+                              });
+                            }
                         }
                     }
                 >
@@ -162,23 +173,30 @@ export default function PositionTable({
         );
       case "actions":
         return (
-            <Tooltip content="Delete Applicant" color={"danger"} delay={400} closeDelay={600}>
-              <Button isIconOnly variant="light" aria-label="Delete Applicant" size="sm" isDisabled={position.name === "General Application"}
+            <Tooltip content="Delete Position" color={"danger"} delay={400} closeDelay={600}>
+              <Button isIconOnly variant="light" aria-label="Delete Position" size="sm" isDisabled={position.id === 1}
                 onPress={async () => {
+                  if (position.id === 1) {
+                    return;
+                  }
                   setPositionsLoading((prev) => {return true;});
-                  await fetch(`/api/delete-positions`, {
+                  const res = await fetch(`/api/positions/delete-positions`, {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({names: [position.name]}),
+                    body: JSON.stringify({positions: [position]}),
                   });
 
-                  setPositions((prev) => {return prev.filter((pair) => pair.name !== position.name);});
+                  if (res.status !== 200) {
+                    console.error("Failed to delete position");
+                  } else {
+                    setPositions((prev) => {return prev.filter((pair) => {return pair.id !== position.id;});});
+                  }
                   setPositionsLoading((prev) => {return false;});
                 }}
               >
-                <span className={position.name === "General Application" ? "text-lg text-default-400 cursor-pointer active:opacity-50" : "text-lg text-danger-400 cursor-pointer active:opacity-50"}>
+                <span className={position.id === 1 ? "text-lg text-default-400 cursor-pointer active:opacity-50" : "text-lg text-danger-400 cursor-pointer active:opacity-50"}>
                   <DeleteOutlinedIcon />
                 </span>
               </Button>
@@ -215,7 +233,7 @@ export default function PositionTable({
           <Input
             isClearable
             className="w-full sm:max-w-[44%]"
-            placeholder="Search by name..."
+            placeholder="Search positions by name..."
             value={positionSearchText}
             onClear={() => onClear()}
             onValueChange={onSearchChange}
@@ -226,7 +244,7 @@ export default function PositionTable({
           <div className="flex gap-3">
             <Dropdown>
               <DropdownTrigger className="hidden sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat" color={statusFilter === "all" || inSet(statusSet, statusFilter) ? "default" : "secondary"}>
+                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat" color={statusFilter === "all" || inSet(statusSet, statusFilter) ? "default" : "danger"}>
                   Status
                 </Button>
               </DropdownTrigger>
@@ -296,23 +314,27 @@ export default function PositionTable({
     return (
       <div className="py-2 px-2 flex items-center">
         <div className="flex-1 flex items-center gap-2">
-          <Tooltip content="Delete Selected Applicants" color={"danger"} delay={400} closeDelay={600}>
-            <Button isIconOnly variant="light" aria-label="Delete Applicant" size="sm"
+          <Tooltip content="Delete Selected Positions" color={"danger"} delay={400} closeDelay={600}>
+            <Button isIconOnly variant="light" aria-label="Delete Position" size="sm"
               onPress={async () => {
                 if (selectedKeys.size === 0) {
                   return;
                 }
-                setPositionsLoading((prev) => {return {status: true, color: "danger", text: "Deleting Selected Applicants..."};});
-                await fetch(`/api/delete-positions`, {
+                setPositionsLoading((prev) => {return true;});
+                const res = await fetch(`/api/positions/delete-positions`, {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
                   },
-                  body: JSON.stringify({ids: (selectedKeys === "all" ? applicantIDs.map((i) => i.id) : [...selectedKeys])}),
+                  body: JSON.stringify({positions: positions.filter((position) => {return selectedKeys.has(`${position.id}`);})}),
                 });
-                setPositions((prev) => prev.filter((triplet) => (selectedKeys === "all" ? false : !selectedKeys.has(triplet.id))));
-                setSelectedKeys(new Set([]));
-                setPositionsLoading((prev) => ({...prev, status: false}));
+                if (res.status !== 200) {
+                  console.error("Failed to delete positions");
+                } else {
+                  setPositions((prev) => {return prev.filter((position) => {return !selectedKeys.has(`${position.id}`) || position.id === 1;});});
+                  setSelectedKeys(new Set([]));
+                }
+                setPositionsLoading((prev) => {return false;});
               }}
             >
               <span className="text-danger-400 cursor-pointer active:opacity-50">
@@ -322,8 +344,8 @@ export default function PositionTable({
           </Tooltip>
           <Dropdown className="min-w-0 w-fit">
             <DropdownTrigger>
-                <Button isIconOnly variant="light" aria-label="Change Applicants Status" size="sm">
-                  <Tooltip content="Change Status of Selected Applicants" color={"warning"} delay={400} closeDelay={600}>
+                <Button isIconOnly variant="light" aria-label="Change Positions Status" size="sm">
+                  <Tooltip content="Change Status of Selected Positions" color={"warning"} delay={400} closeDelay={600}>
                     <span className="text-warning-400 cursor-pointer active:opacity-50">
                       <NextWeekOutlinedIcon />
                     </span>
@@ -341,30 +363,31 @@ export default function PositionTable({
                         if (!keys || keys.size !== 1 || selectedKeys.size === 0) {
                           return;
                         }
+                        setPositionsLoading((prev) => {return true;});
                         const newKey = Array.from(keys)[0];
-                        let newSelectedKeys;
-                        if (selectedKeys === "all") {
-                          newSelectedKeys = positions.map((p) => p.name);
-                        } else {
-                          newSelectedKeys = [...selectedKeys];
-                        }
+                        let changePositions = (selectedKeys === "all") ? positions : positions.filter((position) => {return selectedKeys.has(`${position.id}`);});
 
-                        await fetch(`/api/set-multiple-position-status`, {
+                        const res = await fetch(`/api/positions/set-positions-status`, {
                             method: "POST",
                             headers: {
                               "Content-Type": "application/json",
                             },
-                            body: JSON.stringify({names: newSelectedKeys, status: newKey}),
+                            body: JSON.stringify({positions: changePositions, status: newKey}),
                           });
                         
-                        setPositions((prev) => {
+                        if (res.status !== 200) {
+                          console.error("Failed to set position status");
+                        } else {
+                          setPositions((prev) => {
                             return prev.map((pair) => {
-                              if (newSelectedKeys.includes(pair.name)) {
+                              if ((selectedKeys === "all" || selectedKeys.has(`${pair.id}`)) && (pair.id !== 1)) {
                                 return {...pair, status: newKey};
                               }
                               return pair;
                             });
-                        });
+                          });
+                        }
+                        setPositionsLoading((prev) => {return false;});
                     }
                 }
             >
@@ -388,7 +411,7 @@ export default function PositionTable({
             isCompact
             showControls
             showShadow
-            color="secondary"
+            color="danger"
             page={tablePage}
             total={pages}
             onChange={setTablePage}
@@ -439,7 +462,7 @@ export default function PositionTable({
       </TableHeader>
       <TableBody emptyContent={(positionsLoading ? " " : "Run a query to find positions...")} items={sortedItems} isLoading={positionsLoading} loadingContent={<Spinner className="h-full w-full bg-default-50/75" label="Loading Positions..." color="danger" labelColor={"danger"} size="lg" />}>
         {(item) => (
-          <TableRow key={item.name}>
+          <TableRow key={item.id}>
             {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
           </TableRow>
         )}
