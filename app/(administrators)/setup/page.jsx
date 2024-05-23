@@ -9,9 +9,10 @@ import TerminalOutlinedIcon from '@mui/icons-material/TerminalOutlined';
 import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import {Tabs, Tab} from "@nextui-org/react";
 import { ThemeSwitcher } from "@/app/components/ThemeSwitcher";
-import PositionBar from "../dashboard/PositionBar";
-import PositionTable from "../dashboard/PositionTable";
-import Scheduling from "../dashboard/Scheduling";
+import PositionBar from "@/app/(administrators)/components/PositionBar";
+import PositionTable from "@/app/(administrators)/components/PositionTable";
+import Applications from '@/app/(administrators)/components/Applications';
+
 import EastOutlinedIcon from '@mui/icons-material/EastOutlined';
 import WestOutlinedIcon from '@mui/icons-material/WestOutlined';
 
@@ -20,7 +21,7 @@ function getTabColor(tab) {
       return "warning";
     } else if (tab === "positions") {
       return "danger";
-    } else if (tab === "scheduling") {
+    } else if (tab === "applications") {
       return "primary";
     } else if (tab === "complete") {
       return "success";
@@ -29,13 +30,13 @@ function getTabColor(tab) {
 
 function getDisabledKeys(tab) {
     if (tab === "start") {
-        return ["complete", "scheduling"];
+        return ["complete", "applications"];
     } else if (tab === "positions") {
-        return ["complete", "scheduling"];
-    } else if (tab === "scheduling") {
+        return ["complete", "applications"];
+    } else if (tab === "applications") {
         return ["start", "positions", "complete"];
     } else if (tab === "complete") {
-        return ["start", "positions", "scheduling"];
+        return ["start", "positions", "applications"];
     }
 }
 
@@ -56,10 +57,12 @@ export default function Page() {
 
     const [schedulingLoading, setSchedulingLoading] = useState(true);
 
-    const [schedulingDone, setSchedulingDone] = useState(false);
+    const [methodsSelected, setMethodsSelected] = React.useState(["mail", "ps"]);
+
+    const [methodSaved, setMethodSaved] = React.useState(false);
 
     useEffect(() => {
-        fetch('/api/get-positions')
+        fetch('/api/positions/get-positions')
           .then((res) => res.json())
           .then((data) => {
             setPositions(data);
@@ -68,13 +71,14 @@ export default function Page() {
       }, [setPositions, setPositionsLoading]);
 
     useEffect(() => {
-        fetch('/api/mail-pipeline/get-settings')
+        fetch('/api/settings/get-settings')
             .then((res) => res.json())
             .then((data) => {
-                setScheduling(data);
+                setMethodsSelected(data.methods);
+                setScheduling(data.scheduling);
                 setSchedulingLoading(false);
             })
-    }, [setScheduling, setSchedulingLoading]);
+    }, [setScheduling, setSchedulingLoading, setMethodsSelected]);
 
     return (
         <section className="flex flex-col box-border h-screen">
@@ -94,7 +98,7 @@ export default function Page() {
                         }} disabledKeys={getDisabledKeys(activeTab)}>
                             <Tab key="start" title="Start"/>
                             <Tab key="positions" title="Positions"/>
-                            <Tab key="scheduling" title="Scheduling"/>
+                            <Tab key="applications" title="Applications"/>
                             <Tab key="complete" title="Complete"/>
                         </Tabs>
                     </div>
@@ -112,8 +116,8 @@ export default function Page() {
                         <div className="flex items-center justify-center">
                             <div className="flex flex-col gap-3 p-6 bg-default-50 rounded-medium border-1">
                                 <div className="flex flex-col gap-2 py-2">
-                                    <h2 className="text-3xl text-center text-default-900">Let&apos;s Start!</h2>
-                                    <h2 className="text-lg text-center text-default-600">We will setup open positions and mail inbox listening schedule.</h2>
+                                    <h2 className="text-3xl text-center text-default-900">Let&apos;s Setup Purple Squirrel!</h2>
+                                    <h2 className="text-lg text-center text-default-600">We will setup open positions and accepted application methods.</h2>
                                 </div>
                                 <div className="flex justify-end">
                                     <Button color="secondary" size="md" radius="md" endContent={<EastOutlinedIcon />} onPress={() => setActiveTab("positions")}>
@@ -131,28 +135,21 @@ export default function Page() {
                                         Start
                                     </Button>
                                     <h2>Setup open positions here. You can change them later at Admin Dashboard.</h2>
-                                    <Button color="primary" size="md" radius="md" endContent={<EastOutlinedIcon />} onPress={() => setActiveTab("scheduling")}>
-                                        Scheduling
+                                    <Button color="primary" size="md" radius="md" endContent={<EastOutlinedIcon />} onPress={() => setActiveTab("applications")}>
+                                        Applications
                                     </Button>
                                 </div>
                             </div>
                         :
-                            (activeTab === "scheduling")
+                            (activeTab === "applications")
                             ?
                                 <div className="bg-default-50 rounded-medium px-unit-2 py-unit-3 h-full flex flex-col border-1">
                                     <div className="flex items-center justify-between gap-2 pl-unit-1 text-default-900">
                                         <div className="w-32"></div>
                                         <div>
-                                            <h2>Setup your mail inbox listening schedule here. You can change it later at Admin Dashboard.</h2>
+                                            <h2>Setup your application methods and mail inbox listening schedule here. You can change it later at Admin Dashboard.</h2>
                                         </div>
-                                        <Button isDisabled={!schedulingDone} color={schedulingDone ? "success" : "default" } size="md" radius="md" endContent={<EastOutlinedIcon />} onPress={async () => {
-                                            await fetch("/api/set-setup-status", {
-                                                method: "POST",
-                                                headers: {
-                                                "Content-Type": "application/json"
-                                                },
-                                                body: JSON.stringify(true)
-                                            });
+                                        <Button isDisabled={!methodSaved} color={!methodSaved? "default" : "success" } size="md" radius="md" endContent={<EastOutlinedIcon />} onPress={async () => {
                                             setActiveTab("complete");
                                         }}>
                                             Complete
@@ -188,6 +185,7 @@ export default function Page() {
                                     positions={positions}
                                     setPositions={setPositions}
                                     positionsLoading={positionsLoading}
+                                    setPositionsLoading={setPositionsLoading}
                                     positionOpenText={positionOpenText}
                                     setPositionOpenText={setPositionOpenText}
                                 />
@@ -216,15 +214,17 @@ export default function Page() {
                             </div>
                         </div>
                     :
-                        (activeTab === "scheduling")
+                        (activeTab === "applications")
                         ?
-                            <Scheduling 
+                            <Applications 
                                 scheduling={scheduling}
                                 setScheduling={setScheduling}
                                 schedulingLoading={schedulingLoading}
                                 setSchedulingLoading={setSchedulingLoading}
-                                schedulingDone={schedulingDone}
-                                setSchedulingDone={setSchedulingDone}
+                                methodsSelected={methodsSelected}
+                                setMethodsSelected={setMethodsSelected}
+                                methodSaved={methodSaved}
+                                setMethodSaved={setMethodSaved}
                             />
                         :
                             null

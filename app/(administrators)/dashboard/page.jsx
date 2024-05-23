@@ -1,8 +1,5 @@
 'use client'
 
-import { useUser } from "@clerk/clerk-react";
-import { redirect } from "next/navigation";
-import { Divider } from '@nextui-org/react'
 import React, { useState, useEffect } from 'react';
 import {SquirrelIcon} from '@primer/octicons-react'
 import {Button} from "@nextui-org/button";
@@ -10,15 +7,18 @@ import {Link} from "@nextui-org/link";
 import TerminalOutlinedIcon from '@mui/icons-material/TerminalOutlined';
 import {Tabs, Tab} from "@nextui-org/react";
 import { ThemeSwitcher } from "@/app/components/ThemeSwitcher";
-import PositionBar from "./PositionBar";
-import PositionTable from "./PositionTable";
-import Scheduling from "./Scheduling";
+import PositionBar from "@/app/(administrators)/components/PositionBar";
+import PositionTable from "@/app/(administrators)/components/PositionTable";
+import UserTable from "@/app/(administrators)/components/UserTable";
+import Applications from '@/app/(administrators)/components/Applications';
 
 function getTabColor(tab) {
     if (tab === "positions") {
-      return "danger";
-    } else if (tab === "scheduling") {
-      return "primary";
+        return "danger";
+    } else if (tab === "applications") {
+        return "primary";
+    } else if (tab === "users") {
+        return "secondary";
     }
   }
 
@@ -39,10 +39,20 @@ export default function Page() {
 
     const [schedulingLoading, setSchedulingLoading] = useState(true);
 
-    const [schedulingDone, setSchedulingDone] = useState(false);
+    const [methodsSelected, setMethodsSelected] = React.useState(["mail", "ps"]);
+
+    const [methodSaved, setMethodSaved] = React.useState(false);
+
+    const [users, setUsers] = useState([]);
+    const [userSearchText, setUserSearchText] = useState("");
+    const [usersLoading, setUsersLoading] = useState(false);
+    const [roleFilter, setRoleFilter] = React.useState("all");
+    const [userRowsPerPage, setUserRowsPerPage] = React.useState(10);
+    const [userTablePage, setUserTablePage] = React.useState(1);
+    const [selectedUserKeys, setSelectedUserKeys] = React.useState(new Set([]));
 
     useEffect(() => {
-        fetch('/api/get-positions')
+        fetch('/api/positions/get-positions')
           .then((res) => res.json())
           .then((data) => {
             setPositions(data);
@@ -50,14 +60,15 @@ export default function Page() {
           })
       }, [setPositions, setPositionsLoading]);
 
-      useEffect(() => {
-        fetch('/api/mail-pipeline/get-settings')
+    useEffect(() => {
+        fetch('/api/settings/get-settings')
             .then((res) => res.json())
             .then((data) => {
-                setScheduling(data);
+                setMethodsSelected(data.methods);
+                setScheduling(data.scheduling);
                 setSchedulingLoading(false);
             })
-    }, [setScheduling, setSchedulingLoading]);
+    }, [setScheduling, setSchedulingLoading, setMethodsSelected]);
 
     return (
         <section className="flex flex-col box-border h-screen">
@@ -76,7 +87,8 @@ export default function Page() {
                             setActiveTab(key);
                         }}>
                             <Tab key="positions" title="Positions"/>
-                            <Tab key="scheduling" title="Scheduling"/>
+                            <Tab key="applications" title="Applications"/>
+                            <Tab key="users" title="Users"/>
                         </Tabs>
                     </div>
                     <div className="flex-1 flex items-center justify-end">
@@ -98,6 +110,7 @@ export default function Page() {
                                 positions={positions}
                                 setPositions={setPositions}
                                 positionsLoading={positionsLoading}
+                                setPositionsLoading={setPositionsLoading}
                                 positionOpenText={positionOpenText}
                                 setPositionOpenText={setPositionOpenText}
                             />
@@ -126,14 +139,43 @@ export default function Page() {
                         </div>
                     </div>
                 :
-                    <Scheduling 
-                        scheduling={scheduling}
-                        setScheduling={setScheduling}
-                        schedulingLoading={schedulingLoading}
-                        setSchedulingLoading={setSchedulingLoading}
-                        schedulingDone={schedulingDone}
-                        setSchedulingDone={setSchedulingDone}
-                    />
+                    (activeTab === "applications")
+                    ?
+                        <Applications 
+                            scheduling={scheduling}
+                            setScheduling={setScheduling}
+                            schedulingLoading={schedulingLoading}
+                            setSchedulingLoading={setSchedulingLoading}
+                            methodsSelected={methodsSelected}
+                            setMethodsSelected={setMethodsSelected}
+                            methodSaved={methodSaved}
+                            setMethodSaved={setMethodSaved}
+                        />
+                    :
+                        <div className="flex flex-col h-full">
+                            <div className="flex-auto flex h-full">
+                                <div className="flex-[72_1_0%] transition-all duration-300 ease-in-out">
+                                    <div className="flex flex-col bg-default-50 rounded-medium h-full p-unit-3">
+                                    <UserTable
+                                            users={users}
+                                            setUsers={setUsers}
+                                            userSearchText={userSearchText}
+                                            setUserSearchText={setUserSearchText}
+                                            usersLoading={usersLoading}
+                                            setUsersLoading={setUsersLoading}
+                                            roleFilter={roleFilter}
+                                            setRoleFilter={setRoleFilter}
+                                            userRowsPerPage={userRowsPerPage}
+                                            setUserRowsPerPage={setUserRowsPerPage}
+                                            userTablePage={userTablePage}
+                                            setUserTablePage={setUserTablePage}
+                                            selectedUserKeys={selectedUserKeys}
+                                            setSelectedUserKeys={setSelectedUserKeys}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                 }
             </div> 
         </section>
