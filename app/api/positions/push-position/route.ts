@@ -8,10 +8,13 @@ const redis = new Redis({
 
 export async function POST(req: NextRequest) {
     const data = await req.json();
+    const name = data.name;
 
-    await redis.lpush("positions", data); 
+    const positionId = await redis.incr("position:id:generator");
 
-    return Response.json({ status: 200, message: "Success" });
+    await redis.lpush("positions", {id: positionId, name: name, status: "open"}); 
+
+    return Response.json({ status: 200, message: "Success", id: positionId });
 }
 
 export const dynamic = "force-dynamic";

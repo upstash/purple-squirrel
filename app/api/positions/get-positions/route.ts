@@ -8,8 +8,9 @@ const redis = new Redis({
 export async function GET() {
     const positions = await redis.lrange("positions", 0, -1);
     if (positions.length === 0) {
-        await redis.lpush("positions", {name: "General Application", status: "open"}); 
-        return Response.json([{name: "General Application", status: "open"}]);
+        const positionId = await redis.incr("position:id:generator");
+        await redis.lpush("positions", {id: positionId, name: "General Application", status: "open"}); 
+        return Response.json([{id: positionId, name: "General Application", status: "open"}]);
     }
 
     return Response.json(positions);
