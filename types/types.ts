@@ -3,29 +3,42 @@ export type Applicant = {
 
   applicantInfo: {
     name: string;
-    age: number;
     yoe: number;
     contact: {
       email: string;
       phone: string;
     }
     countryCode: string;
-    latestEducation: {
-      degree: string;
-      subject: string;
-      university: string;
-      graduation: {
-        month: number;
-        year: number;
+    latestEducation?: {
+      degree?: string;
+      subject?: string;
+      university?: string;
+      graduation?: {
+        month?: number;
+        year?: number;
       }
     }
-    urls: {
-      website: string;
-      linkedin: string;
-      github: string;
+    urls?: {
+      website?: string;
+      linkedin?: string;
+      github?: string;
     }
   }
 
+  resumeInfo: {
+    uploadthing: {
+      key: string;
+      url: string;
+    }
+    fullText: string;
+  }
+};
+
+export type Application = {
+  applicationInfo: {
+    date: Date;
+    method: "mail" | "ps";
+  }
   recruitmentInfo: {
     stars: number | null;
     notes: string | null;
@@ -39,27 +52,7 @@ export type Applicant = {
       | "onboarding"
       | "hired";
   }
-
-  applicationInfo: {
-    date: Date;
-    method: "mail" | "upload";
-    position: string;
-    mailInfo?: {
-      date: Date;
-      from: string;
-      subject: string;
-      body: string;
-    }
-  }
-
-  resumeInfo: {
-    uploadthing: {
-      key: string;
-      url: string;
-    }
-    fullText: string;
-  }
-};
+}
 
 export type Filter = {
   positionFilter: string | null;
