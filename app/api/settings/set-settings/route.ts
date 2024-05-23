@@ -15,14 +15,14 @@ const redis = new Redis({
 export async function POST(req: NextRequest) {
     const data = await req.json();
     const scheduling = data.scheduling;
-    const authHeader = headers().get('authorization') || headers().get('Authorization');
-    if (!authHeader) {
-        return Response.json({ status: 401, message: "Unauthorized" });
-    }
+    const methods = data.methods;
+
 
     await redis.json.set("mail:pipeline:settings", "$", data.scheduling);
+    await redis.set("application:methods", methods);
+    await redis.set("setup:status", true);
 
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV === "production" && methods.includes("mail")) {
         const queue = client.queue({
             queueName: "mail-fetch-queue"
         })
@@ -34,9 +34,6 @@ export async function POST(req: NextRequest) {
         await client.publishJSON({
             url: `${BASE_URL}/api/mail-pipeline/search-unseen`,
             method: "POST",
-            headers: {
-              Authorization: authHeader
-            },
             retries: 0,
         });
 
@@ -62,10 +59,18 @@ export async function POST(req: NextRequest) {
 
         await schedules.create({
             destination: `${BASE_URL}/api/mail-pipeline/search-unseen`,
-            headers: { "Authorization": authHeader as string},
             cron: cron,
             retries: 0,
         });
+    }
+    if (process.env.NODE_ENV === "production" && !methods.includes("mail")) {
+        const schedules = client.schedules;
+        const allSchedules = await schedules.list();
+        for (let i = 0; i < allSchedules.length; i++) {
+            if (allSchedules[i].destination === `${BASE_URL}/api/mail-pipeline/search-unseen`) {
+                await schedules.delete(allSchedules[i].scheduleId);
+            }
+        }
     }
 
     return Response.json({ status: 200, message: "Success" });
