@@ -330,9 +330,10 @@ export async function POST(req: NextRequest) {
 
     const namespace = index.namespace(positionId)
 
+    /*
     await namespace.upsert({
         id: `${applicantID}_application`,
-        data: "Test",
+        data: fullResumeText,
         metadata: {
             method: "mail",
             countryCode: applicant.applicantInfo.countryCode,
@@ -343,6 +344,23 @@ export async function POST(req: NextRequest) {
             highestDegree: applicant.applicantInfo.latestEducation?.degree,
             graduationYear: applicant.applicantInfo.latestEducation?.graduation?.year || -1,
             graduationMonth: applicant.applicantInfo.latestEducation?.graduation?.month || -1
+        },
+    });
+    */
+
+    await namespace.upsert({
+        id: `${applicantID}_application`,
+        data: "Test",
+        metadata: {
+            method: "mail",
+            countryCode: "TR",
+            status: "newApply",
+            stars: 0,
+            notes: "",
+            yoe: -1,
+            highestDegree: "Test",
+            graduationYear: -1,
+            graduationMonth: -1
         },
     });
     
