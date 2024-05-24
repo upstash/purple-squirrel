@@ -21,23 +21,35 @@ import ArrowDropDownOutlinedIcon from '@mui/icons-material/ArrowDropDownOutlined
 
 
 const columns = [
+  {name: "ID", uid: "id", sortable: true},
   {name: "NAME", uid: "name", sortable: true},
-  {name: "STATUS", uid: "status", sortable: true},
-  {name: "ACTIONS", uid: "actions"},
+  {name: "STATUS", uid: "status"},
 ];
 
 const statusOptions = [
   {name: "All", uid: "All"},
-  {name: "Open", uid: "open"},
-  {name: "Closed", uid: "closed"},
+  {name: "New", uid: "newApply"},
+  {name: "Screening", uid: "screening"},
+  {name: "Assessment", uid: "assessment"},
+  {name: "Interview", uid: "interview"},
+  {name: "Shortlisted", uid: "shortlisted"},
+  {name: "Offer", uid: "offer"},
+  {name: "Onboarding", uid: "onboarding"},
+  {name: "Hired", uid: "hired"},
 ];
 
 const statusSet = new Set(statusOptions.map((status) => status.uid));
 statusSet.delete("All");
 
 const statusColorMap = {
-  open: "danger",
-  closed: "default",
+  newApply: "default",
+  screening: "warning",
+  assessment: "warning",
+  interview: "warning",
+  shortlisted: "danger",
+  offer: "secondary",
+  onboarding: "success",
+  hired: "success",
 };
 
 const statusArray = Object.keys(statusColorMap);
@@ -50,7 +62,7 @@ const inSet = (xs, ys) =>
     [...xs].every((x) => ys.has(x));
 
 
-export default function ApplyTable({
+export default function AppliedTable({
     appliedPositions,
     setAppliedPositions,
     appliedPositionsLoading,
@@ -93,6 +105,10 @@ export default function ApplyTable({
 
   const renderCell = React.useCallback((position, columnKey) => {
     switch (columnKey) {
+      case "id":
+        return (
+          <p className="text-bold text-sm">{position.id}</p>
+        );
       case "name":
         return (
           <p className="text-bold text-sm capitalize">{position.name}</p>
@@ -100,85 +116,14 @@ export default function ApplyTable({
       case "status":
         const positionStatus = position.status;
         return (
-            <Dropdown className="min-w-0 w-fit">
-                <DropdownTrigger>
-                    <button>
-                        <Chip className="capitalize" color={position.status === "open" ? "danger" : "default"} size="sm" variant="solid" endContent={<ArrowDropDownOutlinedIcon/>}>
-                            {position.status}
-                        </Chip>
-                    </button>
-                </DropdownTrigger>
-                <DropdownMenu 
-                    aria-label="Single selection example"
-                    variant="flat"
-                    disallowEmptySelection
-                    selectionMode="single"
-                    selectedKeys={new Set([position.status])}
-                    className="min-w-0 w-fit"
-                    onSelectionChange={
-                        async (keys) => {
-                            console.log(keys);
-                            /*
-                            await fetch(`/api/set-applicant-status`, {
-                                method: "POST",
-                                headers: {
-                                "Content-Type": "application/json",
-                                },
-                                body: JSON.stringify({id: cardID, status: Array.from(keys)[0]}),
-                            });
-                            
-                            setTableInfo((prevTableInfo) => {
-                                const updatedTableInfo = { ...prevTableInfo };
-                                updatedTableInfo[cardID].status = Array.from(keys)[0];
-                                return updatedTableInfo;
-                            });*/
-                            setAppliedPositions((prev) => {
-                                const newPositions = [...prev];
-                                const positionIndex = newPositions.findIndex((pos) => {return pos.name === position.name;});
-                                newPositions[positionIndex].status = Array.from(keys)[0];
-                                return newPositions;
-                            });
-                        }
-                    }
-                >
-                    {["open", "closed"].map((status) => 
-                        <DropdownItem key={status} textValue={status}>
-                            <Chip className="capitalize" color={status === "open" ? "danger" : "default"} size="sm" variant="solid">
-                                {status}
-                            </Chip>
-                        </DropdownItem>
-                    )}
-                </DropdownMenu>
-            </Dropdown>
-        );
-      case "actions":
-        return (
-            <Tooltip content="Delete Applicant" color={"danger"} delay={400} closeDelay={600}>
-              <Button isIconOnly variant="light" aria-label="Delete Applicant" size="sm" isDisabled={position.name === "General Application"}
-                onPress={async () => {
-                  setAppliedPositionsLoading((prev) => {return true;});
-                  await fetch(`/api/delete-positions`, {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({names: [position.name]}),
-                  });
-
-                  setAppliedPositions((prev) => {return prev.filter((pair) => pair.name !== position.name);});
-                  setAppliedPositionsLoading((prev) => {return false;});
-                }}
-              >
-                <span className={position.name === "General Application" ? "text-lg text-default-400 cursor-pointer active:opacity-50" : "text-lg text-danger-400 cursor-pointer active:opacity-50"}>
-                  <DeleteOutlinedIcon />
-                </span>
-              </Button>
-            </Tooltip>
+          <Chip className="capitalize" color={statusColorMap[positionStatus]} size="sm" variant="solid">
+            {(positionStatus === "newApply") ? "new" : positionStatus}
+          </Chip>
         );
       default:
         return "?";
     }
-  }, [setAppliedPositions, setAppliedPositionsLoading]);
+  }, []);
 
   const onRowsPerPageChange = React.useCallback((e) => {
     setAppliedRowsPerPage(Number(e.target.value));
@@ -242,7 +187,7 @@ export default function ApplyTable({
       </TableHeader>
       <TableBody emptyContent={(appliedPositionsLoading ? " " : "Run a query to find positions...")} items={sortedItems} isLoading={appliedPositionsLoading} loadingContent={<Spinner className="h-full w-full bg-default-50/75" label="Loading Applied Positions..." color="primary" labelColor={"primary"} size="lg" />}>
         {(item) => (
-          <TableRow key={item.name}>
+          <TableRow key={item.id}>
             {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
           </TableRow>
         )}
