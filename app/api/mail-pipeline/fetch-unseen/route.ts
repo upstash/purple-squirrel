@@ -30,18 +30,11 @@ export async function POST(req: Request) {
             status: 401,
             });
     }
-    const value = await redis.json.get("mail:pipeline:settings", "$");
-    if (!value || !Array.isArray(value) || value.length !== 1) {
+    const methodsValue = await redis.get("application:methods");
+    if (!methodsValue || !Array.isArray(methodsValue) || !methodsValue.includes("mail")) {
         return Response.json({
             status: 500,
-            message: "Mail pipeline settings not found"
-        });
-    }
-    const mailPipelineSettings = value[0];
-    if (!(mailPipelineSettings?.setupStatus || !mailPipelineSettings.methods.includes("mail"))) {
-        return Response.json({
-            status: 500,
-            message: "Mail pipeline not setup"
+            message: "Mail method not enabled"
         });
     }
     const data = await req.json();

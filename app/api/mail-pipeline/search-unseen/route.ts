@@ -21,6 +21,13 @@ export async function POST() {
     if (!authHeader) {
         return new Response('Unauthorized', {
             status: 401,
+            });
+    }
+    const methodsValue = await redis.get("application:methods");
+    if (!methodsValue || !Array.isArray(methodsValue) || !methodsValue.includes("mail")) {
+        return Response.json({
+            status: 500,
+            message: "Mail method not enabled"
         });
     }
 

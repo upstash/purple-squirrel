@@ -244,6 +244,13 @@ export async function POST(req: NextRequest) {
             status: 401,
             });
     }
+    const methodsValue = await redis.get("application:methods");
+    if (!methodsValue || !Array.isArray(methodsValue) || !methodsValue.includes("mail")) {
+        return Response.json({
+            status: 500,
+            message: "Mail method not enabled"
+        });
+    }
     const data = await req.json();
     const mailData = data.mailData;
 
