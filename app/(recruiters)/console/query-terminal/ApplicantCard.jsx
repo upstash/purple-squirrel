@@ -82,7 +82,6 @@ function InfoCard({
     const applicantDoc = cardState.doc;
     const applicantName = applicantDoc.name;
     const applicantPosition = applicantDoc.position;
-    const applicantAge = applicantDoc.age;
     const applicantYOE = applicantDoc.yoe;
     const applicantLocation = locationLookup[applicantDoc.countryCode];
     const applicantDegree = applicantDoc.degree;
@@ -116,12 +115,6 @@ function InfoCard({
                     <div className="flex gap-2">
                         <div className="flex-auto flex flex-col gap-2">
                             <div className="flex gap-2 w-full">
-                                <div className="flex-inital border-default-200 border-2 rounded-medium py-1 px-3">
-                                    <div className="flex flex-col">
-                                        <p className="text-xs text-default-300">Age</p>
-                                        <p className="text-small text-bold">{applicantAge}</p>
-                                    </div>
-                                </div>
                                 <div className="flex-initial border-default-200 border-2 rounded-medium py-1 px-3">
                                     <div className="flex flex-col">
                                         <p className="text-xs text-default-300">YOE</p>
