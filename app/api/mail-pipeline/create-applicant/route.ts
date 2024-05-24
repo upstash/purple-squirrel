@@ -332,7 +332,7 @@ export async function POST(req: NextRequest) {
 
     await namespace.upsert({
         id: `${applicantID}_application`,
-        data: `${fullResumeText}`,
+        data: "Test",
         metadata: {
             method: "mail",
             countryCode: applicant.applicantInfo.countryCode,
