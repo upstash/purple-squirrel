@@ -77,6 +77,17 @@ export async function POST() {
                 if (process.env.NODE_ENV === "production") {
                     const res = await client.batchJSON(msgs);
                     console.log("Batch response: ", res);
+                } else {
+                    for (const msg of msgs) {
+                        await fetch(msg.url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': authHeader
+                            },
+                            body: JSON.stringify(msg.body)
+                        });
+                    }
                 }
                 
                 imap.end();

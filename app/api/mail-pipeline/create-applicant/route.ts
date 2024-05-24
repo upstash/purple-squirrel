@@ -348,6 +348,8 @@ export async function POST(req: NextRequest) {
     });
     */
 
+    console.log(positionId)
+
     await namespace.upsert({
         id: `${applicantID}_application`,
         data: "Test",

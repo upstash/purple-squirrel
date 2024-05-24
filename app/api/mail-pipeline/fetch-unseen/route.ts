@@ -98,17 +98,30 @@ export async function POST(req: Request) {
                                         "resumeUrl": response.data.url,
                                         "resumeText": parsedPDF.text
                                     }
-                                    const res = await client.publishJSON({
-                                        url: `${BASE_URL}/api/mail-pipeline/create-applicant`,
-                                        method: "POST",
-                                        body: {
-                                            mailData: mailData
-                                        },
-                                        headers: {
-                                          Authorization: authHeader
-                                        },
-                                        retries: 0,
-                                      });
+                                    if (process.env.NODE_ENV === "production") {
+                                        const res = await client.publishJSON({
+                                            url: `${BASE_URL}/api/mail-pipeline/create-applicant`,
+                                            method: "POST",
+                                            body: {
+                                                mailData: mailData
+                                            },
+                                            headers: {
+                                            Authorization: authHeader
+                                            },
+                                            retries: 0,
+                                        });
+                                    } else {
+                                        await fetch(`${BASE_URL}/api/mail-pipeline/create-applicant`, {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Authorization': authHeader
+                                            },
+                                            body: JSON.stringify({
+                                                mailData: mailData
+                                            })
+                                        });
+                                    }
                                     console.log('processedMailData created');
                                     imap.end();
                                 } catch (error) {
