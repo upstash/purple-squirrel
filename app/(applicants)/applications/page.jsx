@@ -13,9 +13,9 @@ import {Input} from "@nextui-org/input";
 
 function getTabColor(tab) {
     if (tab === "positions") {
-        return "secondary";
-    } else if (tab === "applied") {
         return "primary";
+    } else if (tab === "applied") {
+        return "secondary";
     }
   }
 
@@ -39,13 +39,19 @@ export default function Page() {
 
 
     useEffect(() => {
-        fetch('/api/application/get-open-positions')
+        fetch('/api/application/get-applied-positions')
           .then((res) => res.json())
           .then((data) => {
-            setPositions(data);
-            setPositionsLoading(false);
+            setAppliedPositions(data.appliedPositions);
+            setAppliedPositionsLoading(false);
+            fetch('/api/application/get-open-positions')
+            .then((res) => res.json())
+            .then((data) => {
+                setPositions(data);
+                setPositionsLoading(false);
+            })
           })
-      }, [setPositions, setPositionsLoading]);
+      }, [setPositions, setPositionsLoading, setAppliedPositions, setAppliedPositionsLoading]);
 
 
     return (
@@ -93,6 +99,9 @@ export default function Page() {
                                       setRowsPerPage={setRowsPerPage}
                                       tablePage={tablePage}
                                       setTablePage={setTablePage}
+                                      appliedPositions={appliedPositions}
+                                        setAppliedPositions={setAppliedPositions}
+                                        setActiveTab={setActiveTab}
                                   />
                           </div>
                       </div>
