@@ -11,10 +11,6 @@ import Connection from 'node-imap';
 
 const client = new Client({ token: process.env.QSTASH_TOKEN as string});
 
-const queue = client.queue({
-    queueName: "mail-fetch-queue"
-  })
-
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL as string,
   token: process.env.UPSTASH_REDIS_REST_TOKEN as string,
@@ -57,27 +53,10 @@ export async function POST() {
                     imap.end();
                     return;
                 }
+                
                 const msgs = results.map((result) => {
                     return {
-                        url: `${BASE_URL}/api/mail-pipeline/fetch-unseen`,
-                        headers: {
-                            Authorization: authHeader
-                        },
-                        body: {
-                            mailID: result
-                        },
-                        retries: 0,
-                    }
-                })
-                if (process.env.NODE_ENV === "production") {
-                    await Promise.all(msgs.map(async (msg) => {
-                        await queue.enqueueJSON(msg);
-                    }))
-                }
-                /*
-                const msgs = results.map((result) => {
-                    return {
-                        queue: "mail-fetch-queue",
+                        queueName: "mail-fetch-queue",
                         url: `${BASE_URL}/api/mail-pipeline/fetch-unseen`,
                         headers: {
                             Authorization: authHeader
@@ -89,11 +68,10 @@ export async function POST() {
                     }
                 });
                 if (process.env.NODE_ENV === "production") {
-                    // @ts-ignore
                     const res = await client.batchJSON(msgs);
                     console.log("Batch response: ", res);
                 }
-                */
+                
                 imap.end();
             })
         });
