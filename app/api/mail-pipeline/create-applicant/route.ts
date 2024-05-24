@@ -90,7 +90,6 @@ You will give nothing but the JSON like below:
 {
     "basicInfo": {
         "fullName": <full-name>,
-        "age": <age>,
         "university": <university>,
         "email": <email>,
         "phone": <phone>,
@@ -131,7 +130,7 @@ function positionMatch(position: string, positions: any) {
     const exactMatch = positions.find((pos: any) => {pos.name.toLowerCase().trim() === trimmedPosition});
     if (exactMatch) {
         if (exactMatch.status === "open") {
-            return exactMatch.name;
+            return exactMatch.id;
         } else {
             return "General Application";
         }
@@ -147,9 +146,9 @@ function positionMatch(position: string, positions: any) {
         }
     }
     if (bestMatch.status === "open") {
-        return bestMatch.name;
+        return bestMatch.id;
     } else {
-        return "General Application";
+        return 1;
     }
 }
 
@@ -206,7 +205,6 @@ function mailDataToApplicant(mailData: any, parsedMailData: any, positions: any,
         "id": null,
         "applicantInfo": {
             "name": fullName,
-            "age": age,
             "yoe": yoe,
             "contact": {
                 "email": email,
@@ -228,22 +226,6 @@ function mailDataToApplicant(mailData: any, parsedMailData: any, positions: any,
                 "github": githubUrl
             }
         },
-        "recruitmentInfo": {
-            "stars": null,
-            "notes": null,
-            "status": "newApply"
-        },
-        "applicationInfo": {
-            "date": date,
-            "method": "mail",
-            "position": (position && typeof position === "string") ? positionMatch(position, positions) : "General Application",
-            "mailInfo": {
-                "date": date,
-                "from": mailData.mailFrom,
-                "subject": mailData.mailSubject,
-                "body": mailData.mailBody
-            }
-        },
         "resumeInfo": {
             "uploadthing": {
                 "url": mailData.resumeUrl,
@@ -252,10 +234,16 @@ function mailDataToApplicant(mailData: any, parsedMailData: any, positions: any,
             "fullText": mailData.resumeText,
         }
     };
-    return { applicant: applicant, fullResumeText: mailData.resumeText, mapStatus: true };
+    return { positionId: (position ? positionMatch(position, positions) : 1) , applicant: applicant, fullResumeText: mailData.resumeText, mapStatus: true };
 }
 
 export async function POST(req: NextRequest) {
+    const authHeader = headers().get('authorization') || headers().get('Authorization');
+    if (!authHeader) {
+        return new Response('Unauthorized', {
+            status: 401,
+            });
+    }
     const data = await req.json();
     const mailData = data.mailData;
 
@@ -317,15 +305,12 @@ export async function POST(req: NextRequest) {
         console.log('PIPELINE: OpenAI Parsed Data Error');
         return;
     }
-    
-    console.log('PIPELINE: Fetching OpenAI Embedding Response');
-    const resumeEmbeddingResponse = await openai.embeddings.create({
-        model: "text-embedding-3-small",
-        input: fullResumeText,
-        encoding_format: "float",
-    });
 
-    const resumeEmbedding = resumeEmbeddingResponse.data[0].embedding;
+    const positionId = mapResult.positionId;
+    if (!positionId) {
+        console.log('PIPELINE: OpenAI Parsed Data Error');
+        return;
+    }
 
     let applicantID = await redis.lpop("free:ids");
     if (!applicantID) {
@@ -336,18 +321,21 @@ export async function POST(req: NextRequest) {
         return Response.json({ status: 500, message: "Applicant ID Collusion" });
     }
 
-    await index.upsert({
-        id: `${applicantID}_resume`,
-        vector: resumeEmbedding,
+    const namespace = index.namespace(positionId)
+
+    await namespace.upsert({
+        id: `${applicantID}_application`,
+        data: fullResumeText,
         metadata: {
-            position: applicant.applicationInfo.position,
+            method: "mail",
             countryCode: applicant.applicantInfo.countryCode,
-            status: applicant.recruitmentInfo.status,
-            stars: applicant.recruitmentInfo.stars || 0,
+            status: "newApply",
+            stars: 0,
+            notes: "",
             yoe: applicant.applicantInfo.yoe || -1,
-            highestDegree: applicant.applicantInfo.latestEducation.degree,
-            graduationYear: applicant.applicantInfo.latestEducation.graduation.year || -1,
-            graduationMonth: applicant.applicantInfo.latestEducation.graduation.month || -1
+            highestDegree: applicant.applicantInfo.latestEducation?.degree,
+            graduationYear: applicant.applicantInfo.latestEducation?.graduation?.year || -1,
+            graduationMonth: applicant.applicantInfo.latestEducation?.graduation?.month || -1
         },
     });
     
