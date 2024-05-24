@@ -21,6 +21,7 @@ import ArrowDropDownOutlinedIcon from '@mui/icons-material/ArrowDropDownOutlined
 
 
 const columns = [
+  {name: "ID", uid: "id", sortable: true},
   {name: "POSITION", uid: "position", sortable: true},
   {name: "APPLY", uid: "apply"},
 ];
@@ -37,6 +38,9 @@ export default function ApplyTable({
     setRowsPerPage,
     tablePage,
     setTablePage,
+    appliedPositions,
+    setAppliedPositions,
+    setActiveTab,
 }) {
 
   const hasSearchFilter = Boolean(positionSearchText);
@@ -69,31 +73,51 @@ export default function ApplyTable({
 
   const renderCell = React.useCallback((position, columnKey) => {
     switch (columnKey) {
+      case "id":
+        return (
+          <p className="text-bold text-sm">{position.id}</p>
+        );
       case "position":
         return (
           <p className="text-bold text-sm capitalize">{position.name}</p>
         );
       case "apply":
+        if (appliedPositions && appliedPositions.some((appliedPosition) => appliedPosition.id === position.id)) {
+          return (
+            <Button color="success" size="sm" radius="full">
+              Applied
+            </Button>
+          );
+        }
         return (
-            <Tooltip content="Delete Applicant" color={"danger"} delay={400} closeDelay={600}>
-              <Button variant="solid" radius="full" size="sm" color="primary"
+              <Button color="primary" size="sm" radius="full"
                 onPress={async () => {
                   setPositionsLoading((prev) => {return true;});
-                  await fetch(`/api/applications/apply`, {
+                  const res = await fetch(`/api/application/apply`, {
                     method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({positionId: position.id, positionName: position.name}),
                   });
-                  //setPositions((prev) => {return prev.filter((pair) => pair.name !== position.name);});
+                  if (res.status !== 200) {
+                    console.error("Failed to apply to position");
+                  } else {
+                    setAppliedPositions((prev) => {
+                      return [{id: position.id, name: position.name, status: "newApply"}, ...prev];
+                    });
+                  }
+                  setActiveTab("applied");
                   setPositionsLoading((prev) => {return false;});
                 }}
               >
                 Apply
               </Button>
-            </Tooltip>
         );
       default:
         return "?";
     }
-  }, [setPositionsLoading]);
+  }, [setPositionsLoading, appliedPositions, setAppliedPositions, setActiveTab]);
 
   const onRowsPerPageChange = React.useCallback((e) => {
     setRowsPerPage(Number(e.target.value));
@@ -158,7 +182,7 @@ export default function ApplyTable({
       </TableHeader>
       <TableBody emptyContent={(positionsLoading ? " " : "Run a query to find positions...")} items={sortedItems} isLoading={positionsLoading} loadingContent={<Spinner className="h-full w-full bg-default-50/75" label="Loading Open Positions..." color="secondary" labelColor={"secondary"} size="lg" />}>
         {(item) => (
-          <TableRow key={item.name}>
+          <TableRow key={item.id}>
             {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
           </TableRow>
         )}
