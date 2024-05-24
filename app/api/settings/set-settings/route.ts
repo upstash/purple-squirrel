@@ -59,6 +59,9 @@ export async function POST(req: NextRequest) {
 
         await schedules.create({
             destination: `${BASE_URL}/api/mail-pipeline/search-unseen`,
+            headers: {
+                Authorization: process.env.BASIC_AUTH_PASSWORD as string
+            },
             cron: cron,
             retries: 0,
         });
