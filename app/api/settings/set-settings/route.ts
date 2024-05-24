@@ -34,6 +34,9 @@ export async function POST(req: NextRequest) {
         await client.publishJSON({
             url: `${BASE_URL}/api/mail-pipeline/search-unseen`,
             method: "POST",
+            headers: {
+                Authorization: process.env.BASIC_AUTH_PASSWORD as string
+            },
             retries: 0,
         });
 
