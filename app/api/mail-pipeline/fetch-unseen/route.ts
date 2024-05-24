@@ -2,6 +2,7 @@ var Imap = require('node-imap');
 const {simpleParser} = require('mailparser');
 
 import { Client } from "@upstash/qstash";
+import { Redis } from '@upstash/redis';
 
 import { headers } from 'next/headers'
 
@@ -17,12 +18,31 @@ import { FileEsque } from "uploadthing/types";
 
 const client = new Client({ token: process.env.QSTASH_TOKEN as string});
 
+const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL as string,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN as string,
+});
+
 export async function POST(req: Request) {
     const authHeader = headers().get('authorization') || headers().get('Authorization');
     if (!authHeader) {
         return new Response('Unauthorized', {
             status: 401,
             });
+    }
+    const value = await redis.json.get("mail:pipeline:settings", "$");
+    if (!value || !Array.isArray(value) || value.length !== 1) {
+        return Response.json({
+            status: 500,
+            message: "Mail pipeline settings not found"
+        });
+    }
+    const mailPipelineSettings = value[0];
+    if (!(mailPipelineSettings?.setupStatus || !mailPipelineSettings.methods.includes("mail"))) {
+        return Response.json({
+            status: 500,
+            message: "Mail pipeline not setup"
+        });
     }
     const data = await req.json();
     const mailID = data.mailID;
