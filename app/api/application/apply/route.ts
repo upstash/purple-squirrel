@@ -16,6 +16,7 @@ const index = new Index({
 export async function POST(req: NextRequest) {
     const data = await req.json();
     const positionId = data.positionId;
+    const positionName = data.positionName;
 
     const { sessionClaims, userId } = auth()
 
@@ -34,9 +35,10 @@ export async function POST(req: NextRequest) {
     const namespace = index.namespace(positionId)
 
     await namespace.upsert({
-        id: `${userId}_resume`,
+        id: `${userId}_application`,
         data: applicant.resumeInfo.fullText,
         metadata: {
+            method: "ps",
             countryCode: applicant.applicantInfo.countryCode,
             status: "newApply",
             stars: 0,
@@ -47,6 +49,8 @@ export async function POST(req: NextRequest) {
             graduationMonth: applicant.applicantInfo.latestEducation.graduation.month || -1
         },
     });
+
+    await redis.lpush(`applications#${userId}`, `${positionId}#${positionName}`);
 
     return Response.json({ status: 200, message: "Success" });
 }
