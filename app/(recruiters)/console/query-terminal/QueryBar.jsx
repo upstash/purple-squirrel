@@ -172,6 +172,7 @@ export default function QueryBar({
           <div className="flex-initial px-unit-1">
             <Autocomplete
               isRequired
+              isClearable={false}
               placeholder="Position*"
               size="sm"
               radius="md"
