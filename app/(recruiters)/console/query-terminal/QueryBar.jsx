@@ -172,7 +172,6 @@ export default function QueryBar({
           <div className="flex-initial px-unit-1">
             <Autocomplete
               isRequired
-              isClearable={false}
               placeholder="Position*"
               size="sm"
               radius="md"
@@ -180,6 +179,9 @@ export default function QueryBar({
               selectedKey={filter.positionFilter?.id}
               onSelectionChange={(key) => {
                 setFilter((prev) => {
+                  if (!key) {
+                    return { ...prev, positionFilter: null };
+                  }
                   const title = positions.filter((position) => position.id == key)[0].name;
                   return { ...prev, positionFilter: {id: key, title: title} };
                 });
