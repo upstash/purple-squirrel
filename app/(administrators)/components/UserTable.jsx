@@ -32,7 +32,6 @@ const columns = [
 const roleOptions = [
     {name: "All", uid: "All"},
     {name: "User", uid: "user"},
-    {name: "Applicant", uid: "applicant"},
     {name: "Recruiter", uid: "recruiter"},
     {name: "Admin", uid: "admin"},
 ];
@@ -42,7 +41,6 @@ roleSet.delete("All");
 
 const roleColorMap = {
     user: "default",
-    applicant: "primary",
     recruiter: "secondary",
     admin: "danger"
 };
@@ -401,11 +399,7 @@ export default function Users({
                           setUsers((prev) => {
                               return prev.map((u) => {
                                   if (selectedUserKeys === "all" || selectedUserKeys.has(u.id)) {
-                                      if (chosenRole === "applicant") {
-                                        return {...u, publicMetadata: {...u.publicMetadata, role: chosenRole, complete: false}};
-                                      } else {
-                                        return {...u, publicMetadata: {...u.publicMetadata, role: chosenRole}};
-                                      }
+                                    return {...u, publicMetadata: {...u.publicMetadata, role: chosenRole}};
                                   }
                                   return u;
                               });
