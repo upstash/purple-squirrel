@@ -131,8 +131,6 @@ export default function QueryBar({
     setLocationSearchText,
     settingsTab,
     setSettingsTab,
-    positionMissing,
-    setPositionMissing,
 }) {
   const itemClasses = {
     base: "py-0 w-full",
@@ -177,8 +175,6 @@ export default function QueryBar({
               placeholder="Position*"
               size="sm"
               radius="md"
-              variant={positionMissing ? "bordered" : "solid"}
-              color={positionMissing ? "danger" : "default"}
               className="w-96 styled-autocomplete"
               selectedKey={filter.positionFilter?.id}
               onSelectionChange={(key) => {
@@ -186,7 +182,6 @@ export default function QueryBar({
                   const title = positions.filter((position) => position.id == key)[0].name;
                   return { ...prev, positionFilter: {id: key, title: title} };
                 });
-                setPositionMissing(false);
               }}
             >
               {positions.map((position) => (
@@ -214,6 +209,7 @@ export default function QueryBar({
                   <SearchOutlinedIcon className="text-2xl" />
                 )
               }
+              isDisabled={tableLoading.status || tags.length === 0 || !filter.positionFilter || !filter.positionFilter.id}
               onPress={async () => {
                 if (tableLoading.status) {
                   return;
@@ -222,7 +218,6 @@ export default function QueryBar({
                   return;
                 }
                 if (!filter.positionFilter || !filter.positionFilter.id) {
-                    setPositionMissing(true);
                     return;
                 }
                 setTableLoading({
