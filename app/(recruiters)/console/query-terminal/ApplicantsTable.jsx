@@ -26,7 +26,6 @@ const columns = [
   {name: "ID", uid: "id", sortable: true},
   {name: "SCORE", uid: "score", sortable: true},
   {name: "NAME", uid: "name", sortable: true},
-  {name: "AGE", uid: "age", sortable: true},
   {name: "POSITION", uid: "position"},
   {name: "LOCATION", uid: "location"},
   {name: "STATUS", uid: "status", sortable: true},
@@ -82,7 +81,7 @@ export default function ApplicantsTable({
   cardIDRef.current = cardState.id;
 
   const headerColumns = React.useMemo(() => {
-    return columns.filter((column) => ["score", "name", "position", "location", "stars", "status", "actions"].includes(column.uid));
+    return columns.filter((column) => ["score", "name", "location", "stars", "status", "actions"].includes(column.uid));
   }, []);
 
   const filteredItems = React.useMemo(() => {
@@ -150,10 +149,6 @@ export default function ApplicantsTable({
             {(applicantStatus === "newApply") ? "new" : applicantStatus}
           </Chip>
         );
-      case "age":
-        return (
-          <p className="text-bold text-sm capitalize">{applicantDoc.age}</p>
-        );
       case "id":
         return (
           <p className="text-bold text-sm capitalize">{applicantID}</p>
@@ -166,7 +161,7 @@ export default function ApplicantsTable({
                 onPress={async () => {
                   if (applicantID === cardIDRef.current) {
                     if (applicantDoc && applicantDoc.notes) {
-                      await fetch(`/api/set-applicant-notes`, {
+                      await fetch(`/api/console/set-applicant-notes`, {
                         method: "POST",
                         headers: {
                           "Content-Type": "application/json",
@@ -177,7 +172,7 @@ export default function ApplicantsTable({
                     setCardState((prev) => ({...prev, display: false}));
                   }
                   setTableLoading(() => {return {status: true, color: "danger", text: "Deleting Applicant..."};});
-                  await fetch(`/api/delete-applicants`, {
+                  await fetch(`/api/console/delete-applicants`, {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json",
@@ -216,7 +211,7 @@ export default function ApplicantsTable({
   const handleRowAction = React.useCallback(async (key) => {
     const applicant = applicants.find((applicant) => applicant.id === key);
     if (cardState.doc && cardState.doc.notes) {
-      await fetch(`/api/set-applicant-notes`, {
+      await fetch(`/api/console/set-applicant-notes`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -240,7 +235,7 @@ export default function ApplicantsTable({
                 if (selectedKeys === "all" || selectedKeys.has(cardIDRef.current)) {
                   const cardApplicant = applicants.find((applicant) => applicant.id === cardIDRef.current);
                   if (cardApplicant.doc && cardApplicant.doc.notes) {
-                    await fetch(`/api/set-applicant-notes`, {
+                    await fetch(`/api/console/set-applicant-notes`, {
                       method: "POST",
                       headers: {
                         "Content-Type": "application/json",
@@ -251,7 +246,7 @@ export default function ApplicantsTable({
                   setCardState((prev) => ({...prev, display: false}));
                 }
                 setTableLoading((prev) => {return {status: true, color: "danger", text: "Deleting Selected Applicants..."};});
-                await fetch(`/api/delete-applicants`, {
+                await fetch(`/api/console/delete-applicants`, {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
@@ -297,14 +292,27 @@ export default function ApplicantsTable({
                           newSelectedKeys = [...selectedKeys];
                         }
 
-                        await fetch(`/api/set-multiple-applicant-status`, {
+                        const res = await fetch(`/api/console/update-applicants-metadata`, {
                             method: "POST",
                             headers: {
                               "Content-Type": "application/json",
                             },
-                            body: JSON.stringify({ids: newSelectedKeys, status: newKey}),
+                            body: JSON.stringify({applicants: applicants.filter(
+                              (applicant) => newSelectedKeys.includes(applicant.id)
+                            ).map(
+                              (applicant) => ({id: applicant.id, positionId: applicant.applicantDoc.positionId, metadata: {
+                                countryCode: applicant.applicantDoc.countryCode,
+                                stars: applicant.applicantDoc.stars,
+                                status: newKey,
+                                notes: applicant.applicantDoc.notes,
+                                yoe: applicant.applicantDoc.yoe,
+                            }})
+                            )}),
                           });
-                        
+                        if (!res.ok) {
+                            alert("Failed to update applicant status.");
+                            return;
+                        }
                         setApplicants((prev) => {
                             return prev.map((triplet) => {
                               if (newSelectedKeys.includes(triplet.id)) {
