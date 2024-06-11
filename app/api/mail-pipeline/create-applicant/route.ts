@@ -2,7 +2,7 @@ import { Redis } from '@upstash/redis';
 import { Index } from "@upstash/vector";
 import type { NextRequest } from 'next/server';
 import OpenAI from "openai";
-import type { Applicant } from '@/types/types';
+import type { Applicant, ApplicationMetadata } from '@/types/types';
 import { headers } from 'next/headers'
 import BASE_URL from '@/app/utils/baseURL';
 import { locationLookup } from "@/app/utils/locations";
@@ -42,46 +42,40 @@ You will give nothing but the JSON like below:
 {
     "basicInfo": {
         "fullName": <full-name>,
-        "age": <age>,
-        "university": <university>,
         "email": <email>,
         "phone": <phone>,
         "websiteUrl": <website-url>,
         "linkedinUrl": <linkedin-url>,
-        "githubUrl": <github-url>
+        "githubUrl": <github-url>,
+        "cover": <cover>
     },
     "manualFilters": {
         "yoe": <yoe>,
         "position": <position>,
-        "country": <country>,
-        "highestDegree": <highest-degree>,
-        "degreeSubject": <degree-subject>,
-        "graduationYear": <graduation-year>,
-        "graduationMonth": <graduation-month>
+        "countryCode": <country-code>
     }
 }
 Some information can be taken from the email information along with the resume.
-All the values are strings except age, yoe, graduation-year and graduation-month which are integers.
+All the values are strings except yoe which is an integer.
 If the information is not available in the text, put null.
 Below are information about the key value pairs.
 
 "basicInfo" is an object consisting of basic information about the applicant. You can format the information when you put them here with correct capitalization.
 "fullName", "age", "email", "phone", "websiteUrl", "linkedinUrl", "githubUrl" are self explanatory.
-"university" is the latest university that the applicant got their degree in.
+"cover" is the cover letter/note or any statement of intention from the applicant, it must be taken from the MAIL_BODY if applicable.
 
 "manualFilters" are critical information that the applicant will be filtered on.
 "yoe" is the years of experience of the applicant in an industrial sense. For example: work experience and research experience should be counted but personal hobby projects or education should not be counted. If the information is already presented it in the resume take it, otherwise calculate yourself.
 "position" is the position the applicant is applying to such as Senior Software Engineer. If it exists in the MAIL_SUBJECT, take it directly from there. If not, you can put the latest or the best describing position.
-"countryCode" is the Alpha-2 code of the country in which the applicant lives, you can guess it based on the resume. Do not put more than one country code since it will be exact matched.
-"highestDegree" is highest degree applicant achieved or pursuing. It can be "Unknown", "No Degree", "Associate's", "Bachelor's", "Master's" or "Doctoral".
-"degreeSubject" is the subject of the highest degree such as Computer Science.
-"graduationYear" is the year the applicant graduated or will graduate.
-"graduationMonth" is the month the applicant graduated or will graduate. It must be an integer between 1 and 12 inclusive representing the month.`;
+"countryCode" is the Alpha-2 code of the country in which the applicant lives, you can guess it based on the resume. Do not put more than one country code since it will be exact matched.`;
 
 const TEST_MESSAGE = `You are a resume parser.
 You will be presented information in the following format:
 MAIL_SUBJECT
 <mail-subject>
+
+MAIL_BODY
+<mail-body>
 
 RESUME_TEXT
 <resume-text>
@@ -90,40 +84,32 @@ You will give nothing but the JSON like below:
 {
     "basicInfo": {
         "fullName": <full-name>,
-        "university": <university>,
         "email": <email>,
         "phone": <phone>,
         "websiteUrl": <website-url>,
         "linkedinUrl": <linkedin-url>,
-        "githubUrl": <github-url>
+        "githubUrl": <github-url>,
+        "cover": <cover>
     },
     "manualFilters": {
         "yoe": <yoe>,
         "position": <position>,
-        "countryCode": <country-code>,
-        "highestDegree": <highest-degree>,
-        "degreeSubject": <degree-subject>,
-        "graduationYear": <graduation-year>,
-        "graduationMonth": <graduation-month>
+        "countryCode": <country-code>
     }
 }
 Some information can be taken from the email information along with the resume.
-All the values are strings except age, yoe, graduation-year and graduation-month which are integers.
+All the values are strings except yoe which is an integer.
 If the information is not available in the text, put null.
 Below are information about the key value pairs.
 
 "basicInfo" is an object consisting of basic information about the applicant. You can format the information when you put them here with correct capitalization.
 "fullName", "age", "email", "phone", "websiteUrl", "linkedinUrl", "githubUrl" are self explanatory.
-"university" is the latest university that the applicant got their degree in.
+"cover" is the cover letter/note or any statement of intention from the applicant, it must be taken from the MAIL_BODY if applicable.
 
 "manualFilters" are critical information that the applicant will be filtered on.
 "yoe" is the years of experience of the applicant in an industrial sense. For example: work experience and research experience should be counted but personal hobby projects or education should not be counted. If the information is already presented it in the resume take it, otherwise calculate yourself.
 "position" is the position the applicant is applying to such as Senior Software Engineer. If it exists in the MAIL_SUBJECT, take it directly from there. If not, you can put the latest or the best describing position.
-"countryCode" is the Alpha-2 code of the country in which the applicant lives, you can guess it based on the resume. Do not put more than one country code since it will be exact matched.
-"highestDegree" is highest degree applicant achieved or pursuing. It can be "Unknown", "No Degree", "Associate's", "Bachelor's", "Master's" or "Doctoral".
-"degreeSubject" is the subject of the highest degree such as Computer Science.
-"graduationYear" is the year the applicant graduated or will graduate.
-"graduationMonth" is the month the applicant graduated or will graduate. It must be an integer between 1 and 12 inclusive representing the month.`;
+"countryCode" is the Alpha-2 code of the country in which the applicant lives, you can guess it based on the resume. Do not put more than one country code since it will be exact matched.`;
 
 function positionMatch(position: string, positions: any) {
     const trimmedPosition = position.toLowerCase().trim();
@@ -167,30 +153,17 @@ function mailDataToApplicant(mailData: any, parsedMailData: any, positions: any,
     let yoe;
     let position;
     let countryCode;
-    let highestDegree;
-    let degreeSubject;
-    let graduationYear;
-    let graduationMonth;
     if (parsedMailData.hasOwnProperty("manualFilters")) {
         yoe = parsedMailData.manualFilters.hasOwnProperty("yoe") ? parsedMailData.manualFilters.yoe : null;
         position = parsedMailData.manualFilters.hasOwnProperty("position") ? parsedMailData.manualFilters.position : null;
         countryCode = parsedMailData.manualFilters.hasOwnProperty("countryCode") ? parsedMailData.manualFilters.countryCode : null;
-        highestDegree = parsedMailData.manualFilters.hasOwnProperty("highestDegree") ? parsedMailData.manualFilters.highestDegree : null;
-        degreeSubject = parsedMailData.manualFilters.hasOwnProperty("degreeSubject") ? parsedMailData.manualFilters.degreeSubject : null;
-        graduationYear = parsedMailData.manualFilters.hasOwnProperty("graduationYear") ? parsedMailData.manualFilters.graduationYear : null;
-        graduationMonth = parsedMailData.manualFilters.hasOwnProperty("graduationMonth") ? parsedMailData.manualFilters.graduationMonth : null;
     } else {
         yoe = null;
         position = null;
         countryCode = null;
-        highestDegree = null;
-        degreeSubject = null;
-        graduationYear = null;
-        graduationMonth = null;
     }
     const fullName = parsedMailData.basicInfo.hasOwnProperty("fullName") ? parsedMailData.basicInfo.fullName : null;
-    const age = parsedMailData.basicInfo.hasOwnProperty("age") ? parsedMailData.basicInfo.age : null;
-    const university = parsedMailData.basicInfo.hasOwnProperty("university") ? parsedMailData.basicInfo.university : null;
+    const cover = parsedMailData.basicInfo.hasOwnProperty("cover") ? parsedMailData.basicInfo.cover : null;
     const email = parsedMailData.basicInfo.hasOwnProperty("email") ? parsedMailData.basicInfo.email : null;
     const phone = parsedMailData.basicInfo.hasOwnProperty("phone") ? parsedMailData.basicInfo.phone : null;
     const websiteUrl = parsedMailData.basicInfo.hasOwnProperty("websiteUrl") ? parsedMailData.basicInfo.websiteUrl : null;
@@ -202,29 +175,19 @@ function mailDataToApplicant(mailData: any, parsedMailData: any, positions: any,
         return { applicant: null, fullResumeText: null, mapStatus: false };
     }
     const applicant: Applicant = {
-        "id": null,
         "applicantInfo": {
             "name": fullName,
-            "yoe": yoe,
+            "cover": cover,
             "contact": {
                 "email": email,
                 "phone": phone,
-            },
-            "countryCode": (countryCode && typeof countryCode === "string") ? countryCodeMatch(countryCode) : "unknown",
-            "latestEducation": {
-                "degree": (["Unknown", "No Degree", "Associate's", "Bachelor's", "Master's", "Doctoral"].includes(highestDegree)) ? highestDegree : "Unknown",
-                "subject": degreeSubject,
-                "university": university,
-                "graduation": {
-                    "month": graduationMonth,
-                    "year": graduationYear
-                }
             },
             "urls": {
                 "website": websiteUrl,
                 "linkedin": linkedinUrl,
                 "github": githubUrl
-            }
+            },
+            "notes": ""
         },
         "resumeInfo": {
             "uploadthing": {
@@ -234,7 +197,13 @@ function mailDataToApplicant(mailData: any, parsedMailData: any, positions: any,
             "fullText": mailData.resumeText,
         }
     };
-    return { positionId: (position ? positionMatch(position, positions) : 1) , applicant: applicant, fullResumeText: mailData.resumeText, mapStatus: true };
+    const applicationMetadata: ApplicationMetadata = {
+        "countryCode": (countryCode && typeof countryCode === "string") ? countryCodeMatch(countryCode) : "unknown",
+        "status": "newApply",
+        "stars": 0,
+        "yoe": yoe || -1
+    };
+    return { positionId: (position ? positionMatch(position, positions) : 1) , applicant: applicant, applicationMetadata: applicationMetadata ,fullResumeText: mailData.resumeText, mapStatus: true };
 }
 
 export async function POST(req: NextRequest) {
@@ -262,7 +231,7 @@ export async function POST(req: NextRequest) {
     console.log('PIPELINE: Fetching OpenAI Parsing Response');
                                 
     const prodUserMessage = `MAIL_SUBJECT\n${mailData.mailSubject}\n\nMAIL_FROM\n${mailData.mailFrom}\n\nMAIL_BODY\n${mailData.mailBody}\n\nRESUME_TEXT\n${mailData.resumeText}`;
-    const testUserMessage = `MAIL_SUBJECT\n${mailData.mailSubject}\n\nRESUME_TEXT\n${mailData.resumeText}`;
+    const testUserMessage = `MAIL_SUBJECT\n${mailData.mailSubject}\n\nMAIL_BODY\n${mailData.mailBody}\n\nRESUME_TEXT\n${mailData.resumeText}`;
     const test_mode = true;
     let systemMessage;
     let userMessage;
@@ -319,6 +288,15 @@ export async function POST(req: NextRequest) {
         return;
     }
 
+    console.log('PIPELINE: Fetching OpenAI Embedding Response');
+    const resumeEmbeddingResponse = await openai.embeddings.create({
+        model: "text-embedding-3-small",
+        input: fullResumeText,
+        encoding_format: "float",
+    });
+
+    const resumeEmbedding = resumeEmbeddingResponse.data[0].embedding;
+
     let applicantID = await redis.lpop("free:ids");
     if (!applicantID) {
         applicantID = await redis.incr("applicant:id:generator");
@@ -328,22 +306,12 @@ export async function POST(req: NextRequest) {
         return Response.json({ status: 500, message: "Applicant ID Collusion" });
     }
 
-    const namespace = index.namespace(positionId)
+    const namespace = index.namespace(`${positionId}`)
 
     await namespace.upsert({
         id: `${applicantID}_application`,
-        data: fullResumeText,
-        metadata: {
-            method: "mail",
-            countryCode: applicant.applicantInfo.countryCode,
-            status: "newApply",
-            stars: 0,
-            notes: "",
-            yoe: applicant.applicantInfo.yoe || -1,
-            highestDegree: applicant.applicantInfo.latestEducation?.degree,
-            graduationYear: applicant.applicantInfo.latestEducation?.graduation?.year || -1,
-            graduationMonth: applicant.applicantInfo.latestEducation?.graduation?.month || -1
-        },
+        vector: resumeEmbedding,
+        metadata: mapResult.applicationMetadata,
     });
     
     await redis.json.set(`applicant#${applicantID}`, "$", JSON.stringify(applicant));
