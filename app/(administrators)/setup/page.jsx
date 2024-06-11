@@ -162,7 +162,7 @@ export default function Page() {
                                     <div className="flex flex-col gap-3 p-6 bg-default-50 rounded-medium border-1">
                                         <div className="flex flex-col gap-2 py-2">
                                             <h2 className="text-3xl text-center text-default-900">Your setup is complete!</h2>
-                                            <h2 className="text-lg text-center text-default-600">Applicants from unread mails will appear after two minutes.</h2>
+                                            <h2 className="text-lg text-center text-default-600">Applicants from unread mails will appear shortly.</h2>
                                         </div>
                                         <div className="flex flex-col mt-2 gap-2">
                                             <Button size="lg" variant="solid" color="secondary" className="text-large" as={Link} href="/console" startContent={<TerminalOutlinedIcon />}>Recruiter Console</Button>
