@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
         await queue.upsert({
             parallelism: 2,
         })
+        console.log(`${BASE_URL}/api/mail-pipeline/search-unseen`);
 
         await client.publishJSON({
             url: `${BASE_URL}/api/mail-pipeline/search-unseen`,
