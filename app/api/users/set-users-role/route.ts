@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
             const res = await clerkClient.users.updateUser(
                 id,
                 {
-                  publicMetadata: (role === "user" ? {} : (role === "applicant" ? {role: role, complete: false} : { role: role })),
+                  publicMetadata: (role === "user" ? {} : { role: role }),
                 }
               );
         }));

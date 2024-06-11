@@ -15,11 +15,7 @@ export async function POST(req: NextRequest) {
 
     const authRole = sessionClaims?.metadata?.role;
 
-    if (authRole && (authRole !== "admin")) {
-        return Response.json({status: 401, message: "Not Authorized" });
-    }
-
-    if (!authRole && (role !== "applicant" || id !== userId)) {
+    if (!authRole || (authRole !== "admin")) {
         return Response.json({status: 401, message: "Not Authorized" });
     }
     
@@ -27,7 +23,7 @@ export async function POST(req: NextRequest) {
         const res = await clerkClient.users.updateUser(
           id,
           {
-            publicMetadata: (role === "user" ? {} : (role === "applicant" ? {role: role, complete: false} : { role: role })),
+            publicMetadata: (role === "user" ? {} : { role: role }),
           }
         );
         return Response.json({status: 200, message: "Success" });
