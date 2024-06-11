@@ -47,6 +47,8 @@ export default function QueryTerminal({
   setLocationSearchText,
   settingsTab,
   setSettingsTab,
+  positionMissing,
+  setPositionMissing,
   }) {
     return (
       <div className="flex flex-col h-full">
@@ -81,6 +83,8 @@ export default function QueryTerminal({
                 setLocationSearchText={setLocationSearchText}
                 settingsTab={settingsTab}
                 setSettingsTab={setSettingsTab}
+                positionMissing={positionMissing}
+                setPositionMissing={setPositionMissing}
           />
         </div>
         <div className="flex-auto flex h-full">

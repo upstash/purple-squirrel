@@ -74,6 +74,8 @@ export default function Page() {
 
     const [settingsTab, setSettingsTab] = React.useState("filters");
 
+    const [positionMissing, setPositionMissing] = React.useState(false);
+
     useEffect(() => {
       fetch('/api/settings/get-search-settings')
         .then((res) => res.json())
@@ -190,6 +192,8 @@ export default function Page() {
                                                   setLocationSearchText={setLocationSearchText}
                                                   settingsTab={settingsTab}
                                                   setSettingsTab={setSettingsTab}
+                                                  positionMissing={positionMissing}
+                                                  setPositionMissing={setPositionMissing}
                                                 />
             : ((activeTab === "recent-queries") ? <RecentQueries 
                 recentQueriesState={recentQueriesState}
