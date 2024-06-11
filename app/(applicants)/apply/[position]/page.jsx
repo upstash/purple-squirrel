@@ -35,13 +35,19 @@ export default function Page({ params }) {
   const [position , setPosition] = useState("");
 
   useEffect(() => {
-    fetch('/api/positions/get-position-by-id', {
+    const res = fetch('/api/positions/get-position-by-id', {
         method: 'POST',
         body: JSON.stringify({id: parseInt(params.position)}),
-    }).then(res => res.json())
-    .then(data => {
-        setPosition(data.name);
     })
+    if (!res.ok) {
+      if (res.message) {
+        window.location.href = `/unavailable?message=${res.message}`;
+      } else {
+        window.location.href = "/unavailable?message=error";
+      }
+    }
+    const data = res.json();
+    setPosition(data.name);
   }, [setPosition, params.position])
 
   const formComplete = phoneNumber && experience && location && resume;
