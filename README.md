@@ -16,7 +16,7 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
   3. Fill the environment variables as described in the next steps.
 </details>
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyunusemreozdemir%2Fpurple-squirrel&env=UPSTASH_REDIS_REST_URL,UPSTASH_REDIS_REST_TOKEN,UPSTASH_VECTOR_REST_URL,UPSTASH_VECTOR_REST_TOKEN,QSTASH_URL,QSTASH_TOKEN,IMAP_USERNAME,IMAP_PASSWORD,IMAP_HOST,IMAP_PORT,UPLOADTHING_SECRET,UPLOADTHING_APP_ID,NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY,NEXT_PUBLIC_CLERK_SIGN_IN_URL,NEXT_PUBLIC_CLERK_SIGN_UP_URL,OPENAI_API_KEY,BASIC_AUTH_PASSWORD)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyunusemreozdemir%2Fpurple-squirrel&env=UPSTASH_REDIS_REST_URL,UPSTASH_REDIS_REST_TOKEN,UPSTASH_VECTOR_REST_URL,UPSTASH_VECTOR_REST_TOKEN,QSTASH_URL,QSTASH_TOKEN,IMAP_USERNAME,IMAP_PASSWORD,IMAP_HOST,IMAP_PORT,UPLOADTHING_SECRET,UPLOADTHING_APP_ID,NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY,NEXT_PUBLIC_CLERK_SIGN_IN_URL,NEXT_PUBLIC_CLERK_SIGN_UP_URL,OPENAI_API_KEY,BASIC_AUTH_PASSWORD,NEXT_PUBLIC_URL)
 
 <details>
   <summary>Step 2: Connect your mailbox</summary>
@@ -138,7 +138,15 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
      
 </details>
 
-→ Step 7: Click deploy & visit your site, it will guide you through the rest of your setup!
+<details>
+  <summary>Step 7: Set URL and Basic Auth Password</summary>
+
+  1. Fill the following environment variables in Vercel:
+     * NEXT_PUBLIC_URL: URL of your application (e.g. purple-squirrel.vercel.app)
+     * BASIC_AUTH_PASSWORD: Any password of your choice, to protect scheduled routes
+</details>
+
+→ Step 8: Click deploy & visit your site, it will guide you through the rest of your setup!
 
 ## Stack
 - DB: [Upstash Redis](https://upstash.com)
