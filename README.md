@@ -93,9 +93,18 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
 <details>
   <summary>Step 6: Set up Clerk</summary>
 
-  1. Click the button below.
-  2. Connect your GitHub account & create a Git repository as described.
-  3. Fill the environment variables as described in the next steps.
+  1. Sign in to Clerk and create an application.
+  2. Select a project name and your preferred sign in options.
+  3. Fill the following environment variables in Vercel, which can be found and copied in the API keys tab:
+     * NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+     * CLERK_SECRET_KEY
+     * NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
+     * NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
+       <img width="1078" alt="clerk-keys" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/df42e8b9-cb10-4ba9-ad16-559505a95048">
+  4. **Now we will create ourselves user and make it admin. We will only need to do this once as Recruiter and Admin roles can easily be given in Admin Dashboard inside our application.**
+  5. 
+
+     
 </details>
 
 → Step 7: Click deploy & visit your site, it will guide you through the rest of your setup!
