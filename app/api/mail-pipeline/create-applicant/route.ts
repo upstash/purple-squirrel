@@ -69,6 +69,7 @@ Below are information about the key value pairs.
 "position" is the position the applicant is applying to such as Senior Software Engineer. If it exists in the MAIL_SUBJECT, take it directly from there. If not, you can put the latest or the best describing position.
 "countryCode" is the Alpha-2 code of the country in which the applicant lives, you can guess it based on the resume. Do not put more than one country code since it will be exact matched.`;
 
+
 const TEST_MESSAGE = `You are a resume parser.
 You will be presented information in the following format:
 MAIL_SUBJECT
@@ -232,7 +233,7 @@ export async function POST(req: NextRequest) {
                                 
     const prodUserMessage = `MAIL_SUBJECT\n${mailData.mailSubject}\n\nMAIL_FROM\n${mailData.mailFrom}\n\nMAIL_BODY\n${mailData.mailBody}\n\nRESUME_TEXT\n${mailData.resumeText}`;
     const testUserMessage = `MAIL_SUBJECT\n${mailData.mailSubject}\n\nMAIL_BODY\n${mailData.mailBody}\n\nRESUME_TEXT\n${mailData.resumeText}`;
-    const test_mode = true;
+    const test_mode = false;
     let systemMessage;
     let userMessage;
     if (test_mode) {
