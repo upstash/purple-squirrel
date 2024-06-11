@@ -100,9 +100,28 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
      * CLERK_SECRET_KEY
      * NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
      * NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
-       <img width="1078" alt="clerk-keys" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/df42e8b9-cb10-4ba9-ad16-559505a95048">
-  4. **Now we will create ourselves user and make it admin. We will only need to do this once as Recruiter and Admin roles can easily be given in Admin Dashboard inside our application.**
-  5. 
+       <img width="1078" alt="clerk-keys" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/df42e8b9-cb10-4ba9-ad16-559505a95048"><br/>
+**Now we will create ourselves user and make it admin. We will only need to do this once as Recruiter and Admin roles can easily be given in Admin Dashboard inside our application.**
+  1. Switch to Users tab.
+  2. Click Create user.
+  3. Set up an email and a password, click Create.<br/>
+  <img width="427" alt="clerk-user-create" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/a736a04e-db30-4826-88e7-c3a8ed350798">
+
+  4. Click on the created user to go its page.
+  5. Scroll down to see Metadata section, Edit **public** metadata.<br/>
+  <img width="777" alt="clerk-before" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/ea8576f2-67a4-4c8d-90be-d2f42a1fdc70">
+
+  6. Give admin role as shown below, click Save.<br/>
+  ```json
+{
+	"role": "admin"
+}
+  ```
+  <img width="653" alt="clerk-json" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/27dedf74-fb4a-4643-94cd-613f583b7cc3">
+
+  7. You should see something like this:<br/>
+  <img width="878" alt="clerk-after" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/72d66115-0998-4829-973a-6d4fecce4f0c">
+
 
      
 </details>
