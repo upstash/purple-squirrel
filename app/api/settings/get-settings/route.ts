@@ -13,8 +13,8 @@ export async function GET() {
     
     if (!value || !Array.isArray(value) || value.length !== 1) {
         mailPipelineSettings = {
-            schedulingNum: 10,
-            schedulingInterval: "minutes",
+            schedulingNum: 2,
+            schedulingInterval: "hours",
         };
     } else {
         mailPipelineSettings = value[0];
