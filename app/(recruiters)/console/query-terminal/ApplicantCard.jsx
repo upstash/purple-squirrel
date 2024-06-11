@@ -316,7 +316,7 @@ function InfoCard({
                                         setApplicants((prevApplicants) => {
                                             const updatedApplicants = prevApplicants.map((applicant) => {
                                                 if (applicant.id === applicantID) {
-                                                    return { ...applicant, stars: index + 1 };
+                                                    return { ...applicant, applicantDoc: { ...applicant.applicantDoc, stars: index + 1 } };
                                                 }
                                                 return applicant;
                                             });
@@ -347,7 +347,7 @@ function InfoCard({
                                         setApplicants((prevApplicants) => {
                                             const updatedApplicants = prevApplicants.map((applicant) => {
                                                 if (applicant.id === applicantID) {
-                                                    return { ...applicant, stars: index + 1 };
+                                                    return { ...applicant, applicantDoc: { ...applicant.applicantDoc, stars: index + 1 } };
                                                 }
                                                 return applicant;
                                             });
@@ -369,7 +369,7 @@ function InfoCard({
                             setApplicants((prevApplicants) => {
                                 return prevApplicants.map((applicant) => {
                                     if (applicant.id === applicantID) {
-                                        return { ...applicant, notes: value };
+                                        return { ...applicant, applicantDoc: { ...applicant.applicantDoc, notes: value } };
                                     }
                                     return applicant;
                                 });
