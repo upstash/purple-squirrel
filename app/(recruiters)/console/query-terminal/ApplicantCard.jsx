@@ -210,7 +210,7 @@ function InfoCard({
                                         headers: {
                                             "Content-Type": "application/json",
                                         },
-                                        body: JSON.stringify({ids: [{id: applicantID, positionId: applicantPositionId}]}),
+                                        body: JSON.stringify({applicants: [{id: applicantID, positionId: applicantPositionId}]}),
                                         });
                                         if (cardState.doc && cardState.doc.notes) {
                                             await fetch(`/api/console/set-applicant-notes`, {
