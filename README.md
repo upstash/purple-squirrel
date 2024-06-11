@@ -29,11 +29,11 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
 → Step 7: Visit your site, it will guide you through the rest of your setup!
 
 ## Stack
-- DB: Upstash Redis
-- VectorDB: Upstash Vector
-- Scheduling & Serverless Function Orchestration: Upstash QStash
-- App logic: Next.js
-- Deployment: Vercel
-- Auth: Clerk
-- File Storage: uploadthing
-- LLM & Embeddings: OpenAI
+- DB: [Upstash Redis](https://upstash.com)
+- VectorDB: [Upstash Vector](https://upstash.com)
+- Scheduling & Serverless Function Orchestration: [Upstash QStash](https://upstash.com)
+- App logic: [Next.js](https://nextjs.org)
+- Deployment: [Vercel](https://vercel.com)
+- Auth: [Clerk](https://clerk.com)
+- File Storage: [uploadthing](https://uploadthing.com)
+- LLM & Embedding Models: [OpenAI](https://openai.com)
