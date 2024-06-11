@@ -37,7 +37,7 @@ const openai = new OpenAI({
 });
 
 async function flashRank(data: any, authHeader: any) {
-    const flashRankResponse = await fetch(`${BASE_URL}/api/flash-rank`, {
+    const flashRankResponse = await fetch(`${BASE_URL}/api/query/flash-rank`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
