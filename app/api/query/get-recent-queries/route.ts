@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis';
+import { auth } from "@clerk/nextjs/server"
 
 const redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL as string,
@@ -6,7 +7,8 @@ const redis = new Redis({
 });
 
 export async function GET() {
-    const queries = await redis.lrange("recent:queries", 0, 29); 
+    const { userId } = auth()
+    const queries = await redis.lrange(`recent:queries#${userId}`, 0, 29); 
     return Response.json(queries);
 }
 
