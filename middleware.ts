@@ -2,7 +2,6 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 const isProtectedRoute = createRouteMatcher([
   '/',
-  '/home(.*)'
 ]);
 
 const isAdminRoute = createRouteMatcher([
@@ -12,11 +11,6 @@ const isAdminRoute = createRouteMatcher([
 
 const isRecruiterRoute = createRouteMatcher([
   '/console(.*)',
-]);
-
-const isApplicantRoute = createRouteMatcher([
-  '/apply(.*)',
-  '/profile(.*)',
 ]);
 
 export default clerkMiddleware((auth, req) => {
@@ -31,14 +25,6 @@ export default clerkMiddleware((auth, req) => {
   else if (isRecruiterRoute(req)) {
     const { sessionClaims } = auth();
     if (!(sessionClaims?.metadata?.role === "recruiter" || sessionClaims?.metadata?.role === "admin")) {
-      auth().protect(has => {
-        return false;
-      });
-    }
-  }
-  else if (isApplicantRoute(req)) {
-    const { sessionClaims } = auth();
-    if (!(sessionClaims?.metadata?.role === "applicant")) {
       auth().protect(has => {
         return false;
       });
