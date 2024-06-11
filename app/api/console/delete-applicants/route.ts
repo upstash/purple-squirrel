@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     await Promise.all([
         redis.del(...ids.map((id: string) => `applicant#${id}`)),
         redis.srem("applicant:ids", ...ids),
-        index.delete(ids.map((id: string) => `${id}_resume`)),
+        index.delete(ids.map((id: string) => `${id}_application`)),
     ]);
 
     await redis.rpush("free:ids", ...ids); 
