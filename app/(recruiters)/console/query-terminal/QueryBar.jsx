@@ -76,17 +76,8 @@ const statusColorMap = {
   hired: "success",
 };
 
-const degreeColorMap = {
-  Unknown: "default",
-  "No Degree": "default",
-  "Associate's": "warning",
-  "Bachelor's": "success",
-  "Master's": "primary",
-  Doctoral: "secondary",
-};
 
 const statusArray = Object.keys(statusColorMap);
-const degreeArray = Object.keys(degreeColorMap);
 
 const starsOptions = [
   { name: "No Filter", uid: "No Filter" },
@@ -185,15 +176,16 @@ export default function QueryBar({
               size="sm"
               radius="md"
               className="w-96 styled-autocomplete"
-              selectedKey={filter.positionFilter}
+              selectedKey={filter.positionFilter?.id}
               onSelectionChange={(key) => {
                 setFilter((prev) => {
-                  return { ...prev, positionFilter: key };
+                  const title = positions.filter((position) => position.id == key)[0].name;
+                  return { ...prev, positionFilter: {id: key, title: title} };
                 });
               }}
             >
               {positions.map((position) => (
-                <AutocompleteItem key={position.name} value={position.name}>
+                <AutocompleteItem key={position.id} value={position.id}>
                   {position.name}
                 </AutocompleteItem>
               ))}
@@ -224,7 +216,7 @@ export default function QueryBar({
                 if (tags.length === 0) {
                   return;
                 }
-                if (!filter.positionFilter) {
+                if (!filter.positionFilter || !filter.positionFilter.id) {
                     return;
                 }
                 setTableLoading({
@@ -235,6 +227,8 @@ export default function QueryBar({
                 try {
                   const data = {
                     tags: tags,
+                    positionId: filter.positionFilter.id,
+                    positionTitle: filter.positionFilter.title,
                     filter: filterCoder(filter),
                     searchSettings: searchSettings,
                     rankType: searchSettings.flash ? "flash" : "deep",
@@ -252,8 +246,8 @@ export default function QueryBar({
                   const [rankResponse, redisResponse] = await Promise.all([
                     fetch(
                       searchSettings.flash
-                        ? "/api/flash-rank"
-                        : "/api/deep-rank",
+                        ? "/api/query/flash-rank"
+                        : "/api/query/deep-rank",
                       {
                         method: "POST",
                         headers: {
@@ -262,7 +256,7 @@ export default function QueryBar({
                         body: JSON.stringify(data),
                       }
                     ),
-                    fetch("/api/push-recent-query", {
+                    fetch("/api/query/push-recent-query", {
                       method: "POST",
                       headers: {
                         "Content-Type": "application/json",
@@ -290,7 +284,7 @@ export default function QueryBar({
                       });
                     } else {
                       if (cardState.doc && cardState.doc.notes) {
-                        await fetch(`/api/set-applicant-notes`, {
+                        await fetch(`/api/console/set-applicant-notes`, {
                           method: "POST",
                           headers: {
                             "Content-Type": "application/json",
@@ -342,7 +336,7 @@ export default function QueryBar({
                                             }
                                             const queryID = uuidv4();
                                             setSavedQueriesState((prev) => {return {...prev, savedQueries: [{id: queryID, query: tags, filter: filter}, ...prev.savedQueries]};});
-                                            await fetch("/api/save-query", {
+                                            await fetch("/api/query/save-query", {
                                                 method: "POST",
                                                 headers: {
                                                     "Content-Type": "application/json"
@@ -368,7 +362,7 @@ export default function QueryBar({
               onOpenChange={async (open) => {
                 setSettingsModalOpen(open);
                 if (!open) {
-                  await fetch("/api/save-search-settings", {
+                  await fetch("/api/settings/save-search-settings", {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json",
@@ -866,333 +860,6 @@ export default function QueryBar({
                             </div>
                           </div>
                         </AccordionItem>
-                        <AccordionItem
-                          key="5"
-                          aria-label="Degree"
-                          classNames={{
-                            subtitle:
-                              filter.degreeFilter.length === 0
-                                ? null
-                                : "text-foreground",
-                          }}
-                          startContent={
-                            <AccountBalanceOutlinedIcon className="text-foreground" />
-                          }
-                          subtitle={
-                            filter.degreeFilter.length === 0
-                              ? "Any"
-                              : `${filter.degreeFilter.length} Selected`
-                          }
-                          title="Degree"
-                        >
-                          <div className="flex flex-col gap-2 items-center">
-                            <div className="flex flex-row gap-2 justify-center">
-                              {["Unknown", "No Degree", "Associate's"].map(
-                                (key) => {
-                                  const noFilter =
-                                    filter.degreeFilter.length === 0;
-                                  const degreeChecked =
-                                    filter.degreeFilter.includes(key);
-                                  console.log(filter.degreeFilter);
-                                  return (
-                                    <button
-                                      key={key}
-                                      onClick={() => {
-                                        if (noFilter) {
-                                          setFilter((prev) => {
-                                            return {
-                                              ...prev,
-                                              degreeFilter: degreeArray.filter(
-                                                (id) => {
-                                                  return id !== key;
-                                                }
-                                              ),
-                                            };
-                                          });
-                                        } else {
-                                          if (degreeChecked) {
-                                            setFilter((prev) => {
-                                              return {
-                                                ...prev,
-                                                degreeFilter:
-                                                  prev.degreeFilter.filter(
-                                                    (id) => {
-                                                      return id !== key;
-                                                    }
-                                                  ),
-                                              };
-                                            });
-                                          } else {
-                                            setFilter((prev) => {
-                                              return {
-                                                ...prev,
-                                                degreeFilter:
-                                                  prev.degreeFilter.length === 5
-                                                    ? []
-                                                    : [
-                                                        ...prev.degreeFilter,
-                                                        key,
-                                                      ],
-                                              };
-                                            });
-                                          }
-                                        }
-                                      }}
-                                    >
-                                      <Chip
-                                        className="capitalize"
-                                        color={
-                                          noFilter || degreeChecked
-                                            ? degreeColorMap[key]
-                                            : "default"
-                                        }
-                                        size="sm"
-                                        variant={
-                                          noFilter || degreeChecked
-                                            ? "solid"
-                                            : "bordered"
-                                        }
-                                      >
-                                        {key}
-                                      </Chip>
-                                    </button>
-                                  );
-                                }
-                              )}
-                            </div>
-                            <div className="flex flex-row gap-2 justify-center">
-                              {["Bachelor's", "Master's", "Doctoral"].map(
-                                (key) => {
-                                  const noFilter =
-                                    filter.degreeFilter.length === 0;
-                                  const degreeChecked =
-                                    filter.degreeFilter.includes(key);
-                                  return (
-                                    <button
-                                      key={key}
-                                      onClick={() => {
-                                        if (noFilter) {
-                                          setFilter((prev) => {
-                                            return {
-                                              ...prev,
-                                              degreeFilter: degreeArray.filter(
-                                                (id) => {
-                                                  return id !== key;
-                                                }
-                                              ),
-                                            };
-                                          });
-                                        } else {
-                                          if (degreeChecked) {
-                                            setFilter((prev) => {
-                                              return {
-                                                ...prev,
-                                                degreeFilter:
-                                                  prev.degreeFilter.filter(
-                                                    (id) => {
-                                                      return id !== key;
-                                                    }
-                                                  ),
-                                              };
-                                            });
-                                          } else {
-                                            setFilter((prev) => {
-                                              return {
-                                                ...prev,
-                                                degreeFilter:
-                                                  prev.degreeFilter.length === 5
-                                                    ? []
-                                                    : [
-                                                        ...prev.degreeFilter,
-                                                        key,
-                                                      ],
-                                              };
-                                            });
-                                          }
-                                        }
-                                      }}
-                                    >
-                                      <Chip
-                                        className="capitalize"
-                                        color={
-                                          noFilter || degreeChecked
-                                            ? degreeColorMap[key]
-                                            : "default"
-                                        }
-                                        size="sm"
-                                        variant={
-                                          noFilter || degreeChecked
-                                            ? "solid"
-                                            : "bordered"
-                                        }
-                                      >
-                                        {key}
-                                      </Chip>
-                                    </button>
-                                  );
-                                }
-                              )}
-                            </div>
-                          </div>
-                        </AccordionItem>
-                        <AccordionItem
-                          key="6"
-                          aria-label="Graduation"
-                          classNames={{
-                            subtitle:
-                              filter.graduationDateFilter.min.year === -1 &&
-                              filter.graduationDateFilter.max.year === -1
-                                ? null
-                                : "text-danger",
-                          }}
-                          startContent={
-                            <SchoolOutlinedIcon className="text-danger" />
-                          }
-                          subtitle={
-                            filter.graduationDateFilter.min.year === -1 &&
-                            filter.graduationDateFilter.max.year === -1
-                              ? "Any"
-                              : `${
-                                  filter.graduationDateFilter.min.year === -1
-                                    ? "Any"
-                                    : filter.graduationDateFilter.min.month ===
-                                      -1
-                                    ? filter.graduationDateFilter.min.year
-                                    : filter.graduationDateFilter.min.month +
-                                      "." +
-                                      filter.graduationDateFilter.min.year
-                                } - ${
-                                  filter.graduationDateFilter.max.year === -1
-                                    ? "Any"
-                                    : filter.graduationDateFilter.max.month ===
-                                      -1
-                                    ? filter.graduationDateFilter.max.year
-                                    : filter.graduationDateFilter.max.month +
-                                      "." +
-                                      filter.graduationDateFilter.max.year
-                                }`
-                          }
-                          title="Graduation"
-                        >
-                          <div className="flex flex-col gap-2 justify-center">
-                            <div className="flex gap-2 items-center justify-center">
-                              <div>Between</div>
-                              <Input
-                                size="sm"
-                                label="Year"
-                                className="w-20"
-                                type="number"
-                                value={
-                                  filter.graduationDateFilter.min.year === -1
-                                    ? null
-                                    : filter.graduationDateFilter.min.year
-                                }
-                                placeholder="Any"
-                                onValueChange={(value) => {
-                                  setFilter((prev) => {
-                                    return {
-                                      ...prev,
-                                      graduationDateFilter: {
-                                        ...prev.graduationDateFilter,
-                                        min: {
-                                          ...prev.graduationDateFilter.min,
-                                          year: value === "" ? -1 : value,
-                                        },
-                                      },
-                                    };
-                                  });
-                                }}
-                              />
-                              <Input
-                                size="sm"
-                                label="Month"
-                                className="w-20"
-                                type="number"
-                                value={
-                                  filter.graduationDateFilter.min.month === -1
-                                    ? null
-                                    : filter.graduationDateFilter.min.month
-                                }
-                                placeholder="Any"
-                                isDisabled={
-                                  filter.graduationDateFilter.min.year === -1
-                                }
-                                onValueChange={(value) => {
-                                  setFilter((prev) => {
-                                    return {
-                                      ...prev,
-                                      graduationDateFilter: {
-                                        ...prev.graduationDateFilter,
-                                        min: {
-                                          ...prev.graduationDateFilter.min,
-                                          month: value === "" ? -1 : value,
-                                        },
-                                      },
-                                    };
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div className="flex gap-2 items-center justify-center">
-                              <div>and</div>
-                              <Input
-                                size="sm"
-                                label="Year"
-                                className="w-20"
-                                type="number"
-                                value={
-                                  filter.graduationDateFilter.max.year === -1
-                                    ? null
-                                    : filter.graduationDateFilter.max.year
-                                }
-                                placeholder="Any"
-                                onValueChange={(value) => {
-                                  setFilter((prev) => {
-                                    return {
-                                      ...prev,
-                                      graduationDateFilter: {
-                                        ...prev.graduationDateFilter,
-                                        max: {
-                                          ...prev.graduationDateFilter.max,
-                                          year: value === "" ? -1 : value,
-                                        },
-                                      },
-                                    };
-                                  });
-                                }}
-                              />
-                              <Input
-                                size="sm"
-                                label="Month"
-                                className="w-20"
-                                type="number"
-                                value={
-                                  filter.graduationDateFilter.max.month === -1
-                                    ? null
-                                    : filter.graduationDateFilter.max.month
-                                }
-                                placeholder="Any"
-                                isDisabled={
-                                  filter.graduationDateFilter.max.year === -1
-                                }
-                                onValueChange={(value) => {
-                                  setFilter((prev) => {
-                                    return {
-                                      ...prev,
-                                      graduationDateFilter: {
-                                        ...prev.graduationDateFilter,
-                                        max: {
-                                          ...prev.graduationDateFilter.max,
-                                          month: value === "" ? -1 : value,
-                                        },
-                                      },
-                                    };
-                                  });
-                                }}
-                              />
-                            </div>
-                          </div>
-                        </AccordionItem>
                       </Accordion>
                     ) : (
                       <div className="flex flex-col gap-3 w-[25vw] bg-content1 shadow-medium rounded-medium p-4">
@@ -1212,7 +879,7 @@ export default function QueryBar({
                               )
                             }
                             onValueChange={async (value) => {
-                              await fetch("/api/save-search-settings", {
+                              await fetch("/api/settings/save-search-settings", {
                                 method: "POST",
                                 headers: {
                                   "Content-Type": "application/json",
@@ -1299,15 +966,11 @@ export default function QueryBar({
       <div
         className={
           tags.length === 0 &&
-          !filter.positionFilter &&
           filter.countryCodeFilter.length === 0 &&
           filter.statusFilter.length === 0 &&
           filter.starsFilter === -1 &&
           filter.yoeFilter.min === -1 &&
-          filter.yoeFilter.max === -1 &&
-          filter.degreeFilter.length === 0 &&
-          filter.graduationDateFilter.min.year === -1 &&
-          filter.graduationDateFilter.max.year === -1
+          filter.yoeFilter.max === -1
             ? "flex flex-wrap flex-initial gap-y-1"
             : "flex flex-wrap flex-initial gap-y-1 pt-unit-2"
         }
@@ -1333,25 +996,6 @@ export default function QueryBar({
             </div>
           );
         })}
-        { filter.positionFilter && 
-            <div key={uuidv4()} className="px-1">
-                <Chip
-                    color="danger"
-                    size="sm"
-                    variant="dot"
-                    onClose={() => {
-                        setFilter((prev) => {
-                            return {
-                            ...prev,
-                            positionFilter: null,
-                            };
-                        })
-                    }}
-                    >
-                {filter.positionFilter}
-                </Chip>
-            </div>
-        }
         {filter.countryCodeFilter.map((countryCode) => {
           const filterTagID = uuidv4();
           return (
@@ -1434,69 +1078,6 @@ export default function QueryBar({
                 : filter.yoeFilter.max === -1
                 ? `YOE >= ${filter.yoeFilter.min}`
                 : `${filter.yoeFilter.min} <= YOE <= ${filter.yoeFilter.max}`}
-            </Chip>
-          </div>
-        )}
-        {filter.degreeFilter.map((degree) => {
-          const filterTagID = uuidv4();
-          return (
-            <div key={filterTagID} className="px-1">
-              <Chip
-                color="danger"
-                size="sm"
-                variant="dot"
-                onClose={() => {
-                  setFilter((prev) => {
-                    return {
-                      ...prev,
-                      degreeFilter: prev.degreeFilter.filter((id) => {
-                        return id !== degree;
-                      }),
-                    };
-                  });
-                }}
-              >
-                {degree}
-              </Chip>
-            </div>
-          );
-        })}
-        {(filter.graduationDateFilter.min.year !== -1 ||
-          filter.graduationDateFilter.max.year !== -1) && (
-          <div className="px-1">
-            <Chip
-              color="danger"
-              size="sm"
-              variant="dot"
-              onClose={() => {
-                setFilter((prev) => {
-                  return {
-                    ...prev,
-                    graduationDateFilter: {
-                      min: { year: -1, month: -1 },
-                      max: { year: -1, month: -1 },
-                    },
-                  };
-                });
-              }}
-            >
-              {`Graduation: ${
-                filter.graduationDateFilter.min.year === -1
-                  ? "Any"
-                  : filter.graduationDateFilter.min.month === -1
-                  ? filter.graduationDateFilter.min.year
-                  : filter.graduationDateFilter.min.month +
-                    "." +
-                    filter.graduationDateFilter.min.year
-              } - ${
-                filter.graduationDateFilter.max.year === -1
-                  ? "Any"
-                  : filter.graduationDateFilter.max.month === -1
-                  ? filter.graduationDateFilter.max.year
-                  : filter.graduationDateFilter.max.month +
-                    "." +
-                    filter.graduationDateFilter.max.year
-              }`}
             </Chip>
           </div>
         )}
