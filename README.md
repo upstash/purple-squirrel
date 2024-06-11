@@ -2,9 +2,9 @@
 purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
 
 ## Overview
-- [Deploy your own](#deploy-your-own)
-- [Stack](#stack)
-- [Features](#features)
+- [🐿️ Deploy your own](#deploy-your-own)
+- [🥞 Stack](#stack)
+- [🔍 Features](#features)
 
 ## Deploy your own
 <details>
@@ -81,9 +81,12 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
 <details>
   <summary>Step 5: Set OpenAI API key</summary>
 
-  1. Click the button below.
-  2. Connect your GitHub account & create a Git repository as described.
-  3. Fill the environment variables as described in the next steps.
+  1. Go to [OpenAI Platform -> API keys](https://platform.openai.com/api-keys) and login to your account.
+  2. Click Create new secret key.
+  3. Enter a name and click Create secret key.<br/>
+     <img width="506" alt="openai-key" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/e41693b9-e95e-4fd6-8971-f94acc78fbd6">
+  4. Don't forget to copy and save your key. Fill the following environment variable in Vercel:
+     * OPENAI_API_KEY
 </details>
 
 <details>
