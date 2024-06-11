@@ -42,14 +42,14 @@ export default function RecentQueries({
                         </div>
                     );
                 })}
-                { item.filter.positionFilter && 
+                { item.filter.positionFilter?.id && item.filter.positionFilter?.title &&
                     <div key={uuidv4()} className="px-1">
                         <Chip
-                            color="danger"
+                            color="primary"
                             size="sm"
                             variant="dot"
                             >
-                        {item.filter.positionFilter}
+                        {item.filter.positionFilter.title}
                         </Chip>
                     </div>
                 }
@@ -87,23 +87,6 @@ export default function RecentQueries({
                         </Chip>
                     </div>
                 }
-                {item.filter.degreeFilter.map((degree) => {
-                    const filterTagID = uuidv4();
-                    return (
-                        <div key={filterTagID} className="px-1">
-                            <Chip color="danger" size="sm" variant="dot">
-                                {degree}
-                            </Chip>
-                        </div>
-                    );
-                })}
-                {(item.filter.graduationDateFilter.min.year !== -1 || item.filter.graduationDateFilter.max.year !== -1) &&
-                    <div className="px-1">
-                        <Chip color="danger" size="sm" variant="dot">
-                            {`Graduation: ${item.filter.graduationDateFilter.min.year === -1 ? "Any" : (item.filter.graduationDateFilter.min.month === -1 ? item.filter.graduationDateFilter.min.year : item.filter.graduationDateFilter.min.month + "." + item.filter.graduationDateFilter.min.year)} - ${item.filter.graduationDateFilter.max.year === -1 ? "Any" : (item.filter.graduationDateFilter.max.month === -1 ? item.filter.graduationDateFilter.max.year : item.filter.graduationDateFilter.max.month + "." + item.filter.graduationDateFilter.max.year)}`}
-                        </Chip>
-                    </div>
-                }
             </div>
         );
       case "actions":
@@ -113,7 +96,7 @@ export default function RecentQueries({
               <Button isIconOnly size="sm" variant="light"
                 onPress = {async () => {
                     setSavedQueriesState((prev) => {return {...prev, savedQueries: [{id: item.id, query: item.query, filter: item.filter}, ...prev.savedQueries]};});
-                    await fetch("/api/save-query", {
+                    await fetch("/api/query/save-query", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"

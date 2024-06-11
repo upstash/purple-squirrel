@@ -41,17 +41,17 @@ export default function SavedQueries({
                       </div>
                   );
               })}
-              { item.filter.positionFilter && 
-                  <div key={uuidv4()} className="px-1">
-                      <Chip
-                          color="danger"
-                          size="sm"
-                          variant="dot"
-                          >
-                      {item.filter.positionFilter}
-                      </Chip>
-                  </div>
-              }
+              { item.filter.positionFilter?.id && item.filter.positionFilter?.title &&
+                    <div key={uuidv4()} className="px-1">
+                        <Chip
+                            color="primary"
+                            size="sm"
+                            variant="dot"
+                            >
+                        {item.filter.positionFilter.title}
+                        </Chip>
+                    </div>
+                }
               {item.filter.countryCodeFilter.map((countryCode) => {
                   const filterTagID = uuidv4();
                   return (
@@ -86,23 +86,6 @@ export default function SavedQueries({
                       </Chip>
                   </div>
               }
-              {item.filter.degreeFilter.map((degree) => {
-                  const filterTagID = uuidv4();
-                  return (
-                      <div key={filterTagID} className="px-1">
-                          <Chip color="danger" size="sm" variant="dot">
-                              {degree}
-                          </Chip>
-                      </div>
-                  );
-              })}
-              {(item.filter.graduationDateFilter.min.year !== -1 || item.filter.graduationDateFilter.max.year !== -1) &&
-                  <div className="px-1">
-                      <Chip color="danger" size="sm" variant="dot">
-                          {`Graduation: ${item.filter.graduationDateFilter.min.year === -1 ? "Any" : (item.filter.graduationDateFilter.min.month === -1 ? item.filter.graduationDateFilter.min.year : item.filter.graduationDateFilter.min.month + "." + item.filter.graduationDateFilter.min.year)} - ${item.filter.graduationDateFilter.max.year === -1 ? "Any" : (item.filter.graduationDateFilter.max.month === -1 ? item.filter.graduationDateFilter.max.year : item.filter.graduationDateFilter.max.month + "." + item.filter.graduationDateFilter.max.year)}`}
-                      </Chip>
-                  </div>
-              }
           </div>
         );
       case "actions":
@@ -112,7 +95,7 @@ export default function SavedQueries({
               <Button isIconOnly size="sm" variant="light"
                 onPress = {async () => {
                     setSavedQueriesState((prev) => {return {...prev, savedQueries: prev.savedQueries.filter(i => i.id !== item.id)};});
-                    await fetch("/api/delete-query", {
+                    await fetch("/api/query/delete-saved-query", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json"
