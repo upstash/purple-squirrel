@@ -14,13 +14,21 @@ const index = new Index({
 
 export async function POST(req: NextRequest) {
     const data = await req.json();
-    const ids = data.ids;
+    const applicants = data.applicants;
+
+    const ids = applicants.map((applicant: any) => applicant.id);
 
     await Promise.all([
         redis.del(...ids.map((id: string) => `applicant#${id}`)),
         redis.srem("applicant:ids", ...ids),
-        index.delete(ids.map((id: string) => `${id}_application`)),
     ]);
+
+    await Promise.all(applicants.map(async (applicant: any) => {
+        const id: string = applicant.id;
+        const positionId: number = applicant.positionId;
+        const namespace = index.namespace(`${positionId}`);
+        await namespace.delete([`${id}_application`]);
+    }));
 
     await redis.rpush("free:ids", ...ids); 
 

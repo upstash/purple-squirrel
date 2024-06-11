@@ -177,7 +177,7 @@ export default function ApplicantsTable({
                     headers: {
                       "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ids: [applicantID]}),
+                    body: JSON.stringify({applicants: [{id: applicantID, positionId: applicantDoc.positionId}]}),
                   });
 
                   setApplicants((prev) => {return prev.filter((triplet) => triplet.id !== applicantID);});
@@ -251,7 +251,7 @@ export default function ApplicantsTable({
                   headers: {
                     "Content-Type": "application/json",
                   },
-                  body: JSON.stringify({ids: (selectedKeys === "all" ? applicantIDs.map((i) => i.id) : [...selectedKeys])}),
+                  body: JSON.stringify({applicants: (selectedKeys === "all" ? applicants.map((applicant) => ({id: applicant.id, positionId: applicant.applicantDoc.positionId})) : applicants.filter((applicant) => selectedKeys.has(applicant.id)).map((applicant) => ({id: applicant.id, positionId: applicant.applicantDoc.positionId})))}),
                 });
                 setApplicants((prev) => prev.filter((triplet) => (selectedKeys === "all" ? false : !selectedKeys.has(triplet.id))));
                 setSelectedKeys(new Set([]));
