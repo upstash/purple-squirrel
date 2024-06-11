@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     const id = data.id;
     const notes = data.notes;
 
-    await redis.json.set(`applicant#${id}`, "$.recruitmentInfo.notes", `"${notes}"`);
+    await redis.json.set(`applicant#${id}`, "$.applicantInfo.notes", `"${notes}"`);
 
     return Response.json({ status: 200, message: "Success" });
 }
