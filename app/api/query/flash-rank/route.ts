@@ -18,17 +18,18 @@ const index = new Index({
     token: process.env.UPSTASH_VECTOR_REST_TOKEN as string,
 })
 
-async function gatherResults(tagsEmbedding: number[], inverseEmbedding: number[], topK: number, filter: string) {
+async function gatherResults(tagsEmbedding: number[], inverseEmbedding: number[], topK: number, filter: string, positionId: string) {
+    const namespace = index.namespace(positionId)
     let results;
     if (filter === "") {
         results = await Promise.all([
-            index.query({ topK: topK, vector: tagsEmbedding, includeMetadata: false, includeVectors: false }),
-            index.query({ topK: 1, vector: inverseEmbedding, includeMetadata: false, includeVectors: false }),
+            namespace.query({ topK: topK, vector: tagsEmbedding, includeMetadata: true, includeVectors: false }),
+            namespace.query({ topK: 1, vector: inverseEmbedding, includeMetadata: false, includeVectors: false }),
         ]);
     } else {
         results = await Promise.all([
-            index.query({ topK: topK, vector: tagsEmbedding, includeMetadata: false, includeVectors: false, filter: filter }),
-            index.query({ topK: 1, vector: inverseEmbedding, includeMetadata: false, includeVectors: false }),
+            namespace.query({ topK: topK, vector: tagsEmbedding, includeMetadata: true, includeVectors: false, filter: filter }),
+            namespace.query({ topK: 1, vector: inverseEmbedding, includeMetadata: false, includeVectors: false }),
         ]);
     }
     return results;
@@ -38,6 +39,8 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
 
     const tags = data.tags;
+    const positionId = data.positionId;
+    const positionTitle = data.positionTitle;
     const filter = data.filter;
     const embeddingResponse = await openai.embeddings.create({
         model: "text-embedding-3-small",
@@ -49,7 +52,7 @@ export async function POST(req: NextRequest) {
     const topK = (data.rankType === "flash") ? data.searchSettings.flashTopK : data.searchSettings.deepTopK;
 
     const inverseEmbedding = tagsEmbedding.map(function(x) { return x * -1; });
-    const results = await gatherResults(tagsEmbedding, inverseEmbedding, topK, filter);
+    const results = await gatherResults(tagsEmbedding, inverseEmbedding, topK, filter, positionId);
 
     const [directResults, inverseResults] = results;
 
@@ -78,22 +81,20 @@ export async function POST(req: NextRequest) {
         }
         const applicantDoc = {
             name: applicantData[0].applicantInfo.name,
-            position: applicantData[0].applicationInfo.position,
-            status: applicantData[0].recruitmentInfo.status,
-            age: applicantData[0].applicantInfo.age,
-            countryCode: applicantData[0].applicantInfo.countryCode,
-            stars: applicantData[0].recruitmentInfo.stars,
+            cover: applicantData[0].applicantInfo.cover,
+            positionId: positionId,
+            position: positionTitle,
+            status: pair.metadata?.status,
+            countryCode: pair.metadata?.countryCode,
+            stars: pair.metadata?.stars,
             resumeUrl: applicantData[0].resumeInfo.uploadthing.url,
             websiteUrl: applicantData[0].applicantInfo.urls.website,
             linkedinUrl: applicantData[0].applicantInfo.urls.linkedin,
             githubUrl: applicantData[0].applicantInfo.urls.github,
-            notes: applicantData[0].recruitmentInfo.notes,
+            notes: applicantData[0].applicantInfo.notes,
             email: applicantData[0].applicantInfo.contact.email,
             phone: applicantData[0].applicantInfo.contact.phone,
-            yoe: applicantData[0].applicantInfo.yoe,
-            degree: applicantData[0].applicantInfo.latestEducation.degree,
-            subject: applicantData[0].applicantInfo.latestEducation.subject,
-            university: applicantData[0].applicantInfo.latestEducation.university,
+            yoe: pair.metadata?.yoe,
             notesSaved: true,
         };
         if (data.rankType === "flash") {
