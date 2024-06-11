@@ -121,6 +121,18 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
 
   7. You should see something like this:<br/>
   <img width="878" alt="clerk-after" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/72d66115-0998-4829-973a-6d4fecce4f0c">
+  
+  8. Finally, switch to Sessions tab and edit session token.<br/>
+  <img width="1051" alt="clerk-session-before" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/13b6d611-26d3-4872-9321-27f7bc911bbb">
+
+  9. Set it as shown below:<br/>
+  ```json
+{
+	"metadata": "{{user.public_metadata}}"
+}
+  ```
+  <img width="944" alt="clerk-session-after" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/1410bb54-14fd-4716-900c-5eed663594aa">
+
 
 
      
