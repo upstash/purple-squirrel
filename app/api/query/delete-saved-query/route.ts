@@ -1,5 +1,6 @@
 import { Redis } from '@upstash/redis';
 import type { NextRequest } from 'next/server';
+import { auth } from "@clerk/nextjs/server"
 
 const redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL as string,
@@ -7,9 +8,10 @@ const redis = new Redis({
 });
 
 export async function POST(req: NextRequest) {
+    const { userId } = auth()
     const data = await req.json();
 
-    const removed = await redis.lrem("saved:queries", 1, data); 
+    const removed = await redis.lrem(`saved:queries#${userId}`, 1, data); 
 
 
     return Response.json({ status: 200, message: "Success" });
