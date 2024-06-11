@@ -5,6 +5,7 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
 - [🐿️ Deploy your own](#deploy-your-own)
 - [🥞 Stack](#stack)
 - [🔍 Features](#features)
+- [🖥️ Contribution Guide](#contribution-guide)
 
 ## Deploy your own
 <details>
@@ -111,4 +112,6 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
 - UI Components: [NextUI](https://nextui.org)
 
 ## Features
+
+## Contribution Guide
 
