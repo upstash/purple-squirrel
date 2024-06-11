@@ -1,29 +1,19 @@
 export type Applicant = {
-  id: number | null;
-
   applicantInfo: {
     name: string;
-    yoe: number;
+    cover?: string;
     contact: {
       email: string;
       phone: string;
-    }
-    countryCode: string;
-    latestEducation?: {
-      degree?: string;
-      subject?: string;
-      university?: string;
-      graduation?: {
-        month?: number;
-        year?: number;
-      }
     }
     urls?: {
       website?: string;
       linkedin?: string;
       github?: string;
     }
+    notes: string;
   }
+
 
   resumeInfo: {
     uploadthing: {
@@ -34,15 +24,9 @@ export type Applicant = {
   }
 };
 
-export type Application = {
-  applicationInfo: {
-    date: Date;
-    method: "mail" | "ps";
-  }
-  recruitmentInfo: {
-    stars: number | null;
-    notes: string | null;
-    status:
+export type ApplicationMetadata = {
+  countryCode: string;
+  status:
       | "newApply"
       | "screening"
       | "assessment"
@@ -51,21 +35,21 @@ export type Application = {
       | "offer"
       | "onboarding"
       | "hired";
-  }
+  stars: number;
+  yoe: number;
 }
 
+
 export type Filter = {
-  positionFilter: string | null;
+  positionFilter: {
+    id: number;
+    title: string;
+  };
   countryCodeFilter: string[];
   statusFilter: string[];
   starsFilter: number;
   yoeFilter: {
     min: number;
     max: number;
-  };
-  degreeFilter: string[];
-  graduationDateFilter: {
-    min: { year: number, month: number };
-    max: { year: number, month: number };
   };
 };
