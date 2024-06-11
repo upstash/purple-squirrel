@@ -31,16 +31,6 @@ export default function SavedQueries({
       case "query":
         return (
           <div className="flex flex-wrap flex-initial gap-y-2 px-1">
-              {item.query.map((tag, index) => {
-                  const tagID = uuidv4();
-                  return (
-                      <div key={tagID} className="px-1">
-                          <Chip color="secondary" size="sm" variant="dot">
-                              {tag}
-                          </Chip>
-                      </div>
-                  );
-              })}
               { item.filter.positionFilter?.id && item.filter.positionFilter?.title &&
                     <div key={uuidv4()} className="px-1">
                         <Chip
@@ -52,6 +42,16 @@ export default function SavedQueries({
                         </Chip>
                     </div>
                 }
+              {item.query.map((tag, index) => {
+                  const tagID = uuidv4();
+                  return (
+                      <div key={tagID} className="px-1">
+                          <Chip color="secondary" size="sm" variant="dot">
+                              {tag}
+                          </Chip>
+                      </div>
+                  );
+              })}
               {item.filter.countryCodeFilter.map((countryCode) => {
                   const filterTagID = uuidv4();
                   return (
