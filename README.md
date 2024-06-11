@@ -61,26 +61,40 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
       * QSTASH_TOKEN<br/><br/>
         <img width="367" alt="qstash-tokens" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/8811172b-113f-4505-bacc-cba8365e6763">
 
+</details>
 
+<details>
+  <summary>Step 4: Set up uploadthing</summary>
+
+  1. Sign in to uploadthing.
+  2. Click Create a new app.
+  3. Think of a name and select an app default region close to your users.<br/>
+     <img width="376" alt="uploadthing-create" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/5d297e6d-0db5-4a4d-8588-4d383831e9ed">
+
+  4. Fill the following environment variables in Vercel, which can be found and copied in the API Keys tab:
+     * UPLOADTHING_SECRET
+     * UPLOADTHING_APP_ID<br/><br/>
+     <img width="1246" alt="uploadthing-keys" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/24c585e9-367b-43cf-910b-973e3c2495fd">
 
 </details>
 
 <details>
-<summary>Step 4: Set up uploadthing</summary>
+  <summary>Step 5: Set OpenAI API key</summary>
 
+  1. Click the button below.
+  2. Connect your GitHub account & create a Git repository as described.
+  3. Fill the environment variables as described in the next steps.
 </details>
 
 <details>
-<summary>Step 5: Set OpenAI API key</summary>
+  <summary>Step 6: Set up Clerk</summary>
 
+  1. Click the button below.
+  2. Connect your GitHub account & create a Git repository as described.
+  3. Fill the environment variables as described in the next steps.
 </details>
 
-<details>
-<summary>Step 6: Set up Clerk</summary>
-
-</details>
-
-→ Step 7: Visit your site, it will guide you through the rest of your setup!
+→ Step 7: Click deploy & visit your site, it will guide you through the rest of your setup!
 
 ## Stack
 - DB: [Upstash Redis](https://upstash.com)
@@ -91,6 +105,7 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
 - Auth: [Clerk](https://clerk.com)
 - File Storage: [uploadthing](https://uploadthing.com)
 - LLM & Embedding Models: [OpenAI](https://openai.com)
+- UI Components: [NextUI](https://nextui.org)
 
 ## Features
 
