@@ -1,5 +1,6 @@
 'use client';
 
+import { useUser } from "@clerk/clerk-react";
 import React, { useState, useEffect } from 'react';
 import {Tabs, Tab} from "@nextui-org/react";
 import { ThemeSwitcher } from "@/app/components/ThemeSwitcher";
@@ -22,6 +23,8 @@ function getTabColor(tab) {
 }
 
 export default function Page() {
+    const { isSignedIn, user, isLoaded } = useUser();
+
     const [activeTab, setActiveTab] = useState("query-terminal");
 
     const [applicants, setApplicants] = useState([]);
@@ -37,11 +40,6 @@ export default function Page() {
       yoeFilter: {
         min: -1,
         max: -1,
-      },
-      degreeFilter: [],
-      graduationDateFilter: {
-        min: { year: -1, month: -1 },
-        max: { year: -1, month: -1 },
       },
     });
     const [filterModalOpen, setFilterModalOpen] = useState(false);
@@ -69,7 +67,7 @@ export default function Page() {
     });
     const [tablePage, setTablePage] = React.useState(1);
 
-    const [positions, setPositions] = useState([{name: "General Application", status: "open"}]);
+    const [positions, setPositions] = useState([{id: 1, name: "General Application", status: "open"}]);
     const [positionSearchText, setPositionSearchText] = React.useState("");
 
     const [locationSearchText, setLocationSearchText] = React.useState("");
@@ -77,7 +75,7 @@ export default function Page() {
     const [settingsTab, setSettingsTab] = React.useState("filters");
 
     useEffect(() => {
-      fetch('/api/get-search-settings')
+      fetch('/api/settings/get-search-settings')
         .then((res) => res.json())
         .then((data) => {
           setSearchSettings(data);
@@ -87,7 +85,7 @@ export default function Page() {
     }, [setSearchSettings, setTableLoading, setQueryBarLoading]);
 
   useEffect(() => {
-      fetch('/api/get-recent-queries')
+      fetch('/api/query/get-recent-queries')
         .then((res) => res.json())
         .then((data) => {
           setRecentQueriesState({recentQueries: data, loading: false});
@@ -95,7 +93,7 @@ export default function Page() {
     }, [setRecentQueriesState]);
   
   useEffect(() => {
-      fetch('/api/get-saved-queries')
+      fetch('/api/query/get-saved-queries')
         .then((res) => res.json())
         .then((data) => {
           setSavedQueriesState({savedQueries: data, loading: false});
@@ -103,12 +101,18 @@ export default function Page() {
     }, [setSavedQueriesState]);
 
   useEffect(() => {
-      fetch('/api/get-positions')
+      fetch('/api/positions/get-positions')
         .then((res) => res.json())
         .then((data) => {
           setPositions(data);
         })
     }, [setPositions]);
+
+    if (!isLoaded || !user) {
+      return null;
+    }
+
+    const authRole = user.publicMetadata?.role;
   
     return (
         <section className="flex flex-col box-border h-screen">
@@ -133,9 +137,13 @@ export default function Page() {
               </div>
               <div className="flex-1 flex items-center justify-end">
                 <div className="flex gap-2">
-                  <Button isIconOnly color={getTabColor(activeTab)} variant="light" radius="full" size="sm" href="/dashboard" as={Link}>
-                    <AdminPanelSettingsOutlinedIcon />
-                  </Button>
+                  {
+                    authRole === "admin" && (
+                      <Button isIconOnly color={getTabColor(activeTab)} variant="light" radius="full" size="sm" href="/dashboard" as={Link}>
+                        <AdminPanelSettingsOutlinedIcon />
+                      </Button>
+                    )
+                  }
                   <ThemeSwitcher color={getTabColor(activeTab)} />
                 </div>
               </div>
