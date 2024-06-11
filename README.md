@@ -40,27 +40,32 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
   2. Switch to [Redis tab in Console](https://console.upstash.com/redis).
   3. Click Create database.
   4. Think of a name and select a primary region close to your users.<br/>
-     <img width="511" alt="create-redis-database" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/3dea59e2-a910-4bbb-84c0-19007cb2bbf9">
+     <img width="511" alt="create-redis-database" src="https://github.com/upstash/purple-squirrel/assets/47982397/9a8fe2f5-045f-4037-828f-c2ac8e5f6afd">
+
 
   5. Click Next -> Click Create.
   6. Fill the following environment variables in Vercel, which can be found and copied in your database page:
      * UPSTASH_REDIS_REST_URL
      * UPSTASH_REDIS_REST_TOKEN<br/><br/>
-     <img width="431" alt="redis-tokens" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/b78d08e4-c812-4c7c-873d-93cdcc274ce2">
+     <img width="431" alt="redis-tokens" src="https://github.com/upstash/purple-squirrel/assets/47982397/e71410a7-20ae-4fd7-b5ec-66cf52af0820">
+
   7. Switch to [Vector tab in Console](https://console.upstash.com/vector).
   8. Click Create Index.
   9. Think of a name and select a region close to your users, Embedding Model, Dimensions and Metric should be set like below.<br/>
-      <img width="548" alt="Screenshot 2024-06-11 at 16 38 03" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/56cfedf3-969a-4c03-a7fd-49e96d026922">
+      <img width="548" alt="create-index" src="https://github.com/upstash/purple-squirrel/assets/47982397/68bb794b-9f35-4fdf-b9f9-73bbdd97e9b8">
+
   10. Click Next -> Click Create.
   11. Fill the following environment variables in Vercel, which can be found and copied in your index page:
       * UPSTASH_VECTOR_REST_URL: Your endpoint
       * UPSTASH_VECTOR_REST_TOKEN<br/><br/>
-      <img width="971" alt="Screenshot 2024-06-11 at 16 40 48" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/780e6354-421f-467e-a2e3-e107133ab0d3">
+      <img width="971" alt="vector-token" src="https://github.com/upstash/purple-squirrel/assets/47982397/f657dfe7-60ea-4611-91ed-0eafab83aaad">
+
   12. Switch to [QStash tab in Console](https://console.upstash.com/qstash)
   13. Fill the following environment variables in Vercel, which can be found and copied in your QStash page:
       * QSTASH_URL
       * QSTASH_TOKEN<br/><br/>
-        <img width="367" alt="qstash-tokens" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/8811172b-113f-4505-bacc-cba8365e6763">
+        <img width="367" alt="qstash-tokens" src="https://github.com/upstash/purple-squirrel/assets/47982397/a532fc41-1391-47a0-a427-95494d73ef95">
+
 
 </details>
 
@@ -70,12 +75,14 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
   1. Sign in to uploadthing.
   2. Click Create a new app.
   3. Think of a name and select an app default region close to your users.<br/>
-     <img width="376" alt="uploadthing-create" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/5d297e6d-0db5-4a4d-8588-4d383831e9ed">
+     <img width="376" alt="uploadthing-create" src="https://github.com/upstash/purple-squirrel/assets/47982397/5e459d12-05e9-4c02-9ab4-8c53b646f34c">
+
 
   4. Fill the following environment variables in Vercel, which can be found and copied in the API Keys tab:
      * UPLOADTHING_SECRET
      * UPLOADTHING_APP_ID<br/><br/>
-     <img width="1246" alt="uploadthing-keys" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/24c585e9-367b-43cf-910b-973e3c2495fd">
+     <img width="1246" alt="uploadthing-keys" src="https://github.com/upstash/purple-squirrel/assets/47982397/c729d55e-df70-47d8-a9da-12efadcbfc1c">
+
 
 </details>
 
@@ -85,7 +92,8 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
   1. Go to [OpenAI Platform -> API keys](https://platform.openai.com/api-keys) and login to your account.
   2. Click Create new secret key.
   3. Enter a name and click Create secret key.<br/>
-     <img width="506" alt="openai-key" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/e41693b9-e95e-4fd6-8971-f94acc78fbd6">
+     <img width="506" alt="openai-key" src="https://github.com/upstash/purple-squirrel/assets/47982397/59e53965-2edf-4bad-9c3f-143ad148c437">
+
   4. Don't forget to copy and save your key. Fill the following environment variable in Vercel:
      * OPENAI_API_KEY
 </details>
@@ -100,16 +108,19 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
      * CLERK_SECRET_KEY
      * NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
      * NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
-       <img width="1078" alt="clerk-keys" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/df42e8b9-cb10-4ba9-ad16-559505a95048"><br/>
+       <img width="1078" alt="clerk-keys" src="https://github.com/upstash/purple-squirrel/assets/47982397/f0debba9-813c-4ca5-b181-67e9d4f53943">
+
 **Now we will create ourselves user and make it admin. We will only need to do this once as Recruiter and Admin roles can easily be given in Admin Dashboard inside our application.**
   1. Switch to Users tab.
   2. Click Create user.
   3. Set up an email and a password, click Create.<br/>
-  <img width="427" alt="clerk-user-create" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/a736a04e-db30-4826-88e7-c3a8ed350798">
+  <img width="427" alt="clerk-user-create" src="https://github.com/upstash/purple-squirrel/assets/47982397/a1993c97-d210-4662-9081-d1b435753bd0">
+
 
   4. Click on the created user to go its page.
   5. Scroll down to see Metadata section, Edit **public** metadata.<br/>
-  <img width="777" alt="clerk-before" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/ea8576f2-67a4-4c8d-90be-d2f42a1fdc70">
+  <img width="777" alt="clerk-before" src="https://github.com/upstash/purple-squirrel/assets/47982397/3733160f-9e9a-4da6-a7e5-96df159dd3de">
+
 
   6. Give admin role as shown below, click Save.<br/>
   ```json
@@ -117,13 +128,16 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
 	"role": "admin"
 }
   ```
-  <img width="653" alt="clerk-json" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/27dedf74-fb4a-4643-94cd-613f583b7cc3">
+  <img width="653" alt="clerk-json" src="https://github.com/upstash/purple-squirrel/assets/47982397/b10e8d36-6e5d-4a00-a144-b60f8c8a312c">
+
 
   7. You should see something like this:<br/>
-  <img width="878" alt="clerk-after" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/72d66115-0998-4829-973a-6d4fecce4f0c">
+  <img width="878" alt="clerk-after" src="https://github.com/upstash/purple-squirrel/assets/47982397/c5629fbc-fdbd-4279-81df-c1dce4a18e6c">
+
   
   8. Finally, switch to Sessions tab and edit session token.<br/>
-  <img width="1051" alt="clerk-session-before" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/13b6d611-26d3-4872-9321-27f7bc911bbb">
+  <img width="1051" alt="clerk-session-before" src="https://github.com/upstash/purple-squirrel/assets/47982397/67ed8930-a9db-49a9-bf65-715848378c92">
+
 
   9. Set it as shown below:<br/>
   ```json
@@ -131,7 +145,8 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
 	"metadata": "{{user.public_metadata}}"
 }
   ```
-  <img width="944" alt="clerk-session-after" src="https://github.com/yunusemreozdemir/purple-squirrel/assets/47982397/1410bb54-14fd-4716-900c-5eed663594aa">
+  <img width="944" alt="clerk-session-after" src="https://github.com/upstash/purple-squirrel/assets/47982397/6790d612-ac4b-4708-914a-8d722678251f">
+
 
 
 
