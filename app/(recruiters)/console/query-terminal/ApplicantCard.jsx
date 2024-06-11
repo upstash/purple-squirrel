@@ -81,12 +81,11 @@ function InfoCard({
     const applicantScore = Math.round(cardState.score * 100);
     const applicantDoc = cardState.doc;
     const applicantName = applicantDoc.name;
+    const applicantCover = applicantDoc.cover;
+    const applicantPositionId = applicantDoc.positionId;
     const applicantPosition = applicantDoc.position;
     const applicantYOE = applicantDoc.yoe;
     const applicantLocation = locationLookup[applicantDoc.countryCode];
-    const applicantDegree = applicantDoc.degree;
-    const applicantSubject = applicantDoc.subject;
-    const applicantUniversity = applicantDoc.university;
     const applicantEmail = applicantDoc.email;
     const applicantPhone = applicantDoc.phone;
     const applicantResume = applicantDoc.resumeUrl;
@@ -111,7 +110,7 @@ function InfoCard({
             </CardHeader>
             <Divider className="flex-initial"/>
             <CardBody className="flex-auto">
-                <div className="flex flex-col gap-3 h-full">
+                <div className="flex flex-col gap-3 h-full py-1">
                     <div className="flex gap-2">
                         <div className="flex-auto flex flex-col gap-2">
                             <div className="flex gap-2 w-full">
@@ -125,27 +124,6 @@ function InfoCard({
                                     <div className="flex flex-col">
                                         <p className="text-xs text-default-300">Location</p>
                                         <p className="text-small text-bold">{applicantLocation}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex gap-2 items-end w-full">
-                                <div className="flex-inital border-default-200 border-2 rounded-medium py-1.5 px-3">
-                                    <div className="flex flex-col">
-                                        <p className="text-small text-bold">{applicantDegree}</p>
-                                    </div>
-                                </div>
-                                <h1 className="flex-inital">in</h1>
-                                <div className="flex-auto border-default-200 border-2 rounded-medium py-1.5 px-3">
-                                    <div className="flex flex-col">
-                                        <p className="text-small text-bold">{applicantSubject}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex gap-2 items-end w-full">
-                                <h1 className="flex-inital pl-1">from</h1>
-                                <div className="flex-auto border-default-200 border-2 rounded-medium py-1.5 px-3">
-                                    <div className="flex flex-col">
-                                        <p className="text-small text-bold">{applicantUniversity}</p>
                                     </div>
                                 </div>
                             </div>
@@ -165,6 +143,18 @@ function InfoCard({
                                     </div>
                                 </div>
                             </div>
+                            {
+                                applicantCover && applicantCover.length > 0 && (
+                                    <div className="flex gap-2 items-end w-full">
+                                        <div className="flex-auto border-default-200 border-2 rounded-medium py-1 px-3">
+                                            <div className="flex flex-col">
+                                                <p className="text-xs text-default-300">Cover Note</p>
+                                                <p className="text-small text-bold">{applicantCover}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )
+                            }
                         </div>
                         <div className="flex-initial flex flex-col items-center justify-between">
                             <div className="flex-initial flex flex-col items-center gap-2">
@@ -213,17 +203,17 @@ function InfoCard({
                                 }
                             </div>
                             <Tooltip content="Delete Applicant" color={"danger"} delay={400} closeDelay={600}>
-                                <Button isIconOnly color="danger" variant="bordered" size="md"
+                                <Button isIconOnly color="danger" variant="bordered" size="md" className="mt-2"
                                     onPress={async () => {
-                                        await fetch(`/api/delete-applicants`, {
+                                        await fetch(`/api/console/delete-applicants`, {
                                         method: "POST",
                                         headers: {
                                             "Content-Type": "application/json",
                                         },
-                                        body: JSON.stringify({ids: [cardID]}),
+                                        body: JSON.stringify({ids: [applicantID]}),
                                         });
                                         if (cardState.doc && cardState.doc.notes) {
-                                            await fetch(`/api/set-applicant-notes`, {
+                                            await fetch(`/api/console/set-applicant-notes`, {
                                                 method: "POST",
                                                 headers: {
                                                 "Content-Type": "application/json",
@@ -263,18 +253,32 @@ function InfoCard({
                                 className="min-w-0 w-fit"
                                 onSelectionChange={
                                     async (keys) => {
-                                        await fetch(`/api/set-applicant-status`, {
+                                        const res = await fetch(`/api/console/update-applicants-metadata`, {
                                             method: "POST",
                                             headers: {
                                               "Content-Type": "application/json",
                                             },
-                                            body: JSON.stringify({id: cardID, status: Array.from(keys)[0]}),
+                                            body: JSON.stringify({applicants: [{id: applicantID, positionId: applicantPositionId, metadata: {
+                                                countryCode: applicantDoc.countryCode,
+                                                status: Array.from(keys)[0],
+                                                stars: applicantStars,
+                                                notes: applicantNotes,
+                                                yoe: applicantYOE,
+                                            }}]}),
                                           });
-                                        setTableInfo((prevTableInfo) => {
-                                            const updatedTableInfo = { ...prevTableInfo };
-                                            updatedTableInfo[cardID].status = Array.from(keys)[0];
-                                            return updatedTableInfo;
+                                        if (!res.ok) {
+                                            alert("Failed to update applicant status.");
+                                            return;
+                                        }
+                                        setApplicants((prevApplicants) => {
+                                            return prevApplicants.map((applicant) => {
+                                                if (applicant.id === applicantID) {
+                                                    return { ...applicant, applicantDoc: { ...applicant.applicantDoc, status: Array.from(keys)[0] } };
+                                                }
+                                                return applicant;
+                                            });
                                         });
+                                        setCardState((prev) => {return {...prev, doc: {...prev.doc, status: Array.from(keys)[0]}};});
                                     }
                                 }
                             >
@@ -292,34 +296,64 @@ function InfoCard({
                                 (!applicantStars)
                                 ? <Button isIconOnly key={index} variant="light" size="sm"
                                     onPress={async () => {
-                                        await fetch(`/api/set-applicant-stars`, {
+                                        const res = await fetch(`/api/console/update-applicants-metadata`, {
                                             method: "POST",
                                             headers: {
                                               "Content-Type": "application/json",
                                             },
-                                            body: JSON.stringify({id: cardID, stars: index + 1}),
+                                            body: JSON.stringify({applicants: [{id: applicantID, positionId: applicantPositionId, metadata: {
+                                                countryCode: applicantDoc.countryCode,
+                                                status: applicantStatus,
+                                                stars: index + 1,
+                                                notes: applicantNotes,
+                                                yoe: applicantYOE,
+                                            }}]}),
                                           });
-                                        setTableInfo((prevTableInfo) => {
-                                            const updatedTableInfo = { ...prevTableInfo };
-                                            updatedTableInfo[cardID].stars = index + 1;
-                                            return updatedTableInfo;
-                                        })
+                                        if (!res.ok) {
+                                            alert("Failed to update applicant stars.");
+                                            return;
+                                        }
+                                        setApplicants((prevApplicants) => {
+                                            const updatedApplicants = prevApplicants.map((applicant) => {
+                                                if (applicant.id === applicantID) {
+                                                    return { ...applicant, stars: index + 1 };
+                                                }
+                                                return applicant;
+                                            });
+                                            return updatedApplicants;
+                                        });
+                                        setCardState((prev) => {return {...prev, doc: {...prev.doc, stars: index + 1}};});
                                     }}
                                     ><StarBorderOutlinedIcon key={index} className={"text-default"}/></Button>
                                 : <Button isIconOnly key={index} variant="light" size="sm"
                                     onPress={async () => {
-                                        await fetch(`/api/set-applicant-stars`, {
+                                        const res = await fetch(`/api/console/update-applicants-metadata`, {
                                             method: "POST",
                                             headers: {
                                               "Content-Type": "application/json",
                                             },
-                                            body: JSON.stringify({id: cardID, stars: index + 1}),
+                                            body: JSON.stringify({applicants: [{id: applicantID, positionId: applicantPositionId, metadata: {
+                                                countryCode: applicantDoc.countryCode,
+                                                status: applicantStatus,
+                                                stars: index + 1,
+                                                notes: applicantNotes,
+                                                yoe: applicantYOE,
+                                            }}]}),
                                           });
-                                        setTableInfo((prevTableInfo) => {
-                                            const updatedTableInfo = { ...prevTableInfo };
-                                            updatedTableInfo[cardID].stars = index + 1;
-                                            return updatedTableInfo;
-                                        })
+                                        if (!res.ok) {
+                                            alert("Failed to update applicant stars.");
+                                            return;
+                                        }
+                                        setApplicants((prevApplicants) => {
+                                            const updatedApplicants = prevApplicants.map((applicant) => {
+                                                if (applicant.id === applicantID) {
+                                                    return { ...applicant, stars: index + 1 };
+                                                }
+                                                return applicant;
+                                            });
+                                            return updatedApplicants;
+                                        });
+                                        setCardState((prev) => {return {...prev, doc: {...prev.doc, stars: index + 1}};});
                                     }}
                                     ><StarOutlinedIcon key={index} className={(applicantStars > index) ? "text-warning" : "text-default"}/></Button>
                             )}
@@ -380,21 +414,6 @@ function EmptyCard() {
 
                                 </div>
                                 <div className="flex-[10_1_0%] bg-default-100 rounded-medium py-1 px-3 h-10">
-
-                                </div>
-                            </div>
-                            <div className="flex-[1_1_0%] flex gap-2 items-end w-full">
-                                <div className="flex-[2_1_0%] bg-default-100 rounded-medium py-1.5 px-3 h-10">
-
-                                </div>
-                                <div className="flex-[1_1_0%]"></div>
-                                <div className="flex-[4_1_0%] bg-default-100 rounded-medium py-1.5 px-3 h-10">
-
-                                </div>
-                            </div>
-                            <div className="flex-[1_1_0%] flex gap-2 items-end w-full">
-                                <div className="flex-[1_1_0%] pl-1"></div>
-                                <div className="flex-[5_1_0%] bg-default-100 rounded-medium py-1.5 px-3 h-10">
 
                                 </div>
                             </div>
