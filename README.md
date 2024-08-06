@@ -143,7 +143,6 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
 
   1. Fill the following environment variables in Vercel:
      * NEXT_PUBLIC_URL: URL of your application (e.g. purple-squirrel.vercel.app)
-     * BASIC_AUTH_PASSWORD: Any password of your choice, to protect scheduled routes
 </details>
 
 → Step 8: Click deploy & visit your site, it will guide you through the rest of your setup!
