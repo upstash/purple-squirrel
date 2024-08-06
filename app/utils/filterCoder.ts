@@ -1,4 +1,4 @@
-import { Filter } from '@/types/types';
+import { Filter } from '@/types';
 
 export default function filterCoder(filter: Filter) {
     const filterQuery = [];
