@@ -2,6 +2,11 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import "@/styles/globals.css";
 import { Providers } from "./providers";
+import { Metadata } from 'next'
+ 
+export const metadata: Metadata = {
+  title: 'Purple Squirrel',
+}
 
 export default function RootLayout({
   children,
