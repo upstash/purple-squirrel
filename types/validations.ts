@@ -25,7 +25,7 @@ import {
   roleSchema,
 } from "./schemas";
 
-const isApplicantRow = (data: any): data is ApplicantRow => {
+export const isApplicantRow = (data: any): data is ApplicantRow => {
   return applicantRowSchema.safeParse(data).success;
 };
 
