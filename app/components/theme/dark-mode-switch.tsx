@@ -1,7 +1,7 @@
 import React from "react";
-import {Switch} from "@nextui-org/switch";
-import {MoonIcon} from "./moon-icon";
-import {SunIcon} from "./sun-icon";
+import { Switch } from "@nextui-org/switch";
+import { MoonIcon } from "./moon-icon";
+import { SunIcon } from "./sun-icon";
 import type { NextUIColor } from "@/types";
 
 type Props = {

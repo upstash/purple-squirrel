@@ -25,12 +25,13 @@ import WorkHistoryOutlinedIcon from "@mui/icons-material/WorkHistoryOutlined";
 
 import filterCoder from "@/app/utils/filterCoder";
 
-import { LOCATIONS, LOCATION_LOOKUP, APPLICANT_STATUS_OPTIONS } from "@/app/constants";
-
 import {
-  Autocomplete,
-  AutocompleteItem,
-} from "@nextui-org/autocomplete";
+  LOCATIONS,
+  LOCATION_LOOKUP,
+  APPLICANT_STATUS_OPTIONS,
+} from "@/app/constants";
+
+import { Autocomplete, AutocompleteItem } from "@nextui-org/autocomplete";
 
 import { useQueryTerminal, useQueries } from "@/app/managers";
 
@@ -113,8 +114,10 @@ export function QueryBar() {
                 if (e.key === "Enter") {
                   setQuery((prev) => {
                     return {
-                    ...prev, query: [...prev.tags, tagText]
-                  }});
+                      ...prev,
+                      query: [...prev.tags, tagText],
+                    };
+                  });
                   setTagText("");
                 }
               }}
@@ -136,9 +139,15 @@ export function QueryBar() {
               onSelectionChange={(key) => {
                 setQuery((prev) => {
                   if (!key) {
-                    return { ...prev, filter: { ...prev.filter, positionFilter: 1 } };
+                    return {
+                      ...prev,
+                      filter: { ...prev.filter, positionFilter: 1 },
+                    };
                   }
-                  return { ...prev, filter: { ...prev.filter, positionFilter: Number(key)} };
+                  return {
+                    ...prev,
+                    filter: { ...prev.filter, positionFilter: Number(key) },
+                  };
                 });
               }}
             >
@@ -167,7 +176,11 @@ export function QueryBar() {
                   <SearchOutlinedIcon className="text-2xl" />
                 )
               }
-              isDisabled={tableLoading.status || tags.length === 0 || !filter.positionFilter}
+              isDisabled={
+                tableLoading.status ||
+                tags.length === 0 ||
+                !filter.positionFilter
+              }
               onPress={async () => {
                 if (tableLoading.status) {
                   return;
@@ -176,7 +189,7 @@ export function QueryBar() {
                   return;
                 }
                 if (!filter.positionFilter) {
-                    return;
+                  return;
                 }
                 setTableLoading({
                   status: true,
@@ -194,14 +207,12 @@ export function QueryBar() {
                     searchSettings: searchSettings,
                     rankType: searchSettings.flash ? "flash" : "deep",
                   };
-                  setRecentQueries(
-                    (prev: Query[]) => {
-                      return [
-                        { id: queryID, tags: tags, filter: filter },
-                        ...prev,
-                      ];
-                    }
-                  );
+                  setRecentQueries((prev: Query[]) => {
+                    return [
+                      { id: queryID, tags: tags, filter: filter },
+                      ...prev,
+                    ];
+                  });
                   const [rankResponse, redisResponse] = await Promise.all([
                     fetch(
                       searchSettings.flash
@@ -253,7 +264,10 @@ export function QueryBar() {
                           };
                         });
                       } else {
-                        if (applicantCard.display && applicantCard.applicantInfo.notes) {
+                        if (
+                          applicantCard.display &&
+                          applicantCard.applicantInfo.notes
+                        ) {
                           await fetch(`/api/console/set-applicant-notes`, {
                             method: "POST",
                             headers: {
@@ -419,17 +433,20 @@ export function QueryBar() {
                                                     countryCodeFilter:
                                                       prev.filter.countryCodeFilter.filter(
                                                         (id) => {
-                                                          return id !== countryCode;
+                                                          return (
+                                                            id !== countryCode
+                                                          );
                                                         }
                                                       ),
                                                   },
                                                 };
-                                              }
-                                            );
+                                              });
                                             }}
                                           >
                                             <div className="flex justify-between w-full text-sm text-left">
-                                              {countryCode ? LOCATION_LOOKUP[countryCode] : "Unknown"}
+                                              {countryCode
+                                                ? LOCATION_LOOKUP[countryCode]
+                                                : "Unknown"}
                                             </div>
                                           </Button>
                                         );
@@ -444,65 +461,64 @@ export function QueryBar() {
                                 className="max-h-24 flex flex-col gap-1 mt-2"
                               >
                                 <div className="flex flex-col">
-                                  {LOCATIONS
-                                    .filter((location) => {
-                                      return location.name
-                                        .toLowerCase()
-                                        .includes(
-                                          locationSearchText.toLowerCase()
-                                        );
-                                    })
-                                    .map((location) => {
-                                      const checked =
-                                        filter.countryCodeFilter.includes(
-                                          location.iso2
-                                        );
-                                      return (
-                                        <Button
-                                          size="sm"
-                                          key={location.iso2}
-                                          variant="light"
-                                          color={
-                                            checked ? "primary" : "default"
-                                          }
-                                          onPress={() => {
-                                            if (checked) {
-                                              setQuery((prev) => {
-                                                return {
-                                                  ...prev,
-                                                  filter: {
-                                                    ...prev.filter,
-                                                    countryCodeFilter:
-                                                      prev.filter.countryCodeFilter.filter(
-                                                        (id) => {
-                                                          return id !== location.iso2;
-                                                        }
-                                                      ),
-                                                  },
-                                                };
-                                              });
-                                            } else {
-                                              setQuery((prev) => {
-                                                return {
-                                                  ...prev,
-                                                  filter: {
-                                                    ...prev.filter,
-                                                    countryCodeFilter: [
-                                                      ...prev.filter.countryCodeFilter,
-                                                      location.iso2,
-                                                    ],
-                                                  },
-                                                };
-                                              });
-                                            }
-                                          }}
-                                        >
-                                          <div className="flex justify-between w-full text-sm text-left">
-                                            {location.name}
-                                          </div>
-                                        </Button>
+                                  {LOCATIONS.filter((location) => {
+                                    return location.name
+                                      .toLowerCase()
+                                      .includes(
+                                        locationSearchText.toLowerCase()
                                       );
-                                    })}
+                                  }).map((location) => {
+                                    const checked =
+                                      filter.countryCodeFilter.includes(
+                                        location.iso2
+                                      );
+                                    return (
+                                      <Button
+                                        size="sm"
+                                        key={location.iso2}
+                                        variant="light"
+                                        color={checked ? "primary" : "default"}
+                                        onPress={() => {
+                                          if (checked) {
+                                            setQuery((prev) => {
+                                              return {
+                                                ...prev,
+                                                filter: {
+                                                  ...prev.filter,
+                                                  countryCodeFilter:
+                                                    prev.filter.countryCodeFilter.filter(
+                                                      (id) => {
+                                                        return (
+                                                          id !== location.iso2
+                                                        );
+                                                      }
+                                                    ),
+                                                },
+                                              };
+                                            });
+                                          } else {
+                                            setQuery((prev) => {
+                                              return {
+                                                ...prev,
+                                                filter: {
+                                                  ...prev.filter,
+                                                  countryCodeFilter: [
+                                                    ...prev.filter
+                                                      .countryCodeFilter,
+                                                    location.iso2,
+                                                  ],
+                                                },
+                                              };
+                                            });
+                                          }
+                                        }}
+                                      >
+                                        <div className="flex justify-between w-full text-sm text-left">
+                                          {location.name}
+                                        </div>
+                                      </Button>
+                                    );
+                                  })}
                                 </div>
                               </ScrollShadow>
                             )}
@@ -529,12 +545,14 @@ export function QueryBar() {
                         >
                           <div className="flex flex-col gap-2 justify-center">
                             <div className="flex flex-row gap-2 justify-center">
-                              {([
-                                "newApply",
-                                "screening",
-                                "assessment",
-                                "interview",
-                              ] as const).map((key) => {
+                              {(
+                                [
+                                  "newApply",
+                                  "screening",
+                                  "assessment",
+                                  "interview",
+                                ] as const
+                              ).map((key) => {
                                 const noFilter =
                                   filter.statusFilter.length === 0;
                                 const statusChecked =
@@ -549,11 +567,12 @@ export function QueryBar() {
                                             ...prev,
                                             filter: {
                                               ...prev.filter,
-                                              statusFilter: APPLICANT_STATUS_OPTIONS.filter(
-                                                (id) => {
-                                                  return id !== key;
-                                                }
-                                              ),
+                                              statusFilter:
+                                                APPLICANT_STATUS_OPTIONS.filter(
+                                                  (id) => {
+                                                    return id !== key;
+                                                  }
+                                                ),
                                             },
                                           };
                                         });
@@ -580,10 +599,12 @@ export function QueryBar() {
                                               filter: {
                                                 ...prev.filter,
                                                 statusFilter:
-                                                  prev.filter.statusFilter.length === 7
+                                                  prev.filter.statusFilter
+                                                    .length === 7
                                                     ? []
                                                     : [
-                                                        ...prev.filter.statusFilter,
+                                                        ...prev.filter
+                                                          .statusFilter,
                                                         key,
                                                       ],
                                               },
@@ -614,12 +635,14 @@ export function QueryBar() {
                               })}
                             </div>
                             <div className="flex flex-row gap-2 justify-center">
-                              {([
-                                "shortlisted",
-                                "offer",
-                                "onboarding",
-                                "hired",
-                              ] as const).map((key) => {
+                              {(
+                                [
+                                  "shortlisted",
+                                  "offer",
+                                  "onboarding",
+                                  "hired",
+                                ] as const
+                              ).map((key) => {
                                 const noFilter =
                                   filter.statusFilter.length === 0;
                                 const statusChecked =
@@ -634,11 +657,12 @@ export function QueryBar() {
                                             ...prev,
                                             filter: {
                                               ...prev.filter,
-                                              statusFilter: APPLICANT_STATUS_OPTIONS.filter(
-                                                (id) => {
-                                                  return id !== key;
-                                                }
-                                              ),
+                                              statusFilter:
+                                                APPLICANT_STATUS_OPTIONS.filter(
+                                                  (id) => {
+                                                    return id !== key;
+                                                  }
+                                                ),
                                             },
                                           };
                                         });
@@ -665,10 +689,12 @@ export function QueryBar() {
                                               filter: {
                                                 ...prev.filter,
                                                 statusFilter:
-                                                  prev.filter.statusFilter.length === 7
+                                                  prev.filter.statusFilter
+                                                    .length === 7
                                                     ? []
                                                     : [
-                                                        ...prev.filter.statusFilter,
+                                                        ...prev.filter
+                                                          .statusFilter,
                                                         key,
                                                       ],
                                               },
@@ -771,7 +797,7 @@ export function QueryBar() {
                             filter.yoeFilter.max === -1
                               ? "Any"
                               : `${
-                                filter.yoeFilter.min === -1
+                                  filter.yoeFilter.min === -1
                                     ? "Any"
                                     : filter.yoeFilter.min
                                 } - ${
@@ -804,7 +830,8 @@ export function QueryBar() {
                                         ...prev.filter,
                                         yoeFilter: {
                                           ...prev.filter.yoeFilter,
-                                          min: value === "" ? -1 : Number(value),
+                                          min:
+                                            value === "" ? -1 : Number(value),
                                         },
                                       },
                                     };
@@ -833,7 +860,8 @@ export function QueryBar() {
                                         ...prev.filter,
                                         yoeFilter: {
                                           ...prev.filter.yoeFilter,
-                                          max: value === "" ? -1 : Number(value),
+                                          max:
+                                            value === "" ? -1 : Number(value),
                                         },
                                       },
                                     };
@@ -862,13 +890,16 @@ export function QueryBar() {
                               )
                             }
                             onValueChange={async (value) => {
-                              await fetch("/api/settings/save-search-settings", {
-                                method: "POST",
-                                headers: {
-                                  "Content-Type": "application/json",
-                                },
-                                body: JSON.stringify(searchSettings),
-                              });
+                              await fetch(
+                                "/api/settings/save-search-settings",
+                                {
+                                  method: "POST",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                  },
+                                  body: JSON.stringify(searchSettings),
+                                }
+                              );
                               setSearchSettings((prev) => {
                                 return { ...prev, flash: value };
                               });
@@ -1044,7 +1075,10 @@ export function QueryBar() {
               variant="dot"
               onClose={() => {
                 setQuery((prev) => {
-                  return { ...prev, filter: { ...prev.filter, starsFilter: -1 } };
+                  return {
+                    ...prev,
+                    filter: { ...prev.filter, starsFilter: -1 },
+                  };
                 });
               }}
             >
@@ -1060,7 +1094,10 @@ export function QueryBar() {
               variant="dot"
               onClose={() => {
                 setQuery((prev) => {
-                  return { ...prev, filter: { ...prev.filter, yoeFilter: { min: -1, max: -1 } } };
+                  return {
+                    ...prev,
+                    filter: { ...prev.filter, yoeFilter: { min: -1, max: -1 } },
+                  };
                 });
               }}
             >

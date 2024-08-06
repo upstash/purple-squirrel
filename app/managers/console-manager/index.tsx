@@ -1,33 +1,33 @@
-import { createContext, useContext, useState } from "react"
+import { createContext, useContext, useState } from "react";
 import type { ConsoleTab } from "@/types";
 
 type Console = {
-    activeTab: ConsoleTab;
-    setActiveTab: (tab: ConsoleTab) => void;
-}
+  activeTab: ConsoleTab;
+  setActiveTab: (tab: ConsoleTab) => void;
+};
 
-const ConsoleContext = createContext<Console | undefined>(undefined)
+const ConsoleContext = createContext<Console | undefined>(undefined);
 
-const ConsoleProvider = ConsoleContext.Provider
+const ConsoleProvider = ConsoleContext.Provider;
 
 export const useConsole = () => {
-  const context = useContext(ConsoleContext)
+  const context = useContext(ConsoleContext);
 
-  if (!context) throw new Error("use useConsole within a ConsoleProvider")
+  if (!context) throw new Error("use useConsole within a ConsoleProvider");
 
-  return context
-}
+  return context;
+};
 
 export const ConsoleManager = ({ children }: { children: React.ReactNode }) => {
-    const [activeTab, setActiveTab] = useState<ConsoleTab>("query-terminal");
-    return (
-        <ConsoleProvider
-        value={{
-            activeTab,
-            setActiveTab
-        }}
-        >
-            {children}
-        </ConsoleProvider>
-        )
-    }
+  const [activeTab, setActiveTab] = useState<ConsoleTab>("query-terminal");
+  return (
+    <ConsoleProvider
+      value={{
+        activeTab,
+        setActiveTab,
+      }}
+    >
+      {children}
+    </ConsoleProvider>
+  );
+};

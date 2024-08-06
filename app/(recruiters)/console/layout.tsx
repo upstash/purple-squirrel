@@ -1,15 +1,13 @@
-import {ConsoleManagers} from "./managers";
+import { ConsoleManagers } from "./managers";
 
 export default function ConsoleLayout({
-    children,
-  }: {
-    children: React.ReactNode
-  }) {
-    return (
-      <section>
-        <ConsoleManagers>
-            {children}
-        </ConsoleManagers>
-      </section>
-    )
-  }
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <ConsoleManagers>{children}</ConsoleManagers>
+    </section>
+  );
+}

@@ -4,7 +4,7 @@ type Props = {
   className?: string;
 };
 
-export const SunIcon = ({className}: Props) => (
+export const SunIcon = ({ className }: Props) => (
   <svg
     aria-hidden="true"
     focusable="false"

@@ -1,7 +1,7 @@
 "use client";
 
 import { UploadButton } from "@/app/utils/uploadthing";
-import { ClientUploadedFileData } from 'uploadthing/types';
+import { ClientUploadedFileData } from "uploadthing/types";
 import { Button } from "@nextui-org/button";
 import { Input, Textarea } from "@nextui-org/input";
 import { useState } from "react";
@@ -9,14 +9,13 @@ import { useEffect } from "react";
 
 import { LOCATIONS } from "@/app/constants";
 
-import {
-  Autocomplete,
-  AutocompleteItem,
-} from "@nextui-org/autocomplete";
+import { Autocomplete, AutocompleteItem } from "@nextui-org/autocomplete";
 
-export default function Page({ params } : { params: { position: string } }) {
+export default function Page({ params }: { params: { position: string } }) {
   const [fullName, setFullName] = useState<string | undefined>(undefined);
-  const [emailAddress, setEmailAddress] = useState<string | undefined>(undefined);
+  const [emailAddress, setEmailAddress] = useState<string | undefined>(
+    undefined
+  );
 
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>(undefined);
   const [experience, setExperience] = useState<string | undefined>(undefined);
@@ -28,18 +27,20 @@ export default function Page({ params } : { params: { position: string } }) {
 
   const [cover, setCover] = useState<string | undefined>(undefined);
 
-  const [resume, setResume] = useState<ClientUploadedFileData<{ uploadedBy: string; }> | undefined>(undefined);
+  const [resume, setResume] = useState<
+    ClientUploadedFileData<{ uploadedBy: string }> | undefined
+  >(undefined);
 
   const [submitting, setSubmitting] = useState(false);
 
-  const [position , setPosition] = useState("");
+  const [position, setPosition] = useState("");
 
   useEffect(() => {
     async function fetchData() {
-      const res = await fetch('/api/positions/get-position-by-id', {
-          method: 'POST',
-          body: JSON.stringify({id: parseInt(params.position)}),
-      })
+      const res = await fetch("/api/positions/get-position-by-id", {
+        method: "POST",
+        body: JSON.stringify({ id: parseInt(params.position) }),
+      });
       const data = await res.json();
       if (!res.ok) {
         if (data.message) {
@@ -52,7 +53,7 @@ export default function Page({ params } : { params: { position: string } }) {
     }
 
     fetchData();
-  }, [setPosition, params.position])
+  }, [setPosition, params.position]);
 
   const formComplete = phoneNumber && experience && location && resume;
 
@@ -195,40 +196,43 @@ export default function Page({ params } : { params: { position: string } }) {
             if (!formComplete) return;
             setSubmitting(true);
             const data = {
-                applicantInfo: {
-                    name: fullName,
-                    cover: cover,
-                    contact: {
-                        email: emailAddress,
-                        phone: phoneNumber
-                    },
-                    urls: {
-                        website: website,
-                        linkedin: linkedin,
-                        github: github
-                    }
+              applicantInfo: {
+                name: fullName,
+                cover: cover,
+                contact: {
+                  email: emailAddress,
+                  phone: phoneNumber,
                 },
-                resumeInfo: {
-                    uploadthing: {
-                        key: resume.key,
-                        url: resume.url
-                    }
+                urls: {
+                  website: website,
+                  linkedin: linkedin,
+                  github: github,
                 },
-                yoe: experience,
-                countryCode: location
-            }
+              },
+              resumeInfo: {
+                uploadthing: {
+                  key: resume.key,
+                  url: resume.url,
+                },
+              },
+              yoe: experience,
+              countryCode: location,
+            };
             const res = await fetch("/api/apply", {
-                method: "POST",
-                body: JSON.stringify({data: data, positionId: parseInt(params.position)}),
-                headers: {
-                    "Content-Type": "application/json",
-                },
+              method: "POST",
+              body: JSON.stringify({
+                data: data,
+                positionId: parseInt(params.position),
+              }),
+              headers: {
+                "Content-Type": "application/json",
+              },
             });
             if (res.ok) {
-                setSubmitting(false);
-                window.location.href = "/complete";
+              setSubmitting(false);
+              window.location.href = "/complete";
             } else {
-                alert("Something went wrong.");
+              alert("Something went wrong.");
             }
           }}
         >

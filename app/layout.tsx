@@ -1,28 +1,26 @@
-import { ClerkProvider, SignInButton, SignOutButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
-import { dark } from '@clerk/themes';
+import { ClerkProvider } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 import "@/styles/globals.css";
-import {Providers} from "./providers";
+import { Providers } from "./providers";
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <ClerkProvider
-    appearance={{
-      baseTheme: dark,
-    }}
+      appearance={{
+        baseTheme: dark,
+      }}
     >
-      <html lang="en" className='dark'>
+      <html lang="en" className="dark">
         <body>
           <Providers>
-            <main>
-              {children}
-            </main>
+            <main>{children}</main>
           </Providers>
         </body>
       </html>
     </ClerkProvider>
-  )
+  );
 }
