@@ -4,7 +4,7 @@ const { simpleParser } = require("mailparser");
 import { Client, Receiver } from "@upstash/qstash";
 import { Redis } from "@upstash/redis";
 
-import BASE_URL from "@/app/utils/baseURL";
+import QSTASH_TARGET_URL from "@/app/utils/qstash-target-url";
 import Connection, { ImapMessage } from "node-imap";
 
 import { Blob } from "buffer";
@@ -118,29 +118,14 @@ export async function POST(req: Request) {
                     resumeUrl: response.data.url,
                     resumeText: parsedPDF.text,
                   };
-                  if (process.env.NODE_ENV === "production") {
-                    const res = await client.publishJSON({
-                      url: `${BASE_URL}/api/mail-pipeline/create-applicant`,
-                      method: "POST",
-                      body: {
-                        mailData: mailData,
-                      },
-                      retries: 0,
-                    });
-                  } else {
-                    await fetch(
-                      `${BASE_URL}/api/mail-pipeline/create-applicant`,
-                      {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                          mailData: mailData,
-                        }),
-                      }
-                    );
-                  }
+                  const res = await client.publishJSON({
+                    url: `${QSTASH_TARGET_URL}/api/mail-pipeline/create-applicant`,
+                    method: "POST",
+                    body: {
+                      mailData: mailData,
+                    },
+                    retries: 0,
+                  });
                   console.log("processedMailData created");
                   imap.end();
                 } catch (error) {

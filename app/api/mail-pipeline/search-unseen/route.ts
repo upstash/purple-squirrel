@@ -3,7 +3,7 @@ var Imap = require("node-imap");
 import { Redis } from "@upstash/redis";
 import { Client, Receiver } from "@upstash/qstash";
 
-import BASE_URL from "@/app/utils/baseURL";
+import QSTASH_TARGET_URL from "@/app/utils/qstash-target-url";
 import Connection from "node-imap";
 
 const receiver = new Receiver({
@@ -83,27 +83,15 @@ export async function POST(req: Request) {
         const msgs = results.map((result) => {
           return {
             queueName: "mail-fetch-queue",
-            url: `${BASE_URL}/api/mail-pipeline/fetch-unseen`,
+            url: `${QSTASH_TARGET_URL}/api/mail-pipeline/fetch-unseen`,
             body: {
               mailID: result,
             },
             retries: 0,
           };
         });
-        if (process.env.NODE_ENV === "production") {
-          const res = await client.batchJSON(msgs);
-          console.log("Batch response: ", res);
-        } else {
-          for (const msg of msgs) {
-            await fetch(msg.url, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(msg.body),
-            });
-          }
-        }
+        const res = await client.batchJSON(msgs);
+        console.log("Batch response: ", res);
 
         imap.end();
       });

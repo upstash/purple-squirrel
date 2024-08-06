@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { Redis } from "@upstash/redis";
 import { Client } from "@upstash/qstash";
-import BASE_URL from "@/app/utils/baseURL";
+import QSTASH_TARGET_URL from "@/app/utils/qstash-target-url";
 
 const client = new Client({ token: process.env.QSTASH_TOKEN as string });
 
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   await redis.set("application:methods", methods);
   await redis.set("setup:status", true);
 
-  if (process.env.NODE_ENV === "production" && methods.includes("mail")) {
+  if (methods.includes("mail")) {
     const queue = client.queue({
       queueName: "mail-fetch-queue",
     });
@@ -28,10 +28,10 @@ export async function POST(req: NextRequest) {
     await queue.upsert({
       parallelism: 2,
     });
-    console.log(`${BASE_URL}/api/mail-pipeline/search-unseen`);
+    console.log(`${QSTASH_TARGET_URL}/api/mail-pipeline/search-unseen`);
 
     await client.publishJSON({
-      url: `${BASE_URL}/api/mail-pipeline/search-unseen`,
+      url: `${QSTASH_TARGET_URL}/api/mail-pipeline/search-unseen`,
       method: "POST",
       retries: 0,
     });
@@ -53,25 +53,24 @@ export async function POST(req: NextRequest) {
     for (let i = 0; i < allSchedules.length; i++) {
       if (
         allSchedules[i].destination ===
-        `${BASE_URL}/api/mail-pipeline/search-unseen`
+        `${QSTASH_TARGET_URL}/api/mail-pipeline/search-unseen`
       ) {
         await schedules.delete(allSchedules[i].scheduleId);
       }
     }
 
     await schedules.create({
-      destination: `${BASE_URL}/api/mail-pipeline/search-unseen`,
+      destination: `${QSTASH_TARGET_URL}/api/mail-pipeline/search-unseen`,
       cron: cron,
       retries: 0,
     });
-  }
-  if (process.env.NODE_ENV === "production" && !methods.includes("mail")) {
+  } else {
     const schedules = client.schedules;
     const allSchedules = await schedules.list();
     for (let i = 0; i < allSchedules.length; i++) {
       if (
         allSchedules[i].destination ===
-        `${BASE_URL}/api/mail-pipeline/search-unseen`
+        `${QSTASH_TARGET_URL}/api/mail-pipeline/search-unseen`
       ) {
         await schedules.delete(allSchedules[i].scheduleId);
       }
