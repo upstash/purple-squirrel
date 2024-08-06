@@ -34,14 +34,14 @@ const applicantDataSchema = z.object({
     name: z.string(),
     cover: z.string().optional(),
     contact: z.object({
-      email: z.string(),
-      phone: z.string(),
-    }),
+      email: z.string().optional().nullable(),
+      phone: z.string().optional().nullable(),
+    }).optional(),
     urls: z
       .object({
-        website: z.string().optional(),
-        linkedin: z.string().optional(),
-        github: z.string().optional(),
+        website: z.string().optional().nullable(),
+        linkedin: z.string().optional().nullable(),
+        github: z.string().optional().nullable(),
       })
       .optional(),
     notes: z.string(),

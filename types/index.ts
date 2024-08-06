@@ -14,15 +14,15 @@ import {
 export type ApplicantData = {
   applicantInfo: {
     name: string;
-    cover?: string;
-    contact: {
-      email: string;
-      phone: string;
+    cover?: string | null;
+    contact?: {
+      email?: string | null;
+      phone?: string | null;
     };
     urls?: {
-      website?: string;
-      linkedin?: string;
-      github?: string;
+      website?: string | null;
+      linkedin?: string | null;
+      github?: string | null;
     };
     notes: string;
   };
