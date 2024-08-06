@@ -1,14 +1,18 @@
 import { Redis } from '@upstash/redis';
 import { Index } from "@upstash/vector";
+import { Receiver } from "@upstash/qstash";
 import type { NextRequest } from 'next/server';
 import OpenAI from "openai";
-import type { Applicant, ApplicationMetadata } from '@/types/types';
-import { headers } from 'next/headers'
-import BASE_URL from '@/app/utils/baseURL';
-import { locationLookup } from "@/app/utils/locations";
+import type { ApplicantData, ApplicantMetadata } from '@/types';
+import { isCountryCode } from '@/types/validations';
 const levenshtein = require('js-levenshtein');
 
 export const runtime = "edge";
+
+const receiver = new Receiver({
+    currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY as string,
+    nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY as string,
+  });
 
 const redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL as string,
@@ -139,13 +143,6 @@ function positionMatch(position: string, positions: any) {
     }
 }
 
-function countryCodeMatch(countryCode: string) {
-    if (!countryCode || countryCode.length !== 2 || !locationLookup.hasOwnProperty(countryCode)) {
-        return "unknown";
-    }
-    return countryCode;
-}
-
 function mailDataToApplicant(mailData: any, parsedMailData: any, positions: any, date: Date) {
     if (!parsedMailData.hasOwnProperty("basicInfo")) {
         console.log('PIPELINE: OpenAI Parsing fields missing');
@@ -175,7 +172,8 @@ function mailDataToApplicant(mailData: any, parsedMailData: any, positions: any,
         console.log('PIPELINE: OpenAI Parsing fields missing');
         return { applicant: null, fullResumeText: null, mapStatus: false };
     }
-    const applicant: Applicant = {
+    const positionId = (position ? positionMatch(position, positions) : 1);
+    const applicantData: ApplicantData = {
         "applicantInfo": {
             "name": fullName,
             "cover": cover,
@@ -190,6 +188,7 @@ function mailDataToApplicant(mailData: any, parsedMailData: any, positions: any,
             },
             "notes": ""
         },
+        "positionId": positionId,
         "resumeInfo": {
             "uploadthing": {
                 "url": mailData.resumeUrl,
@@ -198,18 +197,31 @@ function mailDataToApplicant(mailData: any, parsedMailData: any, positions: any,
             "fullText": mailData.resumeText,
         }
     };
-    const applicationMetadata: ApplicationMetadata = {
-        "countryCode": (countryCode && typeof countryCode === "string") ? countryCodeMatch(countryCode) : "unknown",
+    const applicantMetadata: ApplicantMetadata = {
+        "countryCode": (isCountryCode(countryCode) ? countryCode : undefined),
         "status": "newApply",
         "stars": 0,
         "yoe": yoe || -1
     };
-    return { positionId: (position ? positionMatch(position, positions) : 1) , applicant: applicant, applicationMetadata: applicationMetadata ,fullResumeText: mailData.resumeText, mapStatus: true };
+    return { positionId: (position ? positionMatch(position, positions) : 1) , applicantData: applicantData, applicantMetadata: applicantMetadata ,fullResumeText: mailData.resumeText, mapStatus: true };
 }
 
 export async function POST(req: NextRequest) {
-    const authHeader = headers().get('authorization') || headers().get('Authorization');
-    if (!authHeader) {
+    const signature = req.headers.get("Upstash-Signature");
+    const body = await req.json();
+
+    if (!signature) {
+        return new Response('Unauthorized', {
+            status: 401,
+            });
+    }
+    const isValid = receiver.verify({
+        body,
+        signature,
+        url: req.url,
+      });
+
+    if (!isValid) {
         return new Response('Unauthorized', {
             status: 401,
             });
@@ -272,8 +284,8 @@ export async function POST(req: NextRequest) {
         console.log('PIPELINE: OpenAI Parsed Data Does Not Fit Applicant Schema');
         return;
     }
-    const applicant = mapResult.applicant;
-    if (!applicant) {
+    const applicantData = mapResult.applicantData;
+    if (!applicantData) {
         console.log('PIPELINE: OpenAI Parsed Data Error');
         return;
     }
@@ -312,10 +324,10 @@ export async function POST(req: NextRequest) {
     await namespace.upsert({
         id: `${applicantID}_application`,
         vector: resumeEmbedding,
-        metadata: mapResult.applicationMetadata,
+        metadata: mapResult.applicantMetadata,
     });
     
-    await redis.json.set(`applicant#${applicantID}`, "$", JSON.stringify(applicant));
+    await redis.json.set(`applicant#${applicantID}`, "$", JSON.stringify(applicantData));
     await redis.sadd("applicant:ids", applicantID);
     return Response.json({ status: 200, message: "Success" });
 }

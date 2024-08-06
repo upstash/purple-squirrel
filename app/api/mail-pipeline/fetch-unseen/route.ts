@@ -1,10 +1,8 @@
 var Imap = require('node-imap');
 const {simpleParser} = require('mailparser');
 
-import { Client } from "@upstash/qstash";
+import { Client, Receiver } from "@upstash/qstash";
 import { Redis } from '@upstash/redis';
-
-import { headers } from 'next/headers'
 
 import BASE_URL from '@/app/utils/baseURL';
 import Connection, { ImapMessage } from 'node-imap';
@@ -16,6 +14,11 @@ import pdf from 'pdf-parse/lib/pdf-parse'
 
 import { FileEsque } from "uploadthing/types";
 
+const receiver = new Receiver({
+    currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY as string,
+    nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY as string,
+  });
+
 const client = new Client({ token: process.env.QSTASH_TOKEN as string});
 
 const redis = new Redis({
@@ -24,8 +27,21 @@ const redis = new Redis({
 });
 
 export async function POST(req: Request) {
-    const authHeader = headers().get('authorization') || headers().get('Authorization');
-    if (!authHeader) {
+    const signature = req.headers.get("Upstash-Signature");
+    const body = await req.json();
+
+    if (!signature) {
+        return new Response('Unauthorized', {
+            status: 401,
+            });
+    }
+    const isValid = receiver.verify({
+        body,
+        signature,
+        url: req.url,
+      });
+
+    if (!isValid) {
         return new Response('Unauthorized', {
             status: 401,
             });
@@ -105,9 +121,6 @@ export async function POST(req: Request) {
                                             body: {
                                                 mailData: mailData
                                             },
-                                            headers: {
-                                            Authorization: authHeader
-                                            },
                                             retries: 0,
                                         });
                                     } else {
@@ -115,7 +128,6 @@ export async function POST(req: Request) {
                                             method: 'POST',
                                             headers: {
                                                 'Content-Type': 'application/json',
-                                                'Authorization': authHeader
                                             },
                                             body: JSON.stringify({
                                                 mailData: mailData

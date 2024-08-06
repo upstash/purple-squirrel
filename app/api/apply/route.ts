@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server';
-import type { Applicant, ApplicationMetadata } from '@/types/types';
+import type { ApplicantData, ApplicantMetadata } from '@/types';
 import { Redis } from '@upstash/redis';
 import { Index } from "@upstash/vector";
 import OpenAI from "openai";
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     const parsedPDF = await pdf(await pdfResponse.arrayBuffer());
     const fullText = parsedPDF.text;
     
-    const applicant: Applicant = {
+    const applicantData: ApplicantData = {
         applicantInfo: {
             ...data.applicantInfo,
             notes: ""
@@ -36,9 +36,10 @@ export async function POST(req: NextRequest) {
         resumeInfo: {
             uploadthing: data.resumeInfo.uploadthing,
             fullText: fullText
-        }
+        },
+        positionId: positionId,
     }
-    const applicationMetadata: ApplicationMetadata = {
+    const applicationMetadata: ApplicantMetadata = {
         "countryCode": data.countryCode,
         "status": "newApply",
         "stars": 0,
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
         metadata: applicationMetadata,
     });
     
-    await redis.json.set(`applicant#${applicantID}`, "$", JSON.stringify(applicant));
+    await redis.json.set(`applicant#${applicantID}`, "$", JSON.stringify(applicantData));
     await redis.sadd("applicant:ids", applicantID);
     return Response.json({ status: 200, message: "Success" });
 

@@ -1,0 +1,3 @@
+.styled-autocomplete [data-slot="input-wrapper"] {
+    height: 2.5rem;
+  }

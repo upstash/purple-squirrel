@@ -1,6 +1,6 @@
 import { Index } from '@upstash/vector';
 import type { NextRequest } from 'next/server';
-import type { Applicant, ApplicationMetadata } from '@/types/types';
+import type { ApplicantMetadata } from '@/types';
 
 const index = new Index({
     url: process.env.UPSTASH_VECTOR_REST_URL as string,
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     await Promise.all(applicants.map(async (applicant: any) => {
         const id: string = applicant.id;
         const positionId: number = applicant.positionId;
-        const metadata: ApplicationMetadata = applicant.metadata;
+        const metadata: ApplicantMetadata = applicant.metadata;
         const namespace = index.namespace(`${positionId}`);
         await namespace.update({
             id: `${id}_application`,

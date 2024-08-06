@@ -1,13 +1,15 @@
 var Imap = require('node-imap');
 
 import { Redis } from '@upstash/redis';
-import { Client } from "@upstash/qstash";
-
-import { headers } from 'next/headers'
+import { Client, Receiver } from "@upstash/qstash";
 
 import BASE_URL from '@/app/utils/baseURL';
 import Connection from 'node-imap';
 
+const receiver = new Receiver({
+    currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY as string,
+    nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY as string,
+  });
 
 const client = new Client({ token: process.env.QSTASH_TOKEN as string});
 
@@ -16,9 +18,22 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN as string,
 });
 
-export async function POST() {
-    const authHeader = headers().get('authorization') || headers().get('Authorization');
-    if (!authHeader) {
+export async function POST(req: Request) {
+    const signature = req.headers.get("Upstash-Signature");
+    const body = await req.json();
+
+    if (!signature) {
+        return new Response('Unauthorized', {
+            status: 401,
+            });
+    }
+    const isValid = receiver.verify({
+        body,
+        signature,
+        url: req.url,
+      });
+
+    if (!isValid) {
         return new Response('Unauthorized', {
             status: 401,
             });
@@ -65,9 +80,6 @@ export async function POST() {
                     return {
                         queueName: "mail-fetch-queue",
                         url: `${BASE_URL}/api/mail-pipeline/fetch-unseen`,
-                        headers: {
-                            Authorization: authHeader
-                        },
                         body: {
                             mailID: result
                         },
@@ -83,7 +95,6 @@ export async function POST() {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'Authorization': authHeader
                             },
                             body: JSON.stringify(msg.body)
                         });
