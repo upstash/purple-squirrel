@@ -24,7 +24,7 @@ import { Chip } from "@nextui-org/chip";
 import { Tooltip } from "@nextui-org/tooltip";
 import { Pagination } from "@nextui-org/pagination";
 
-import { ChevronDownIcon } from "@/app/utils/ChevronDownIcon";
+import { ChevronDownIcon } from "@/app/utils/chevron-down-icon";
 import { capitalize } from "@/app/utils";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import NextWeekOutlinedIcon from "@mui/icons-material/NextWeekOutlined";

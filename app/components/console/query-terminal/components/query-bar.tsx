@@ -23,7 +23,7 @@ import NextWeekOutlinedIcon from "@mui/icons-material/NextWeekOutlined";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import WorkHistoryOutlinedIcon from "@mui/icons-material/WorkHistoryOutlined";
 
-import filterCoder from "@/app/utils/filterCoder";
+import filterCoder from "@/app/utils/filter-coder";
 
 import {
   LOCATIONS,
@@ -37,7 +37,8 @@ import { useQueryTerminal, useQueries } from "@/app/managers";
 
 import type { Query } from "@/types";
 
-import { isApplicantRowArray } from "@/types/validations";
+import { isApplicantRowArray, isApplicantRow } from "@/types/validations";
+import { applicantRowSchema } from "@/types/schemas";
 
 import { getApplicantStatusColor } from "@/app/utils";
 
@@ -115,7 +116,7 @@ export function QueryBar() {
                   setQuery((prev) => {
                     return {
                       ...prev,
-                      query: [...prev.tags, tagText],
+                      tags: [...prev.tags, tagText],
                     };
                   });
                   setTagText("");
@@ -214,18 +215,13 @@ export function QueryBar() {
                     ];
                   });
                   const [rankResponse, redisResponse] = await Promise.all([
-                    fetch(
-                      searchSettings.flash
-                        ? "/api/query/flash-rank"
-                        : "/api/query/deep-rank",
-                      {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(data),
-                      }
-                    ),
+                    fetch("/api/query/rank", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify(data),
+                    }),
                     fetch("/api/query/push-recent-query", {
                       method: "POST",
                       headers: {
@@ -241,9 +237,15 @@ export function QueryBar() {
                   const rankResponseData = await rankResponse.json();
                   console.log(rankResponseData);
                   if (rankResponseData.status === 200) {
-                    const rankApplicants = searchSettings.flash
-                      ? rankResponseData.flashRankedApplicants
-                      : rankResponseData.deepRankedApplicants;
+                    const rankApplicants = rankResponseData.rankedApplicants
+                    for (const triplet of rankApplicants) {
+                      if (!applicantRowSchema.safeParse(triplet).success) {
+                        console.error("Invalid response data");
+                        console.error(triplet);
+                        console.error(applicantRowSchema.safeParse(triplet));
+                        break;
+                      }
+                    }
                     if (!isApplicantRowArray(rankApplicants)) {
                       console.error("Invalid response data");
                       setTableLoading((prev) => {
