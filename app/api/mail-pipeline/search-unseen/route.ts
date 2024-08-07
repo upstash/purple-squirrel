@@ -27,10 +27,10 @@ export async function POST(req: Request) {
       status: 401,
     });
   }
-  const isValid = receiver.verify({
-    body,
+  const isValid = await receiver.verify({
+    body: JSON.stringify(body),
     signature,
-    url: req.url,
+    url: `${QSTASH_TARGET_URL}/api/mail-pipeline/search-unseen`,
   });
 
   if (!isValid) {
@@ -79,8 +79,8 @@ export async function POST(req: Request) {
           imap.end();
           return;
         }
-
-        const msgs = results.map((result) => {
+        
+        const msgs = results.slice(-50).map((result) => {
           return {
             queueName: "mail-fetch-queue",
             url: `${QSTASH_TARGET_URL}/api/mail-pipeline/fetch-unseen`,

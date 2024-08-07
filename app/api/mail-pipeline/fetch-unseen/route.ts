@@ -35,10 +35,10 @@ export async function POST(req: Request) {
       status: 401,
     });
   }
-  const isValid = receiver.verify({
-    body,
+  const isValid = await receiver.verify({
+    body: JSON.stringify(body),
     signature,
-    url: req.url,
+    url: `${QSTASH_TARGET_URL}/api/mail-pipeline/fetch-unseen`,
   });
 
   if (!isValid) {
@@ -57,8 +57,7 @@ export async function POST(req: Request) {
       message: "Mail method not enabled",
     });
   }
-  const data = await req.json();
-  const mailID = data.mailID;
+  const mailID = body.mailID;
   var imap = new Imap({
     user: process.env.IMAP_USERNAME,
     password: process.env.IMAP_PASSWORD,

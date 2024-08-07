@@ -34,37 +34,45 @@ export async function POST(req: NextRequest) {
       url: `${QSTASH_TARGET_URL}/api/mail-pipeline/search-unseen`,
       method: "POST",
       retries: 0,
+      body: JSON.stringify({
+        message: "Fetch unseen mails",
+      }),
     });
-
-    let cron;
-    switch (scheduling.schedulingInterval) {
-      case "minutes":
-        cron = `*/${scheduling.schedulingNum} * * * *`;
-        break;
-      case "hours":
-        cron = `0 */${scheduling.schedulingNum} * * *`;
-        break;
-    }
-    if (!cron) {
-      return Response.json({ status: 400, message: "Invalid cron" });
-    }
-    const schedules = client.schedules;
-    const allSchedules = await schedules.list();
-    for (let i = 0; i < allSchedules.length; i++) {
-      if (
-        allSchedules[i].destination ===
-        `${QSTASH_TARGET_URL}/api/mail-pipeline/search-unseen`
-      ) {
-        await schedules.delete(allSchedules[i].scheduleId);
+    if (process.env.NODE_ENV === "production") {
+      let cron;
+      switch (scheduling.schedulingInterval) {
+        case "minutes":
+          cron = `*/${scheduling.schedulingNum} * * * *`;
+          break;
+        case "hours":
+          cron = `0 */${scheduling.schedulingNum} * * *`;
+          break;
       }
-    }
+      if (!cron) {
+        return Response.json({ status: 400, message: "Invalid cron" });
+      }
+      const schedules = client.schedules;
+      const allSchedules = await schedules.list();
+      for (let i = 0; i < allSchedules.length; i++) {
+        if (
+          allSchedules[i].destination ===
+          `${QSTASH_TARGET_URL}/api/mail-pipeline/search-unseen`
+        ) {
+          await schedules.delete(allSchedules[i].scheduleId);
+        }
+      }
 
-    await schedules.create({
-      destination: `${QSTASH_TARGET_URL}/api/mail-pipeline/search-unseen`,
-      cron: cron,
-      retries: 0,
-    });
-  } else {
+      await schedules.create({
+        destination: `${QSTASH_TARGET_URL}/api/mail-pipeline/search-unseen`,
+        cron: cron,
+        retries: 0,
+        body: JSON.stringify({
+          message: "Fetch unseen mails",
+        }),
+      });
+    }
+  }
+  if (process.env.NODE_ENV === "production" && !methods.includes("mail")) {
     const schedules = client.schedules;
     const allSchedules = await schedules.list();
     for (let i = 0; i < allSchedules.length; i++) {
