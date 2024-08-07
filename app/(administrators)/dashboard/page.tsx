@@ -31,45 +31,21 @@ export default function Page() {
   const [activeTab, setActiveTab] = useState<DashboardTab>("positions");
 
   const {
-    setPositions,
-    positions,
-    positionsLoading,
-    setPositionsLoading,
-    positionOpenText,
-    setPositionOpenText,
-    positionSearchText,
-    setPositionSearchText,
-    statusFilter,
-    setStatusFilter,
-    rowsPerPage,
-    setRowsPerPage,
-    tablePage,
-    setTablePage,
-    selectedKeys,
-    setSelectedKeys,
-    users,
     setUsers,
-    userSearchText,
-    setUserSearchText,
-    usersLoading,
-    setUsersLoading,
-    roleFilter,
-    setRoleFilter,
-    userRowsPerPage,
-    setUserRowsPerPage,
-    userTablePage,
-    setUserTablePage,
-    selectedUserKeys,
-    setSelectedUserKeys,
-    scheduling,
+    setPositions,
+    setPositionsLoading,
     setScheduling,
-    schedulingLoading,
-    methodsSelected,
     setMethodsSelected,
-    methodSaved,
-    setMethodSaved,
     setSchedulingLoading,
   } = useAdmin();
+
+  useEffect(() => {
+    fetch("/api/users/get-users")
+      .then((res) => res.json())
+      .then((data) => {
+        setUsers(data.users);
+      });
+  }, [setUsers]);
 
   useEffect(() => {
     fetch("/api/positions/get-positions")
