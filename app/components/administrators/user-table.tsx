@@ -92,16 +92,21 @@ export function UserTable() {
       filteredUsers = filteredUsers.filter((user) =>
         user.publicMetadata.role
           ? (user.publicMetadata.role === "user" &&
-              Array.from(roleFilter).includes("User")) ||
+              Array.from(roleFilter).includes("user")) ||
             (user.publicMetadata.role === "recruiter" &&
-              Array.from(roleFilter).includes("Recruiter")) ||
+              Array.from(roleFilter).includes("recruiter")) ||
             (user.publicMetadata.role === "admin" &&
-              Array.from(roleFilter).includes("Admin"))
-          : Array.from(roleFilter).includes("User")
+              Array.from(roleFilter).includes("admin"))
+          : Array.from(roleFilter).includes("user")
       );
     }
+    filteredUsers = filteredUsers.filter((user) =>
+      user?.firstName?.toLowerCase().includes(userSearchText.toLowerCase())
+        || user?.lastName?.toLowerCase().includes(userSearchText.toLowerCase())
+        || user.emailAddresses[0].emailAddress.toLowerCase().includes(userSearchText.toLowerCase())
+    );
     return filteredUsers;
-  }, [users, roleFilter]);
+  }, [users, roleFilter, userSearchText]);
 
   const pages = Math.ceil(filteredItems.length / userRowsPerPage);
 
@@ -286,44 +291,7 @@ export function UserTable() {
                 })
               }
               classNames={{ inputWrapper: "h-unit-10 bg-default-100" }}
-              onKeyUp={async (e) => {
-                if (e.key === "Enter") {
-                  setUsersLoading(true);
-                  const res = await fetch(`/api/users/get-users`, {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ query: userSearchText }),
-                  });
-                  const resdata = await res.json();
-                  setUsers(resdata.users);
-                  setUsersLoading(false);
-                }
-              }}
             />
-          </div>
-          <div className="flex-initial">
-            <Button
-              color="secondary"
-              size="md"
-              radius="md"
-              onPress={async () => {
-                setUsersLoading(true);
-                const res = await fetch(`/api/users/get-users`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({ query: userSearchText }),
-                });
-                const resdata = await res.json();
-                setUsers(resdata.users);
-                setUsersLoading(false);
-              }}
-            >
-              Search
-            </Button>
           </div>
           <div className="flex gap-3">
             <Dropdown>
@@ -346,7 +314,12 @@ export function UserTable() {
                 closeOnSelect={false}
                 selectedKeys={roleFilter}
                 selectionMode="multiple"
-                onSelectionChange={(keys) => {}}
+                onSelectionChange={(keys) => {
+                  if (!Array.from(keys).every((key) => isRole(key))) {
+                    return;
+                  }
+                  setRoleFilter(new Set(Array.from(keys)) as Set<"admin" | "user" | "recruiter">);
+                }}
               >
                 {roleOptions.map((role) => (
                   <DropdownItem
