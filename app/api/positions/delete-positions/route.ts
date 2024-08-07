@@ -22,6 +22,21 @@ export async function POST(req: NextRequest) {
         return;
       }
       await redis.lrem("positions", 1, position);
+      const ids = await redis.smembers(`position#${position.id}:ids`);
+      redis.del(...ids.map((id: string) => `applicant#${id}`)),
+
+      await Promise.all(
+        ids.map(async (id: string) => {
+          const positionId: number = position.id;
+          const namespace = index.namespace(`${positionId}`);
+          await namespace.delete([`${id}_application`]);
+          await redis.lrem(`latest:applicants`, 1, { id: id, positionId: positionId });
+        })
+      );
+
+      await redis.rpush("free:ids", ...ids);
+      await redis.del(`position#${position.id}:ids`);
+      
       try {
         await index.deleteNamespace(position.id);
       } catch (error) {
