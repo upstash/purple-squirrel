@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
       ) {
         throw new TypeError("Error in flash-rank: Invalid element");
       }
-      const id = pair.id.split("_")[0];
+      const id = parseInt(pair.id.split("_")[0]);
 
       const score =
         maxScore === minScore
@@ -205,7 +205,7 @@ export async function POST(req: NextRequest) {
         if (
           !quartet ||
           !quartet.id ||
-          typeof quartet.id !== "string" ||
+          typeof quartet.id !== "number" ||
           !quartet.hasOwnProperty("score") ||
           typeof quartet.score !== "number"
         ) {

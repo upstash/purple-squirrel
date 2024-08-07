@@ -1,5 +1,6 @@
 import { Redis } from "@upstash/redis";
 import type { NextRequest } from "next/server";
+import { isPosition } from "@/types/validations";
 
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL as string,
@@ -8,7 +9,7 @@ const redis = new Redis({
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const positionId = body.id;
+  const positionId = parseInt(body.id);
 
   const setupStatus = await redis.get("setup:status");
   if (!setupStatus) {
@@ -36,15 +37,13 @@ export async function POST(req: NextRequest) {
     return Response.json({ status: 404, message: "not-found" });
   }
   const position = positions.find((p: any) => p.id === positionId);
-  if (!position) {
+  if (!position || !isPosition(position)) {
     return Response.json({ status: 404, message: "not-found" });
   }
-  const parsedPosition = JSON.parse(position);
-
-  if (parsedPosition.status !== "open") {
+  if (position.status !== "open") {
     return Response.json({ status: 400, message: "closed" });
   }
-  return Response.json(position);
+  return Response.json({ status: 200, position: position });
 }
 
 export const dynamic = "force-dynamic";
