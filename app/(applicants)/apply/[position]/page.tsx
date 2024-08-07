@@ -39,17 +39,18 @@ export default function Page({ params }: { params: { position: string } }) {
     async function fetchData() {
       const res = await fetch("/api/positions/get-position-by-id", {
         method: "POST",
-        body: JSON.stringify({ id: parseInt(params.position) }),
+        body: JSON.stringify({ id: params.position }),
       });
       const data = await res.json();
-      if (!res.ok) {
+      if (data.status !== 200) {
         if (data.message) {
           window.location.href = `/unavailable?message=${data.message}`;
         } else {
           window.location.href = "/unavailable?message=error";
         }
+      } else {
+        setPosition(data.position.name);
       }
-      setPosition(data.name);
     }
 
     fetchData();
@@ -59,7 +60,7 @@ export default function Page({ params }: { params: { position: string } }) {
 
   return (
     <div className="h-screen flex justify-center bg-gradient-to-br from-blue-800 to-purple-500 pt-6">
-      <div className="flex flex-col gap-3 p-6 bg-default-50 rounded-medium h-min w-4/12">
+      <div className="flex flex-col gap-3 p-6 bg-default-50 rounded-medium h-min w-[550px]">
         <div className="flex flex-col gap-2">
           <div className="text-2xl pl-2">Application: {position}</div>
           <Input
@@ -73,28 +74,30 @@ export default function Page({ params }: { params: { position: string } }) {
               setFullName(value);
             }}
           />
-          <Input
-            isRequired
-            label="Email Address"
-            type="email"
-            size="sm"
-            variant="bordered"
-            value={emailAddress}
-            onValueChange={(value) => {
-              setEmailAddress(value);
-            }}
-          />
-          <Input
-            isRequired
-            label="Phone Number"
-            type="tel"
-            size="sm"
-            variant="bordered"
-            value={phoneNumber}
-            onValueChange={(value) => {
-              setPhoneNumber(value);
-            }}
-          />
+          <div className="flex flex-row gap-2">
+            <Input
+              isRequired
+              label="Email Address"
+              type="email"
+              size="sm"
+              variant="bordered"
+              value={emailAddress}
+              onValueChange={(value) => {
+                setEmailAddress(value);
+              }}
+            />
+            <Input
+              isRequired
+              label="Phone Number"
+              type="tel"
+              size="sm"
+              variant="bordered"
+              value={phoneNumber}
+              onValueChange={(value) => {
+                setPhoneNumber(value);
+              }}
+            />
+          </div>
           <div className="flex flex-row gap-2">
             <Input
               isRequired
@@ -165,6 +168,10 @@ export default function Page({ params }: { params: { position: string } }) {
             placeholder="Why do you want to work with us?"
             className=""
             variant="bordered"
+            value={cover}
+            onValueChange={(value) => {
+              setCover(value);
+            }}
           />
         </div>
         <UploadButton
