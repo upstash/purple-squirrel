@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardHeader, CardBody, CardFooter } from "@nextui-org/card";
 import { Link } from "@nextui-org/link";
 import { Divider } from "@nextui-org/divider";
@@ -14,6 +15,7 @@ import ArrowDropDownOutlinedIcon from "@mui/icons-material/ArrowDropDownOutlined
 import MailOutlineOutlinedIcon from "@mui/icons-material/MailOutlineOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import { Tooltip } from "@nextui-org/tooltip";
+import { ScrollShadow } from "@nextui-org/scroll-shadow";
 import {
   Dropdown,
   DropdownTrigger,
@@ -49,17 +51,26 @@ function checkMailAddress(email: string) {
 }
 
 function InfoCard() {
-  const { applicantCard, setApplicantCard, setApplicants, positions } =
-    useQueryTerminal();
+  const {
+    applicantCard,
+    setApplicantCard,
+    setApplicants,
+    positions,
+    setLatestApplicants,
+    firstQuery,
+  } = useQueryTerminal();
+  const [hover, setHover] = useState<number | null>(null);
   if (!applicantCard.display) {
     return null;
   }
   const applicantID = applicantCard.id;
-  const applicantScore = Math.round(applicantCard.score * 100);
+  const applicantScore = applicantCard.score
+    ? Math.round(applicantCard.score * 100)
+    : undefined;
   const applicant = applicantCard;
   const applicantName = applicant.applicantInfo.name;
   const applicantCover = applicant.applicantInfo.cover;
-  const applicantPositionID = applicant.id;
+  const applicantPositionID = applicant.positionId;
   const applicantPositionTitle = positions.find(
     (position) => position.id === applicant.positionId
   )?.name;
@@ -67,8 +78,8 @@ function InfoCard() {
   const applicantLocation = applicant.countryCode
     ? LOCATION_LOOKUP[applicant.countryCode]
     : "Unknown";
-  const applicantEmail = applicant.applicantInfo.contact.email;
-  const applicantPhone = applicant.applicantInfo.contact.phone;
+  const applicantEmail = applicant.applicantInfo.contact?.email;
+  const applicantPhone = applicant.applicantInfo.contact?.phone;
   const applicantResume = applicant.resumeInfo.uploadthing.url;
   const applicantWebsite = applicant.applicantInfo.urls?.website;
   const applicantLinkedIn = applicant.applicantInfo.urls?.linkedin;
@@ -87,19 +98,21 @@ function InfoCard() {
                 {applicantPositionTitle}
               </p>
             </div>
-            <p
-              className={
-                applicantScore > 89
-                  ? "text-bold text-6xl bg-gradient-to-r from-secondary to-secondary-400 bg-clip-text text-transparent"
-                  : applicantScore > 79
-                  ? "text-bold text-6xl bg-gradient-to-r from-success to-success-300 bg-clip-text text-transparent"
-                  : applicantScore > 49
-                  ? "text-bold text-6xl bg-gradient-to-r from-warning to-warning-300 bg-clip-text text-transparent"
-                  : "text-bold text-6xl bg-gradient-to-r from-danger to-danger-300 bg-clip-text text-transparent"
-              }
-            >
-              {applicantScore}
-            </p>
+            {applicantScore && (
+              <p
+                className={
+                  applicantScore > 89
+                    ? "text-bold text-6xl bg-gradient-to-r from-secondary to-secondary-400 bg-clip-text text-transparent"
+                    : applicantScore > 79
+                    ? "text-bold text-6xl bg-gradient-to-r from-success to-success-300 bg-clip-text text-transparent"
+                    : applicantScore > 49
+                    ? "text-bold text-6xl bg-gradient-to-r from-warning to-warning-300 bg-clip-text text-transparent"
+                    : "text-bold text-6xl bg-gradient-to-r from-danger to-danger-300 bg-clip-text text-transparent"
+                }
+              >
+                {applicantScore}
+              </p>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -109,12 +122,14 @@ function InfoCard() {
           <div className="flex gap-2">
             <div className="flex-auto flex flex-col gap-2">
               <div className="flex gap-2 w-full">
-                <div className="flex-initial border-default-200 border-2 rounded-medium py-1 px-3">
-                  <div className="flex flex-col">
-                    <p className="text-xs text-default-300">YOE</p>
-                    <p className="text-small text-bold">{applicantYOE}</p>
+                {applicantYOE !== -1 ? (
+                  <div className="flex-initial border-default-200 border-2 rounded-medium py-1 px-3">
+                    <div className="flex flex-col">
+                      <p className="text-xs text-default-300">YOE</p>
+                      <p className="text-small text-bold">{applicantYOE}</p>
+                    </div>
                   </div>
-                </div>
+                ) : null}
                 <div className="flex-auto border-default-200 border-2 rounded-medium py-1 px-3">
                   <div className="flex flex-col">
                     <p className="text-xs text-default-300">Location</p>
@@ -122,28 +137,34 @@ function InfoCard() {
                   </div>
                 </div>
               </div>
-              <div className="flex gap-2 items-end w-full">
-                <div className="flex-auto border-default-200 border-2 rounded-medium py-1 px-3">
-                  <div className="flex min-h-3 flex-col">
-                    <p className="text-xs text-default-300">Email</p>
-                    <p className="text-small text-bold">{applicantEmail}</p>
+              {applicantEmail && (
+                <div className="flex gap-2 items-end w-full">
+                  <div className="flex-auto border-default-200 border-2 rounded-medium py-1 px-3">
+                    <div className="flex min-h-3 flex-col">
+                      <p className="text-xs text-default-300">Email</p>
+                      <p className="text-small text-bold">{applicantEmail}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex gap-2 items-end w-full">
-                <div className="flex-auto border-default-200 border-2 rounded-medium py-1 px-3">
-                  <div className="flex flex-col">
-                    <p className="text-xs text-default-300">Phone</p>
-                    <p className="text-small text-bold">{applicantPhone}</p>
+              )}
+              {applicantPhone && (
+                <div className="flex gap-2 items-end w-full">
+                  <div className="flex-auto border-default-200 border-2 rounded-medium py-1 px-3">
+                    <div className="flex flex-col">
+                      <p className="text-xs text-default-300">Phone</p>
+                      <p className="text-small text-bold">{applicantPhone}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
               {applicantCover && applicantCover.length > 0 && (
                 <div className="flex gap-2 items-end w-full">
                   <div className="flex-auto border-default-200 border-2 rounded-medium py-1 px-3">
                     <div className="flex flex-col">
                       <p className="text-xs text-default-300">Cover Note</p>
-                      <p className="text-small text-bold">{applicantCover}</p>
+                      <ScrollShadow className="w-full max-h-[180px]" size={20}>
+                        <p className="text-small text-bold">{applicantCover}</p>
+                      </ScrollShadow>
                     </div>
                   </div>
                 </div>
@@ -187,7 +208,11 @@ function InfoCard() {
                   <Button
                     isIconOnly
                     isExternal
-                    href={applicantLinkedIn}
+                    href={
+                      applicantLinkedIn.includes("https://")
+                        ? applicantLinkedIn
+                        : `https://${applicantLinkedIn}`
+                    }
                     as={Link}
                   >
                     <LinkedInIcon fontSize="medium" />
@@ -197,7 +222,11 @@ function InfoCard() {
                   <Button
                     isIconOnly
                     isExternal
-                    href={applicantGithub}
+                    href={
+                      applicantGithub.includes("https://")
+                        ? applicantGithub
+                        : `https://${applicantGithub}`
+                    }
                     as={Link}
                   >
                     <MarkGithubIcon size={28} />
@@ -228,24 +257,20 @@ function InfoCard() {
                         ],
                       }),
                     });
-                    if (applicant && applicant.applicantInfo.notes) {
-                      await fetch(`/api/console/set-applicant-notes`, {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                          id: applicant.id,
-                          notes: applicant.applicantInfo.notes,
-                        }),
+                    setApplicantCard({ display: false });
+                    if (firstQuery) {
+                      setLatestApplicants((prev) => {
+                        return prev.filter(
+                          (triplet) => triplet.id !== applicantID
+                        );
+                      });
+                    } else {
+                      setApplicants((prev) => {
+                        return prev.filter(
+                          (triplet) => triplet.id !== applicantID
+                        );
                       });
                     }
-                    setApplicantCard({ display: false });
-                    setApplicants((prev) => {
-                      return prev.filter(
-                        (triplet) => triplet.id !== applicantID
-                      );
-                    });
                   }}
                 >
                   <DeleteOutlinedIcon />
@@ -309,19 +334,35 @@ function InfoCard() {
                     alert("Failed to update applicant status.");
                     return;
                   }
-                  setApplicants((prevApplicants) => {
-                    return prevApplicants.map((applicant) => {
-                      const newStatus = Array.from(keys)[0];
-                      if (
-                        typeof newStatus === "string" &&
-                        isApplicantStatus(newStatus) &&
-                        applicant.id === applicantID
-                      ) {
-                        return { ...applicant, status: newStatus };
-                      }
-                      return applicant;
+                  if (firstQuery) {
+                    setLatestApplicants((prevApplicants) => {
+                      return prevApplicants.map((applicant) => {
+                        const newStatus = Array.from(keys)[0];
+                        if (
+                          typeof newStatus === "string" &&
+                          isApplicantStatus(newStatus) &&
+                          applicant.id === applicantID
+                        ) {
+                          return { ...applicant, status: newStatus };
+                        }
+                        return applicant;
+                      });
                     });
-                  });
+                  } else {
+                    setApplicants((prevApplicants) => {
+                      return prevApplicants.map((applicant) => {
+                        const newStatus = Array.from(keys)[0];
+                        if (
+                          typeof newStatus === "string" &&
+                          isApplicantStatus(newStatus) &&
+                          applicant.id === applicantID
+                        ) {
+                          return { ...applicant, status: newStatus };
+                        }
+                        return applicant;
+                      });
+                    });
+                  }
                   setApplicantCard((prev) => {
                     const newStatus = Array.from(keys)[0];
                     if (
@@ -342,7 +383,7 @@ function InfoCard() {
                   >
                     <Chip
                       className="capitalize"
-                      color={getApplicantStatusColor(applicantStatus)}
+                      color={getApplicantStatusColor(key)}
                       size="sm"
                       variant="solid"
                     >
@@ -353,42 +394,34 @@ function InfoCard() {
               </DropdownMenu>
             </Dropdown>
             <div className="flex items-center">
-              {Array.from({ length: 5 }).map((_, index) =>
-                !applicantStars ? (
-                  <Button
-                    isIconOnly
-                    key={index}
-                    variant="light"
-                    size="sm"
-                    onPress={async () => {
-                      const res = await fetch(
-                        `/api/console/update-applicants-metadata`,
-                        {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
-                          },
-                          body: JSON.stringify({
-                            applicants: [
-                              {
-                                id: applicantID,
-                                positionId: applicantPositionID,
-                                metadata: {
-                                  countryCode: applicant.countryCode,
-                                  status: applicantStatus,
-                                  stars: index + 1,
-                                  notes: applicantNotes,
-                                  yoe: applicantYOE,
-                                },
-                              },
-                            ],
-                          }),
-                        }
-                      );
-                      if (!res.ok) {
-                        alert("Failed to update applicant stars.");
-                        return;
+              {Array.from({ length: 5 }).map((_, index) => (
+                <Button
+                  isIconOnly
+                  key={index}
+                  variant="light"
+                  size="sm"
+                  onMouseEnter={() => setHover(index)}
+                  onMouseLeave={() => setHover(null)}
+                  onPress={async () => {
+                    setApplicantCard((prev) => {
+                      if (!prev.display) {
+                        return prev;
                       }
+                      return { ...prev, stars: index + 1 };
+                    });
+                    if (firstQuery) {
+                      setLatestApplicants((prevApplicants) => {
+                        const updatedApplicants = prevApplicants.map(
+                          (applicant) => {
+                            if (applicant.id === applicantID) {
+                              return { ...applicant, stars: index + 1 };
+                            }
+                            return applicant;
+                          }
+                        );
+                        return updatedApplicants;
+                      });
+                    } else {
                       setApplicants((prevApplicants) => {
                         const updatedApplicants = prevApplicants.map(
                           (applicant) => {
@@ -400,82 +433,52 @@ function InfoCard() {
                         );
                         return updatedApplicants;
                       });
-                      setApplicantCard((prev) => {
-                        if (!prev.display) {
-                          return prev;
-                        }
-                        return { ...prev, stars: index + 1 };
-                      });
-                    }}
-                  >
-                    <StarBorderOutlinedIcon
-                      key={index}
-                      className={"text-default"}
-                    />
-                  </Button>
-                ) : (
-                  <Button
-                    isIconOnly
-                    key={index}
-                    variant="light"
-                    size="sm"
-                    onPress={async () => {
-                      const res = await fetch(
-                        `/api/console/update-applicants-metadata`,
-                        {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
-                          },
-                          body: JSON.stringify({
-                            applicants: [
-                              {
-                                id: applicantID,
-                                positionId: applicantPositionID,
-                                metadata: {
-                                  countryCode: applicant.countryCode,
-                                  status: applicantStatus,
-                                  stars: index + 1,
-                                  notes: applicantNotes,
-                                  yoe: applicantYOE,
-                                },
+                    }
+                    const res = await fetch(
+                      `/api/console/update-applicants-metadata`,
+                      {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                          applicants: [
+                            {
+                              id: applicantID,
+                              positionId: applicantPositionID,
+                              metadata: {
+                                countryCode: applicant.countryCode,
+                                status: applicantStatus,
+                                stars: index + 1,
+                                notes: applicantNotes,
+                                yoe: applicantYOE,
                               },
-                            ],
-                          }),
-                        }
-                      );
-                      if (!res.ok) {
-                        alert("Failed to update applicant stars.");
-                        return;
+                            },
+                          ],
+                        }),
                       }
-                      setApplicants((prevApplicants) => {
-                        const updatedApplicants = prevApplicants.map(
-                          (applicant) => {
-                            if (applicant.id === applicantID) {
-                              return { ...applicant, stars: index + 1 };
-                            }
-                            return applicant;
-                          }
-                        );
-                        return updatedApplicants;
-                      });
-                      setApplicantCard((prev) => {
-                        if (!prev.display) {
-                          return prev;
-                        }
-                        return { ...prev, stars: index + 1 };
-                      });
-                    }}
-                  >
+                    );
+                    if (!res.ok) {
+                      alert("Failed to update applicant stars.");
+                      return;
+                    }
+                  }}
+                >
+                  {(
+                    hover !== null ? index <= hover : index < applicantStars
+                  ) ? (
                     <StarOutlinedIcon
                       key={index}
-                      className={
-                        applicantStars > index ? "text-warning" : "text-default"
-                      }
+                      className="text-large text-warning"
                     />
-                  </Button>
-                )
-              )}
+                  ) : (
+                    <StarBorderOutlinedIcon
+                      key={index}
+                      className="text-large text-default"
+                    />
+                  )}
+                </Button>
+              ))}
             </div>
           </div>
           <Textarea
@@ -483,22 +486,53 @@ function InfoCard() {
             radius="md"
             placeholder="Enter notes..."
             value={applicantNotes || ""}
+            onBlur={async () => {
+              if (applicant && applicant.applicantInfo.notes) {
+                await fetch(`/api/console/set-applicant-notes`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    id: applicant.id,
+                    notes: applicant.applicantInfo.notes,
+                  }),
+                });
+              }
+            }}
             onValueChange={(value) => {
               applicant.applicantInfo.notes = value;
-              setApplicants((prevApplicants) => {
-                return prevApplicants.map((applicant) => {
-                  if (applicant.id === applicantID) {
-                    return {
-                      ...applicant,
-                      applicantInfo: {
-                        ...applicant.applicantInfo,
-                        notes: value,
-                      },
-                    };
-                  }
-                  return applicant;
+              if (firstQuery) {
+                setLatestApplicants((prevApplicants) => {
+                  return prevApplicants.map((applicant) => {
+                    if (applicant.id === applicantID) {
+                      return {
+                        ...applicant,
+                        applicantInfo: {
+                          ...applicant.applicantInfo,
+                          notes: value,
+                        },
+                      };
+                    }
+                    return applicant;
+                  });
                 });
-              });
+              } else {
+                setApplicants((prevApplicants) => {
+                  return prevApplicants.map((applicant) => {
+                    if (applicant.id === applicantID) {
+                      return {
+                        ...applicant,
+                        applicantInfo: {
+                          ...applicant.applicantInfo,
+                          notes: value,
+                        },
+                      };
+                    }
+                    return applicant;
+                  });
+                });
+              }
             }}
             className="w-full h-full"
           />

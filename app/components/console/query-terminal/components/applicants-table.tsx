@@ -75,7 +75,7 @@ const getColumnValue = (
 ) => {
   switch (columnKey) {
     case "score":
-      return Math.round(applicant.score * 100);
+      return Math.round((applicant.score || 0) * 100);
     case "name":
       return applicant.applicantInfo.name;
     case "position":
@@ -154,7 +154,7 @@ export function ApplicantsTable() {
       const applicantID = applicant.id;
       switch (columnKey) {
         case "score":
-          const applicantScore = Math.round(applicant.score * 100);
+          const applicantScore = Math.round((applicant.score || 0) * 100);
           return (
             <div>
               <p
@@ -208,17 +208,13 @@ export function ApplicantsTable() {
                       className={
                         applicantStars === 0
                           ? "text-large text-default"
-                          : "text-large"
+                          : "text-large text-warning"
                       }
                     />
                   ) : (
                     <StarBorderOutlinedIcon
                       key={index}
-                      className={
-                        applicantStars === 0
-                          ? "text-large text-default"
-                          : "text-large"
-                      }
+                      className="text-large text-default"
                     />
                   )
                 )}
@@ -242,6 +238,26 @@ export function ApplicantsTable() {
         case "actions":
           return (
             <div className="relative flex items-center gap-0 justify-end pr-unit-2">
+              <Tooltip
+                content="View Resume"
+                color={"default"}
+                delay={400}
+                closeDelay={600}
+              >
+                <Button
+                  isIconOnly
+                  isExternal
+                  as={Link}
+                  href={applicant.resumeInfo.uploadthing.url}
+                  variant="light"
+                  aria-label="View Resume"
+                  size="sm"
+                >
+                  <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                    <InsertDriveFileOutlinedIcon />
+                  </span>
+                </Button>
+              </Tooltip>
               <Tooltip
                 content="Delete Applicant"
                 color={"danger"}
@@ -294,26 +310,6 @@ export function ApplicantsTable() {
                   </span>
                 </Button>
               </Tooltip>
-              <Tooltip
-                content="View Resume"
-                color={"default"}
-                delay={400}
-                closeDelay={600}
-              >
-                <Button
-                  isIconOnly
-                  isExternal
-                  as={Link}
-                  href={applicant.resumeInfo.uploadthing.url}
-                  variant="light"
-                  aria-label="View Resume"
-                  size="sm"
-                >
-                  <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                    <InsertDriveFileOutlinedIcon />
-                  </span>
-                </Button>
-              </Tooltip>
             </div>
           );
         default:
@@ -333,25 +329,13 @@ export function ApplicantsTable() {
 
   const handleRowAction = useCallback(
     async (key: Key) => {
-      const applicant = applicants.find((applicant) => applicant.id === key);
+      const applicant = applicants.find((applicant) => applicant.id === parseInt(key as string));
       if (!applicant) {
         return;
       }
-      if (applicantCard.display && key === applicantCard.id) {
-        await fetch(`/api/console/set-applicant-notes`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: key,
-            notes: applicant?.applicantInfo.notes,
-          }),
-        });
-      }
       setApplicantCard((prev) => ({ display: true, ...applicant }));
     },
-    [applicants, applicantCard, setApplicantCard]
+    [applicants, setApplicantCard]
   );
 
   const bottomContent = useMemo(() => {
@@ -407,7 +391,7 @@ export function ApplicantsTable() {
                           }))
                         : applicants
                             .filter((applicant) =>
-                              new Set(selectedKeys).has(applicant.id)
+                              new Set(selectedKeys).has(applicant.id.toString())
                             )
                             .map((applicant) => ({
                               id: applicant.id,
@@ -419,7 +403,7 @@ export function ApplicantsTable() {
                   prev.filter((triplet) =>
                     selectedKeys === "all"
                       ? false
-                      : !new Set(selectedKeys).has(triplet.id)
+                      : !new Set(selectedKeys).has(triplet.id.toString())
                   )
                 );
                 setSelectedKeys(new Set([]));
@@ -488,7 +472,7 @@ export function ApplicantsTable() {
                     body: JSON.stringify({
                       applicants: applicants
                         .filter((applicant) =>
-                          newSelectedKeys.includes(applicant.id)
+                          newSelectedKeys.includes(applicant.id.toString())
                         )
                         .map((applicant) => ({
                           id: applicant.id,
@@ -510,7 +494,7 @@ export function ApplicantsTable() {
                 }
                 setApplicants((prev) => {
                   return prev.map((triplet) => {
-                    if (newSelectedKeys.includes(triplet.id)) {
+                    if (newSelectedKeys.includes(triplet.id.toString())) {
                       return { ...triplet, status: newKey };
                     }
                     return triplet;
@@ -540,7 +524,7 @@ export function ApplicantsTable() {
               data={applicants.map((applicant) => {
                 return {
                   ID: applicant.id,
-                  SCORE: Math.round(applicant.score * 100),
+                  SCORE: Math.round((applicant.score || 0) * 100),
                   NAME: applicant.applicantInfo.name,
                   POSITION: positions.find(
                     (position) => position.id === applicant.positionId
