@@ -33,7 +33,7 @@ import {
 const applicantDataSchema = z.object({
   applicantInfo: z.object({
     name: z.string(),
-    cover: z.string().optional(),
+    cover: z.string().optional().nullable(),
     contact: z.object({
       email: z.string().optional().nullable(),
       phone: z.string().optional().nullable(),
