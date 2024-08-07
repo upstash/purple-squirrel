@@ -2,10 +2,25 @@
 purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
 
 ## Overview
-- [🐿️ Deploy your own](#deploy-your-own)
-- [🥞 Stack](#stack)
 - [🔍 Features](#features)
-- [🖥️ Contribution Guide](#contribution-guide)
+- [🥞 Stack](#stack)
+- [🐿️ Deploy your own](#deploy-your-own)
+- [💻 Local development](#local-development)
+- [🚨 Troubleshooting](#troubleshooting)
+- [➕ Contribution Guide](#contribution-guide)
+
+## Features
+
+## Stack
+- DB: [Upstash Redis](https://upstash.com)
+- VectorDB: [Upstash Vector](https://upstash.com)
+- Scheduling & Serverless Function Orchestration: [Upstash QStash](https://upstash.com)
+- App logic: [Next.js](https://nextjs.org)
+- Deployment: [Vercel](https://vercel.com)
+- Auth: [Clerk](https://clerk.com)
+- File Storage: [uploadthing](https://uploadthing.com)
+- LLM & Embedding Models: [OpenAI](https://openai.com)
+- UI Components: [NextUI](https://nextui.org)
 
 ## Deploy your own
 <details>
@@ -16,7 +31,7 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
   3. Fill the environment variables as described in the next steps.
 </details>
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fupstash%2Fpurple-squirrel&env=UPSTASH_REDIS_REST_URL,UPSTASH_REDIS_REST_TOKEN,UPSTASH_VECTOR_REST_URL,UPSTASH_VECTOR_REST_TOKEN,QSTASH_URL,QSTASH_TOKEN,IMAP_USERNAME,IMAP_PASSWORD,IMAP_HOST,IMAP_PORT,UPLOADTHING_SECRET,UPLOADTHING_APP_ID,NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY,NEXT_PUBLIC_CLERK_SIGN_IN_URL,NEXT_PUBLIC_CLERK_SIGN_UP_URL,OPENAI_API_KEY,BASIC_AUTH_PASSWORD,NEXT_PUBLIC_URL)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fupstash%2Fpurple-squirrel&env=UPSTASH_REDIS_REST_URL,UPSTASH_REDIS_REST_TOKEN,UPSTASH_VECTOR_REST_URL,UPSTASH_VECTOR_REST_TOKEN,QSTASH_URL,QSTASH_TOKEN,IMAP_USERNAME,IMAP_PASSWORD,IMAP_HOST,IMAP_PORT,UPLOADTHING_SECRET,UPLOADTHING_APP_ID,NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY,NEXT_PUBLIC_CLERK_SIGN_IN_URL,NEXT_PUBLIC_CLERK_SIGN_UP_URL,OPENAI_API_KEY,NEXT_PUBLIC_URL)
 
 <details>
   <summary>Step 2: Connect your mailbox</summary>
@@ -63,7 +78,9 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
   12. Switch to [QStash tab in Console](https://console.upstash.com/qstash)
   13. Fill the following environment variables in Vercel, which can be found and copied in your QStash page:
       * QSTASH_URL
-      * QSTASH_TOKEN<br/><br/>
+      * QSTASH_TOKEN
+      * QSTASH_CURRENT_SIGNING_KEY
+      * QSTASH_NEXT_SIGNING_KEY<br/><br/>
         <img width="367" alt="qstash-tokens" src="https://github.com/upstash/purple-squirrel/assets/47982397/a532fc41-1391-47a0-a427-95494d73ef95">
 
 
@@ -154,7 +171,7 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
 </details>
 
 <details>
-  <summary>Step 7: Set URL and Basic Auth Password</summary>
+  <summary>Step 7: Set your application URL</summary>
 
   1. Fill the following environment variables in Vercel:
      * NEXT_PUBLIC_URL: URL of your application (e.g. purple-squirrel.vercel.app)
@@ -162,18 +179,9 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
 
 → Step 8: Click deploy & visit your site, it will guide you through the rest of your setup!
 
-## Stack
-- DB: [Upstash Redis](https://upstash.com)
-- VectorDB: [Upstash Vector](https://upstash.com)
-- Scheduling & Serverless Function Orchestration: [Upstash QStash](https://upstash.com)
-- App logic: [Next.js](https://nextjs.org)
-- Deployment: [Vercel](https://vercel.com)
-- Auth: [Clerk](https://clerk.com)
-- File Storage: [uploadthing](https://uploadthing.com)
-- LLM & Embedding Models: [OpenAI](https://openai.com)
-- UI Components: [NextUI](https://nextui.org)
+## Local development
 
-## Features
+## Troubleshooting
 
 ## Contribution Guide
 
