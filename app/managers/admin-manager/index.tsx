@@ -13,9 +13,9 @@ type AdminConsole = {
   setPositionOpenText: React.Dispatch<React.SetStateAction<string>>;
   positionSearchText: string;
   setPositionSearchText: React.Dispatch<React.SetStateAction<string>>;
-  statusFilter: "all" | Set<"Open" | "Closed">;
+  statusFilter: "all" | Set<"open" | "closed">;
   setStatusFilter: React.Dispatch<
-    React.SetStateAction<"all" | Set<"Open" | "Closed">>
+    React.SetStateAction<"all" | Set<"open" | "closed">>
   >;
   rowsPerPage: number;
   setRowsPerPage: React.Dispatch<React.SetStateAction<number>>;
@@ -39,9 +39,9 @@ type AdminConsole = {
   setUserSearchText: React.Dispatch<React.SetStateAction<string>>;
   usersLoading: boolean;
   setUsersLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  roleFilter: "all" | Set<"Admin" | "User" | "Recruiter">;
+  roleFilter: "all" | Set<"admin" | "user" | "recruiter">;
   setRoleFilter: React.Dispatch<
-    React.SetStateAction<"all" | Set<"Admin" | "User" | "Recruiter">>
+    React.SetStateAction<"all" | Set<"admin" | "user" | "recruiter">>
   >;
   userRowsPerPage: number;
   setUserRowsPerPage: React.Dispatch<React.SetStateAction<number>>;
@@ -72,7 +72,7 @@ export const AdminManager = ({ children }: { children: React.ReactNode }) => {
   const [positionSearchText, setPositionSearchText] = useState<string>("");
 
   const [statusFilter, setStatusFilter] = useState<
-    "all" | Set<"Open" | "Closed">
+    "all" | Set<"open" | "closed">
   >("all");
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [tablePage, setTablePage] = useState<number>(1);
@@ -92,7 +92,7 @@ export const AdminManager = ({ children }: { children: React.ReactNode }) => {
   const [userSearchText, setUserSearchText] = useState<string>("");
   const [usersLoading, setUsersLoading] = useState<boolean>(false);
   const [roleFilter, setRoleFilter] = useState<
-    "all" | Set<"Admin" | "User" | "Recruiter">
+    "all" | Set<"admin" | "user" | "recruiter">
   >("all");
   const [userRowsPerPage, setUserRowsPerPage] = useState<number>(10);
   const [userTablePage, setUserTablePage] = useState<number>(1);
