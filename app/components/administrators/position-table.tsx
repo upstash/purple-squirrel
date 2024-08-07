@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback, Key } from "react";
+import { useMemo, useCallback, useState, Key } from "react";
 
 import {
   Dropdown,
@@ -23,12 +23,15 @@ import { Input } from "@nextui-org/input";
 import { Chip } from "@nextui-org/chip";
 import { Tooltip } from "@nextui-org/tooltip";
 import { Pagination } from "@nextui-org/pagination";
+import { Link } from "@nextui-org/link";
 
 import { ChevronDownIcon } from "@/app/utils/chevron-down-icon";
 import { capitalize } from "@/app/utils";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import NextWeekOutlinedIcon from "@mui/icons-material/NextWeekOutlined";
 import ArrowDropDownOutlinedIcon from "@mui/icons-material/ArrowDropDownOutlined";
+import InsertLinkOutlinedIcon from "@mui/icons-material/InsertLinkOutlined";
+import DoneOutlinedIcon from '@mui/icons-material/DoneOutlined';
 
 import { useAdmin } from "@/app/managers";
 
@@ -39,6 +42,8 @@ import { isPositionStatus } from "@/types/validations";
 import { POSITION_STATUS_COLOR_MAP } from "@/app/constants";
 
 import { getPositionStatusColor } from "@/app/utils";
+
+import BASE_URL from "@/app/utils/base-url";
 
 const columns = [
   { name: "ID", uid: "id", sortable: true },
@@ -62,6 +67,38 @@ const eqSet = (xs: Set<any>, ys: Set<any>) =>
 
 const inSet = (xs: Set<any>, ys: Set<any>) =>
   Array.from(xs).every((x) => ys.has(x));
+
+function CopyButton({ url }: { url: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <Tooltip
+      content="Share Position"
+      color={"default"}
+      delay={400}
+      closeDelay={600}
+    >
+      <Button
+        isIconOnly
+        variant="light"
+        aria-label="Share Position"
+        size="sm"
+        onPress={() => {
+          navigator.clipboard.writeText(url);
+          setCopied(true);
+          setTimeout(() => {
+            setCopied(false);
+          }, 1500);
+        }}
+      >
+        <span
+          className="text-lg text-default-500 cursor-pointer active:opacity-50"
+        >
+          {copied ? <DoneOutlinedIcon /> : <InsertLinkOutlinedIcon />}
+        </span>
+      </Button>
+    </Tooltip>
+  );
+}
 
 export function PositionTable() {
   const {
@@ -99,8 +136,8 @@ export function PositionTable() {
     ) {
       filteredPositions = filteredPositions.filter((position) =>
         position.status === "open"
-          ? Array.from(statusFilter).includes("Open")
-          : Array.from(statusFilter).includes("Closed")
+          ? Array.from(statusFilter).includes("open")
+          : Array.from(statusFilter).includes("closed")
       );
     }
     return filteredPositions;
@@ -214,58 +251,61 @@ export function PositionTable() {
           );
         case "actions":
           return (
-            <Tooltip
-              content="Delete Position"
-              color={"danger"}
-              delay={400}
-              closeDelay={600}
-            >
-              <Button
-                isIconOnly
-                variant="light"
-                aria-label="Delete Position"
-                size="sm"
-                isDisabled={position.id === 1}
-                onPress={async () => {
-                  if (position.id === 1) {
-                    return;
-                  }
-                  setPositionsLoading((prev) => {
-                    return true;
-                  });
-                  const res = await fetch(`/api/positions/delete-positions`, {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ positions: [position] }),
-                  });
-
-                  if (res.status !== 200) {
-                    console.error("Failed to delete position");
-                  } else {
-                    setPositions((prev) => {
-                      return prev.filter((pair) => {
-                        return pair.id !== position.id;
-                      });
-                    });
-                  }
-                  setPositionsLoading((prev) => {
-                    return false;
-                  });
-                }}
+            <div className="flex flex-row gap-0">
+              <CopyButton url={`${BASE_URL}/apply/${position.id}`} />
+              <Tooltip
+                content="Delete Position"
+                color={"danger"}
+                delay={400}
+                closeDelay={600}
               >
-                <span
-                  className={
-                    position.id === 1
-                      ? "text-lg text-default-400 cursor-pointer active:opacity-50"
-                      : "text-lg text-danger-400 cursor-pointer active:opacity-50"
-                  }
+                <Button
+                  isIconOnly
+                  variant="light"
+                  aria-label="Delete Position"
+                  size="sm"
+                  isDisabled={position.id === 1}
+                  onPress={async () => {
+                    if (position.id === 1) {
+                      return;
+                    }
+                    setPositionsLoading((prev) => {
+                      return true;
+                    });
+                    const res = await fetch(`/api/positions/delete-positions`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({ positions: [position] }),
+                    });
+
+                    if (res.status !== 200) {
+                      console.error("Failed to delete position");
+                    } else {
+                      setPositions((prev) => {
+                        return prev.filter((pair) => {
+                          return pair.id !== position.id;
+                        });
+                      });
+                    }
+                    setPositionsLoading((prev) => {
+                      return false;
+                    });
+                  }}
                 >
-                  <DeleteOutlinedIcon />
-                </span>
-              </Button>
-            </Tooltip>
+                  <span
+                    className={
+                      position.id === 1
+                        ? "text-lg text-default-400 cursor-pointer active:opacity-50"
+                        : "text-lg text-danger-400 cursor-pointer active:opacity-50"
+                    }
+                  >
+                    <DeleteOutlinedIcon />
+                  </span>
+                </Button>
+              </Tooltip>
+            </div>
           );
         default:
           return "?";
@@ -335,16 +375,17 @@ export function PositionTable() {
                 closeOnSelect={false}
                 selectedKeys={statusFilter}
                 selectionMode="multiple"
-                onSelectionChange={(keys) => {}}
+                onSelectionChange={(keys) => {
+                  if (!Array.from(keys).every((key) => isPositionStatus(key))) {
+                    return;
+                  }
+                  setStatusFilter(new Set(Array.from(keys)) as Set<"open" | "closed">);
+                }}
               >
                 {statusOptions.map((status) => (
                   <DropdownItem
                     key={status.uid}
-                    className={
-                      status.uid === "All"
-                        ? "capitalize text-danger"
-                        : "capitalize"
-                    }
+                    className="capitalize"
                     variant="bordered"
                   >
                     {
