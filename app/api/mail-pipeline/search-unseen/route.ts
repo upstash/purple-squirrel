@@ -80,7 +80,7 @@ export async function POST(req: Request) {
           return;
         }
         
-        const msgs = results.slice(-50).map((result) => {
+        const msgs = results.map((result) => {
           return {
             queueName: "mail-fetch-queue",
             url: `${QSTASH_TARGET_URL}/api/mail-pipeline/fetch-unseen`,
