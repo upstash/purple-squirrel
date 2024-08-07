@@ -10,6 +10,7 @@ import {
   PositionStatus,
   Scheduling,
   Role,
+  Position,
 } from "./index";
 import {
   applicantRowSchema,
@@ -23,6 +24,7 @@ import {
   positionStatusSchema,
   schedulingSchema,
   roleSchema,
+  positionSchema,
 } from "./schemas";
 
 export const isApplicantRow = (data: any): data is ApplicantRow => {
@@ -65,6 +67,10 @@ export const isCountryCode = (data: any): data is CountryCode => {
 
 export const isPositionStatus = (data: any): data is PositionStatus => {
   return positionStatusSchema.safeParse(data).success;
+};
+
+export const isPosition = (data: any): data is Position => {
+  return positionSchema.safeParse(data).success;
 };
 
 export const isScheduling = (data: any): data is Scheduling => {
