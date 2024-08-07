@@ -43,19 +43,19 @@ export type ApplicantStatus = (typeof APPLICANT_STATUS_OPTIONS)[number];
 export type CountryCode = (typeof COUNTRY_CODES)[number] | undefined;
 
 export type ApplicantMetadata = {
-  countryCode: CountryCode;
+  countryCode?: CountryCode;
   status: ApplicantStatus;
   stars: number;
   yoe: number;
 };
 
 export type Applicant = {
-  id: string;
+  id: number;
 } & ApplicantData &
   ApplicantMetadata;
 
 export type ApplicantRow = Applicant & {
-  score: number;
+  score?: number;
 };
 
 export type ApplicantCard =
