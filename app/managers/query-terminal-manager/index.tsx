@@ -9,6 +9,7 @@ import type {
   ApplicantCard,
   SearchSettings,
   ApplicantRow,
+  Applicant,
 } from "@/types";
 
 type QueryTerminal = {
@@ -52,6 +53,10 @@ type QueryTerminal = {
   setSettingsTab: React.Dispatch<
     React.SetStateAction<QueryTerminalSettingsTab>
   >;
+  latestApplicants: Applicant[];
+  setLatestApplicants: React.Dispatch<React.SetStateAction<Applicant[]>>;
+  firstQuery: boolean;
+  setFirstQuery: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const QueryTerminalContext = createContext<QueryTerminal | undefined>(
@@ -134,6 +139,10 @@ export const QueryTerminalManager = ({
 
   const [settingsTab, setSettingsTab] =
     useState<QueryTerminalSettingsTab>("filters");
+
+  const [latestApplicants, setLatestApplicants] = useState<Applicant[]>([]);
+
+  const [firstQuery, setFirstQuery] = useState<boolean>(true);
   return (
     <QueryTerminalProvider
       value={{
@@ -171,6 +180,10 @@ export const QueryTerminalManager = ({
         setLocationSearchText,
         settingsTab,
         setSettingsTab,
+        latestApplicants,
+        setLatestApplicants,
+        firstQuery,
+        setFirstQuery,
       }}
     >
       {children}

@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { ApplicantsTable, ApplicantCard, QueryBar } from "./components";
+import {
+  ApplicantsTable,
+  ApplicantCard,
+  QueryBar,
+  LatestApplicantsTable,
+} from "./components";
 
 import { useQueryTerminal } from "@/app/managers";
 
@@ -12,7 +17,18 @@ export function QueryTerminal() {
     setQueryBarLoading,
     setPositions,
     applicantCard,
+    firstQuery,
+    setLatestApplicants,
   } = useQueryTerminal();
+
+  useEffect(() => {
+    fetch("/api/console/get-latest-applicants")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data)
+        setLatestApplicants(data);
+      });
+  }, [setLatestApplicants]);
 
   useEffect(() => {
     fetch("/api/settings/get-search-settings")
@@ -43,7 +59,7 @@ export function QueryTerminal() {
       <div className="flex-auto flex h-full">
         <div className="flex-[72_1_0%] pt-unit-2 transition-all duration-300 ease-in-out">
           <div className="flex flex-col bg-default-50 rounded-medium h-full">
-            <ApplicantsTable />
+            {firstQuery ? <LatestApplicantsTable /> : <ApplicantsTable />}
           </div>
         </div>
         {applicantCard.display ? (

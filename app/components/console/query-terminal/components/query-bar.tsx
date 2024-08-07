@@ -80,6 +80,7 @@ export function QueryBar() {
     setSettingsTab,
     locationSearchText,
     setLocationSearchText,
+    setFirstQuery,
   } = useQueryTerminal();
 
   const { setRecentQueries } = useQueries();
@@ -197,6 +198,9 @@ export function QueryBar() {
                   color: searchSettings.flash ? "primary" : "secondary",
                   text: "Finding Applicants...",
                 });
+                setFirstQuery((prev) => {
+                  return false;
+                });
                 try {
                   const data = {
                     tags: tags,
@@ -237,7 +241,7 @@ export function QueryBar() {
                   const rankResponseData = await rankResponse.json();
                   console.log(rankResponseData);
                   if (rankResponseData.status === 200) {
-                    const rankApplicants = rankResponseData.rankedApplicants
+                    const rankApplicants = rankResponseData.rankedApplicants;
                     for (const triplet of rankApplicants) {
                       if (!applicantRowSchema.safeParse(triplet).success) {
                         console.error("Invalid response data");
@@ -266,21 +270,6 @@ export function QueryBar() {
                           };
                         });
                       } else {
-                        if (
-                          applicantCard.display &&
-                          applicantCard.applicantInfo.notes
-                        ) {
-                          await fetch(`/api/console/set-applicant-notes`, {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({
-                              id: applicantCard.id,
-                              notes: applicantCard.applicantInfo.notes,
-                            }),
-                          });
-                        }
                         setApplicantCard({ display: false });
                       }
                     }
@@ -365,68 +354,126 @@ export function QueryBar() {
                       <Tab key="ranking" title="Ranking" />
                     </Tabs>
                     {settingsTab === "filters" ? (
-                      <Accordion
-                        showDivider={false}
-                        className="p-2 flex flex-col gap-1 w-[25vw]"
-                        variant="shadow"
-                        itemClasses={itemClasses}
-                      >
-                        <AccordionItem
-                          key="1"
-                          aria-label="Location"
-                          classNames={{
-                            subtitle:
-                              filter.countryCodeFilter.length === 0
-                                ? null
-                                : "text-primary",
-                          }}
-                          startContent={
-                            <PublicOutlinedIcon className="text-primary" />
-                          }
-                          subtitle={
-                            filter.countryCodeFilter.length === 0
-                              ? "Any"
-                              : `${filter.countryCodeFilter.length} Selected`
-                          }
-                          title="Location"
+                      <div className="flex flex-col gap-2">
+                        <Accordion
+                          showDivider={false}
+                          className="p-2 flex flex-col gap-1 w-[25vw]"
+                          variant="shadow"
+                          itemClasses={itemClasses}
                         >
-                          <div className="flex flex-col px-1 py-2 w-full">
-                            <Input
-                              isClearable
-                              placeholder="Enter a location..."
-                              onClear={() => {
-                                setLocationSearchText((prev) => {
-                                  return "";
-                                });
-                              }}
-                              size="sm"
-                              className="w-full"
-                              value={locationSearchText}
-                              onValueChange={(value) =>
-                                setLocationSearchText((prev) => {
-                                  return value;
-                                })
-                              }
-                              classNames={{
-                                inputWrapper: "h-unit-10 bg-default-100",
-                              }}
-                            ></Input>
-                            {locationSearchText.length < 3 ? (
-                              filter.countryCodeFilter.length === 0 ? null : (
+                          <AccordionItem
+                            key="1"
+                            aria-label="Location"
+                            classNames={{
+                              subtitle:
+                                filter.countryCodeFilter.length === 0
+                                  ? null
+                                  : "text-primary",
+                            }}
+                            startContent={
+                              <PublicOutlinedIcon className="text-primary" />
+                            }
+                            subtitle={
+                              filter.countryCodeFilter.length === 0
+                                ? "Any"
+                                : `${filter.countryCodeFilter.length} Selected`
+                            }
+                            title="Location"
+                          >
+                            <div className="flex flex-col px-1 py-2 w-full">
+                              <Input
+                                isClearable
+                                placeholder="Enter a location..."
+                                onClear={() => {
+                                  setLocationSearchText((prev) => {
+                                    return "";
+                                  });
+                                }}
+                                size="sm"
+                                className="w-full"
+                                value={locationSearchText}
+                                onValueChange={(value) =>
+                                  setLocationSearchText((prev) => {
+                                    return value;
+                                  })
+                                }
+                                classNames={{
+                                  inputWrapper: "h-unit-10 bg-default-100",
+                                }}
+                              ></Input>
+                              {locationSearchText.length < 3 ? (
+                                filter.countryCodeFilter.length === 0 ? null : (
+                                  <ScrollShadow
+                                    size={5}
+                                    className="max-h-24 flex flex-col gap-2 mt-2"
+                                  >
+                                    <div className="flex flex-col">
+                                      {filter.countryCodeFilter.map(
+                                        (countryCode) => {
+                                          return (
+                                            <Button
+                                              size="sm"
+                                              key={countryCode}
+                                              variant="light"
+                                              color="primary"
+                                              onPress={() => {
+                                                setQuery((prev) => {
+                                                  return {
+                                                    ...prev,
+                                                    filter: {
+                                                      ...prev.filter,
+                                                      countryCodeFilter:
+                                                        prev.filter.countryCodeFilter.filter(
+                                                          (id) => {
+                                                            return (
+                                                              id !== countryCode
+                                                            );
+                                                          }
+                                                        ),
+                                                    },
+                                                  };
+                                                });
+                                              }}
+                                            >
+                                              <div className="flex justify-between w-full text-sm text-left">
+                                                {countryCode
+                                                  ? LOCATION_LOOKUP[countryCode]
+                                                  : "Unknown"}
+                                              </div>
+                                            </Button>
+                                          );
+                                        }
+                                      )}
+                                    </div>
+                                  </ScrollShadow>
+                                )
+                              ) : (
                                 <ScrollShadow
                                   size={5}
-                                  className="max-h-24 flex flex-col gap-2 mt-2"
+                                  className="max-h-24 flex flex-col gap-1 mt-2"
                                 >
                                   <div className="flex flex-col">
-                                    {filter.countryCodeFilter.map(
-                                      (countryCode) => {
-                                        return (
-                                          <Button
-                                            size="sm"
-                                            key={countryCode}
-                                            variant="light"
-                                            color="primary"
-                                            onPress={() => {
+                                    {LOCATIONS.filter((location) => {
+                                      return location.name
+                                        .toLowerCase()
+                                        .includes(
+                                          locationSearchText.toLowerCase()
+                                        );
+                                    }).map((location) => {
+                                      const checked =
+                                        filter.countryCodeFilter.includes(
+                                          location.iso2
+                                        );
+                                      return (
+                                        <Button
+                                          size="sm"
+                                          key={location.iso2}
+                                          variant="light"
+                                          color={
+                                            checked ? "primary" : "default"
+                                          }
+                                          onPress={() => {
+                                            if (checked) {
                                               setQuery((prev) => {
                                                 return {
                                                   ...prev,
@@ -436,63 +483,104 @@ export function QueryBar() {
                                                       prev.filter.countryCodeFilter.filter(
                                                         (id) => {
                                                           return (
-                                                            id !== countryCode
+                                                            id !== location.iso2
                                                           );
                                                         }
                                                       ),
                                                   },
                                                 };
                                               });
-                                            }}
-                                          >
-                                            <div className="flex justify-between w-full text-sm text-left">
-                                              {countryCode
-                                                ? LOCATION_LOOKUP[countryCode]
-                                                : "Unknown"}
-                                            </div>
-                                          </Button>
-                                        );
-                                      }
-                                    )}
+                                            } else {
+                                              setQuery((prev) => {
+                                                return {
+                                                  ...prev,
+                                                  filter: {
+                                                    ...prev.filter,
+                                                    countryCodeFilter: [
+                                                      ...prev.filter
+                                                        .countryCodeFilter,
+                                                      location.iso2,
+                                                    ],
+                                                  },
+                                                };
+                                              });
+                                            }
+                                          }}
+                                        >
+                                          <div className="flex justify-between w-full text-sm text-left">
+                                            {location.name}
+                                          </div>
+                                        </Button>
+                                      );
+                                    })}
                                   </div>
                                 </ScrollShadow>
-                              )
-                            ) : (
-                              <ScrollShadow
-                                size={5}
-                                className="max-h-24 flex flex-col gap-1 mt-2"
-                              >
-                                <div className="flex flex-col">
-                                  {LOCATIONS.filter((location) => {
-                                    return location.name
-                                      .toLowerCase()
-                                      .includes(
-                                        locationSearchText.toLowerCase()
-                                      );
-                                  }).map((location) => {
-                                    const checked =
-                                      filter.countryCodeFilter.includes(
-                                        location.iso2
-                                      );
-                                    return (
-                                      <Button
-                                        size="sm"
-                                        key={location.iso2}
-                                        variant="light"
-                                        color={checked ? "primary" : "default"}
-                                        onPress={() => {
-                                          if (checked) {
+                              )}
+                            </div>
+                          </AccordionItem>
+                          <AccordionItem
+                            key="2"
+                            aria-label="Status"
+                            classNames={{
+                              subtitle:
+                                filter.statusFilter.length === 0
+                                  ? null
+                                  : "text-success",
+                            }}
+                            startContent={
+                              <NextWeekOutlinedIcon className="text-success" />
+                            }
+                            subtitle={
+                              filter.statusFilter.length === 0
+                                ? "Any"
+                                : `${filter.statusFilter.length} Selected`
+                            }
+                            title="Status"
+                          >
+                            <div className="flex flex-col gap-2 justify-center">
+                              <div className="flex flex-row gap-2 justify-center">
+                                {(
+                                  [
+                                    "newApply",
+                                    "screening",
+                                    "assessment",
+                                    "interview",
+                                  ] as const
+                                ).map((key) => {
+                                  const noFilter =
+                                    filter.statusFilter.length === 0;
+                                  const statusChecked =
+                                    filter.statusFilter.includes(key);
+                                  return (
+                                    <button
+                                      key={key}
+                                      onClick={() => {
+                                        if (noFilter) {
+                                          setQuery((prev) => {
+                                            return {
+                                              ...prev,
+                                              filter: {
+                                                ...prev.filter,
+                                                statusFilter:
+                                                  APPLICANT_STATUS_OPTIONS.filter(
+                                                    (id) => {
+                                                      return id === key;
+                                                    }
+                                                  ),
+                                              },
+                                            };
+                                          });
+                                        } else {
+                                          if (statusChecked) {
                                             setQuery((prev) => {
                                               return {
                                                 ...prev,
                                                 filter: {
                                                   ...prev.filter,
-                                                  countryCodeFilter:
-                                                    prev.filter.countryCodeFilter.filter(
+                                                  statusFilter:
+                                                    prev.filter.statusFilter.filter(
                                                       (id) => {
-                                                        return (
-                                                          id !== location.iso2
-                                                        );
+                                                        return id !== key;
                                                       }
                                                     ),
                                                 },
@@ -504,376 +592,308 @@ export function QueryBar() {
                                                 ...prev,
                                                 filter: {
                                                   ...prev.filter,
-                                                  countryCodeFilter: [
-                                                    ...prev.filter
-                                                      .countryCodeFilter,
-                                                    location.iso2,
-                                                  ],
+                                                  statusFilter:
+                                                    prev.filter.statusFilter
+                                                      .length === 7
+                                                      ? []
+                                                      : [
+                                                          ...prev.filter
+                                                            .statusFilter,
+                                                          key,
+                                                        ],
                                                 },
                                               };
                                             });
                                           }
-                                        }}
+                                        }
+                                      }}
+                                    >
+                                      <Chip
+                                        className="capitalize"
+                                        color={
+                                          noFilter || statusChecked
+                                            ? getApplicantStatusColor(key)
+                                            : "default"
+                                        }
+                                        size="sm"
+                                        variant={
+                                          noFilter || statusChecked
+                                            ? "solid"
+                                            : "bordered"
+                                        }
                                       >
-                                        <div className="flex justify-between w-full text-sm text-left">
-                                          {location.name}
-                                        </div>
-                                      </Button>
-                                    );
-                                  })}
-                                </div>
-                              </ScrollShadow>
-                            )}
-                          </div>
-                        </AccordionItem>
-                        <AccordionItem
-                          key="2"
-                          aria-label="Status"
-                          classNames={{
-                            subtitle:
-                              filter.statusFilter.length === 0
-                                ? null
-                                : "text-success",
-                          }}
-                          startContent={
-                            <NextWeekOutlinedIcon className="text-success" />
-                          }
-                          subtitle={
-                            filter.statusFilter.length === 0
-                              ? "Any"
-                              : `${filter.statusFilter.length} Selected`
-                          }
-                          title="Status"
-                        >
-                          <div className="flex flex-col gap-2 justify-center">
-                            <div className="flex flex-row gap-2 justify-center">
-                              {(
-                                [
-                                  "newApply",
-                                  "screening",
-                                  "assessment",
-                                  "interview",
-                                ] as const
-                              ).map((key) => {
-                                const noFilter =
-                                  filter.statusFilter.length === 0;
-                                const statusChecked =
-                                  filter.statusFilter.includes(key);
-                                return (
-                                  <button
-                                    key={key}
-                                    onClick={() => {
-                                      if (noFilter) {
-                                        setQuery((prev) => {
-                                          return {
-                                            ...prev,
-                                            filter: {
-                                              ...prev.filter,
-                                              statusFilter:
-                                                APPLICANT_STATUS_OPTIONS.filter(
-                                                  (id) => {
-                                                    return id !== key;
-                                                  }
-                                                ),
-                                            },
-                                          };
-                                        });
-                                      } else {
-                                        if (statusChecked) {
+                                        {key === "newApply" ? "New" : key}
+                                      </Chip>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                              <div className="flex flex-row gap-2 justify-center">
+                                {(
+                                  [
+                                    "shortlisted",
+                                    "offer",
+                                    "onboarding",
+                                    "hired",
+                                  ] as const
+                                ).map((key) => {
+                                  const noFilter =
+                                    filter.statusFilter.length === 0;
+                                  const statusChecked =
+                                    filter.statusFilter.includes(key);
+                                  return (
+                                    <button
+                                      key={key}
+                                      onClick={() => {
+                                        if (noFilter) {
                                           setQuery((prev) => {
                                             return {
                                               ...prev,
                                               filter: {
                                                 ...prev.filter,
                                                 statusFilter:
-                                                  prev.filter.statusFilter.filter(
+                                                  APPLICANT_STATUS_OPTIONS.filter(
                                                     (id) => {
-                                                      return id !== key;
+                                                      return id === key;
                                                     }
                                                   ),
                                               },
                                             };
                                           });
                                         } else {
-                                          setQuery((prev) => {
-                                            return {
-                                              ...prev,
-                                              filter: {
-                                                ...prev.filter,
-                                                statusFilter:
-                                                  prev.filter.statusFilter
-                                                    .length === 7
-                                                    ? []
-                                                    : [
-                                                        ...prev.filter
-                                                          .statusFilter,
-                                                        key,
-                                                      ],
-                                              },
-                                            };
-                                          });
+                                          if (statusChecked) {
+                                            setQuery((prev) => {
+                                              return {
+                                                ...prev,
+                                                filter: {
+                                                  ...prev.filter,
+                                                  statusFilter:
+                                                    prev.filter.statusFilter.filter(
+                                                      (id) => {
+                                                        return id !== key;
+                                                      }
+                                                    ),
+                                                },
+                                              };
+                                            });
+                                          } else {
+                                            setQuery((prev) => {
+                                              return {
+                                                ...prev,
+                                                filter: {
+                                                  ...prev.filter,
+                                                  statusFilter:
+                                                    prev.filter.statusFilter
+                                                      .length === 7
+                                                      ? []
+                                                      : [
+                                                          ...prev.filter
+                                                            .statusFilter,
+                                                          key,
+                                                        ],
+                                                },
+                                              };
+                                            });
+                                          }
                                         }
-                                      }
-                                    }}
-                                  >
-                                    <Chip
-                                      className="capitalize"
-                                      color={
-                                        noFilter || statusChecked
-                                          ? getApplicantStatusColor(key)
-                                          : "default"
-                                      }
-                                      size="sm"
-                                      variant={
-                                        noFilter || statusChecked
-                                          ? "solid"
-                                          : "bordered"
-                                      }
+                                      }}
                                     >
-                                      {key === "newApply" ? "New" : key}
-                                    </Chip>
-                                  </button>
-                                );
-                              })}
+                                      <Chip
+                                        className="capitalize"
+                                        color={
+                                          noFilter || statusChecked
+                                            ? getApplicantStatusColor(key)
+                                            : "default"
+                                        }
+                                        size="sm"
+                                        variant={
+                                          noFilter || statusChecked
+                                            ? "solid"
+                                            : "bordered"
+                                        }
+                                      >
+                                        {key}
+                                      </Chip>
+                                    </button>
+                                  );
+                                })}
+                              </div>
                             </div>
+                          </AccordionItem>
+                          <AccordionItem
+                            key="3"
+                            aria-label="Stars"
+                            classNames={{
+                              subtitle:
+                                filter.starsFilter === -1
+                                  ? null
+                                  : "text-warning",
+                            }}
+                            startContent={
+                              <StarBorderOutlinedIcon className="text-warning" />
+                            }
+                            subtitle={
+                              filter.starsFilter === -1
+                                ? "Any"
+                                : `${filter.starsFilter}+`
+                            }
+                            title="Stars"
+                          >
                             <div className="flex flex-row gap-2 justify-center">
-                              {(
-                                [
-                                  "shortlisted",
-                                  "offer",
-                                  "onboarding",
-                                  "hired",
-                                ] as const
-                              ).map((key) => {
-                                const noFilter =
-                                  filter.statusFilter.length === 0;
-                                const statusChecked =
-                                  filter.statusFilter.includes(key);
+                              {[-1, 1, 2, 3, 4, 5].map((key) => {
+                                const starsChecked = filter.starsFilter === key;
                                 return (
                                   <button
                                     key={key}
                                     onClick={() => {
-                                      if (noFilter) {
-                                        setQuery((prev) => {
-                                          return {
-                                            ...prev,
-                                            filter: {
-                                              ...prev.filter,
-                                              statusFilter:
-                                                APPLICANT_STATUS_OPTIONS.filter(
-                                                  (id) => {
-                                                    return id !== key;
-                                                  }
-                                                ),
-                                            },
-                                          };
-                                        });
-                                      } else {
-                                        if (statusChecked) {
-                                          setQuery((prev) => {
-                                            return {
-                                              ...prev,
-                                              filter: {
-                                                ...prev.filter,
-                                                statusFilter:
-                                                  prev.filter.statusFilter.filter(
-                                                    (id) => {
-                                                      return id !== key;
-                                                    }
-                                                  ),
-                                              },
-                                            };
-                                          });
-                                        } else {
-                                          setQuery((prev) => {
-                                            return {
-                                              ...prev,
-                                              filter: {
-                                                ...prev.filter,
-                                                statusFilter:
-                                                  prev.filter.statusFilter
-                                                    .length === 7
-                                                    ? []
-                                                    : [
-                                                        ...prev.filter
-                                                          .statusFilter,
-                                                        key,
-                                                      ],
-                                              },
-                                            };
-                                          });
-                                        }
-                                      }
+                                      setQuery((prev) => {
+                                        return {
+                                          ...prev,
+                                          filter: {
+                                            ...prev.filter,
+                                            starsFilter: starsChecked
+                                              ? -1
+                                              : key,
+                                          },
+                                        };
+                                      });
                                     }}
                                   >
                                     <Chip
-                                      className="capitalize"
                                       color={
-                                        noFilter || statusChecked
-                                          ? getApplicantStatusColor(key)
-                                          : "default"
+                                        key === -1 || !starsChecked
+                                          ? "default"
+                                          : "warning"
                                       }
                                       size="sm"
                                       variant={
-                                        noFilter || statusChecked
-                                          ? "solid"
-                                          : "bordered"
+                                        starsChecked ? "solid" : "bordered"
                                       }
                                     >
-                                      {key}
+                                      {key === -1 ? "No Filter" : `${key}+`}
                                     </Chip>
                                   </button>
                                 );
                               })}
                             </div>
-                          </div>
-                        </AccordionItem>
-                        <AccordionItem
-                          key="3"
-                          aria-label="Stars"
-                          classNames={{
-                            subtitle:
-                              filter.starsFilter === -1 ? null : "text-warning",
-                          }}
-                          startContent={
-                            <StarBorderOutlinedIcon className="text-warning" />
-                          }
-                          subtitle={
-                            filter.starsFilter === -1
-                              ? "Any"
-                              : `${filter.starsFilter}+`
-                          }
-                          title="Stars"
-                        >
-                          <div className="flex flex-row gap-2 justify-center">
-                            {[-1, 1, 2, 3, 4, 5].map((key) => {
-                              const starsChecked = filter.starsFilter === key;
-                              return (
-                                <button
-                                  key={key}
-                                  onClick={() => {
+                          </AccordionItem>
+                          <AccordionItem
+                            key="4"
+                            aria-label="Experience"
+                            classNames={{
+                              subtitle:
+                                filter.yoeFilter.min === -1 &&
+                                filter.yoeFilter.max === -1
+                                  ? null
+                                  : "text-secondary",
+                            }}
+                            startContent={
+                              <WorkHistoryOutlinedIcon className="text-secondary" />
+                            }
+                            subtitle={
+                              filter.yoeFilter.min === -1 &&
+                              filter.yoeFilter.max === -1
+                                ? "Any"
+                                : `${
+                                    filter.yoeFilter.min === -1
+                                      ? "Any"
+                                      : filter.yoeFilter.min
+                                  } - ${
+                                    filter.yoeFilter.max === -1
+                                      ? "Any"
+                                      : filter.yoeFilter.max
+                                  }`
+                            }
+                            title="Experience"
+                          >
+                            <div className="flex gap-4 justify-center">
+                              <div className="flex gap-2 items-center justify-center">
+                                <div>Minimum</div>
+                                <Input
+                                  size="sm"
+                                  label="Years"
+                                  className="w-16"
+                                  type="number"
+                                  value={
+                                    filter.yoeFilter.min === -1
+                                      ? undefined
+                                      : filter.yoeFilter.min.toString()
+                                  }
+                                  placeholder="Any"
+                                  onValueChange={(value) => {
                                     setQuery((prev) => {
                                       return {
                                         ...prev,
                                         filter: {
                                           ...prev.filter,
-                                          starsFilter: key,
+                                          yoeFilter: {
+                                            ...prev.filter.yoeFilter,
+                                            min:
+                                              value === "" ? -1 : Number(value),
+                                          },
                                         },
                                       };
                                     });
                                   }}
-                                >
-                                  <Chip
-                                    color={
-                                      key === -1 || !starsChecked
-                                        ? "default"
-                                        : "warning"
-                                    }
-                                    size="sm"
-                                    variant={
-                                      starsChecked ? "solid" : "bordered"
-                                    }
-                                  >
-                                    {key === -1 ? "No Filter" : `${key}+`}
-                                  </Chip>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </AccordionItem>
-                        <AccordionItem
-                          key="4"
-                          aria-label="Experience"
-                          classNames={{
-                            subtitle:
-                              filter.yoeFilter.min === -1 &&
-                              filter.yoeFilter.max === -1
-                                ? null
-                                : "text-secondary",
+                                />
+                              </div>
+                              <div className="flex gap-2 items-center justify-center">
+                                <div>Maximum</div>
+                                <Input
+                                  size="sm"
+                                  label="Years"
+                                  className="w-16"
+                                  type="number"
+                                  value={
+                                    filter.yoeFilter.max === -1
+                                      ? undefined
+                                      : filter.yoeFilter.max.toString()
+                                  }
+                                  placeholder="Any"
+                                  onValueChange={(value) => {
+                                    setQuery((prev) => {
+                                      return {
+                                        ...prev,
+                                        filter: {
+                                          ...prev.filter,
+                                          yoeFilter: {
+                                            ...prev.filter.yoeFilter,
+                                            max:
+                                              value === "" ? -1 : Number(value),
+                                          },
+                                        },
+                                      };
+                                    });
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </AccordionItem>
+                        </Accordion>
+                        <Button
+                          variant="light"
+                          color="danger"
+                          onClick={() => {
+                            setQuery((prev) => {
+                              return {
+                                ...prev,
+                                filter: {
+                                  positionFilter: prev.filter.positionFilter,
+                                  countryCodeFilter: [],
+                                  statusFilter: [],
+                                  starsFilter: -1,
+                                  yoeFilter: {
+                                    min: -1,
+                                    max: -1,
+                                  },
+                                },
+                              };
+                            });
                           }}
-                          startContent={
-                            <WorkHistoryOutlinedIcon className="text-secondary" />
-                          }
-                          subtitle={
-                            filter.yoeFilter.min === -1 &&
-                            filter.yoeFilter.max === -1
-                              ? "Any"
-                              : `${
-                                  filter.yoeFilter.min === -1
-                                    ? "Any"
-                                    : filter.yoeFilter.min
-                                } - ${
-                                  filter.yoeFilter.max === -1
-                                    ? "Any"
-                                    : filter.yoeFilter.max
-                                }`
-                          }
-                          title="Experience"
                         >
-                          <div className="flex gap-4 justify-center">
-                            <div className="flex gap-2 items-center justify-center">
-                              <div>Minimum</div>
-                              <Input
-                                size="sm"
-                                label="Years"
-                                className="w-16"
-                                type="number"
-                                value={
-                                  filter.yoeFilter.min === -1
-                                    ? undefined
-                                    : filter.yoeFilter.min.toString()
-                                }
-                                placeholder="Any"
-                                onValueChange={(value) => {
-                                  setQuery((prev) => {
-                                    return {
-                                      ...prev,
-                                      filter: {
-                                        ...prev.filter,
-                                        yoeFilter: {
-                                          ...prev.filter.yoeFilter,
-                                          min:
-                                            value === "" ? -1 : Number(value),
-                                        },
-                                      },
-                                    };
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div className="flex gap-2 items-center justify-center">
-                              <div>Maximum</div>
-                              <Input
-                                size="sm"
-                                label="Years"
-                                className="w-16"
-                                type="number"
-                                value={
-                                  filter.yoeFilter.max === -1
-                                    ? undefined
-                                    : filter.yoeFilter.max.toString()
-                                }
-                                placeholder="Any"
-                                onValueChange={(value) => {
-                                  setQuery((prev) => {
-                                    return {
-                                      ...prev,
-                                      filter: {
-                                        ...prev.filter,
-                                        yoeFilter: {
-                                          ...prev.filter.yoeFilter,
-                                          max:
-                                            value === "" ? -1 : Number(value),
-                                        },
-                                      },
-                                    };
-                                  });
-                                }}
-                              />
-                            </div>
-                          </div>
-                        </AccordionItem>
-                      </Accordion>
+                          Reset Filters
+                        </Button>
+                      </div>
                     ) : (
                       <div className="flex flex-col gap-3 w-[25vw] bg-content1 shadow-medium rounded-medium p-4">
                         <div className="flex justify-between items-center whitespace-nowrap">
