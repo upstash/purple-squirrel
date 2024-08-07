@@ -4,6 +4,7 @@ import { Receiver } from "@upstash/qstash";
 import type { NextRequest } from "next/server";
 import OpenAI from "openai";
 import type { ApplicantData, ApplicantMetadata } from "@/types";
+import QSTASH_TARGET_URL from "@/app/utils/qstash-target-url";
 import { isCountryCode } from "@/types/validations";
 const levenshtein = require("js-levenshtein");
 
@@ -247,10 +248,10 @@ export async function POST(req: NextRequest) {
       status: 401,
     });
   }
-  const isValid = receiver.verify({
-    body,
+  const isValid = await receiver.verify({
+    body: JSON.stringify(body),
     signature,
-    url: req.url,
+    url: `${QSTASH_TARGET_URL}/api/mail-pipeline/create-applicant`,
   });
 
   if (!isValid) {
@@ -269,8 +270,7 @@ export async function POST(req: NextRequest) {
       message: "Mail method not enabled",
     });
   }
-  const data = await req.json();
-  const mailData = data.mailData;
+  const mailData = body.mailData;
 
   const date = new Date();
 
@@ -363,6 +363,12 @@ export async function POST(req: NextRequest) {
     return Response.json({ status: 500, message: "Applicant ID Collusion" });
   }
 
+  await redis.json.set(
+    `applicant#${applicantID}`,
+    "$",
+    JSON.stringify(applicantData)
+  );
+
   const namespace = index.namespace(`${positionId}`);
 
   await namespace.upsert({
@@ -370,13 +376,9 @@ export async function POST(req: NextRequest) {
     vector: resumeEmbedding,
     metadata: mapResult.applicantMetadata,
   });
-
-  await redis.json.set(
-    `applicant#${applicantID}`,
-    "$",
-    JSON.stringify(applicantData)
-  );
-  await redis.sadd("applicant:ids", applicantID);
+  
+  await redis.sadd(`position#${positionId}:ids`, applicantID);
+  await redis.lpush('latest:applicants', { id: applicantID, positionId: positionId });
   return Response.json({ status: 200, message: "Success" });
 }
 

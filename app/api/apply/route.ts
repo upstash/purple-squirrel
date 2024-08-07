@@ -23,7 +23,7 @@ const openai = new OpenAI({
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const data = body.data;
-  const positionId = data.positionId;
+  const positionId = body.positionId;
   const pdfResponse = await fetch(data.resumeInfo.uploadthing.url);
   const parsedPDF = await pdf(await pdfResponse.arrayBuffer());
   const fullText = parsedPDF.text;
@@ -62,6 +62,12 @@ export async function POST(req: NextRequest) {
     return Response.json({ status: 500, message: "Applicant ID Collusion" });
   }
 
+  await redis.json.set(
+    `applicant#${applicantID}`,
+    "$",
+    JSON.stringify(applicantData)
+  );
+
   const namespace = index.namespace(`${positionId}`);
 
   await namespace.upsert({
@@ -69,13 +75,9 @@ export async function POST(req: NextRequest) {
     vector: resumeEmbedding,
     metadata: applicationMetadata,
   });
-
-  await redis.json.set(
-    `applicant#${applicantID}`,
-    "$",
-    JSON.stringify(applicantData)
-  );
-  await redis.sadd("applicant:ids", applicantID);
+  
+  await redis.sadd(`position#${positionId}:ids`, applicantID);
+  await redis.lpush('latest:applicants', { id: applicantID, positionId: positionId });
   return Response.json({ status: 200, message: "Success" });
 }
 

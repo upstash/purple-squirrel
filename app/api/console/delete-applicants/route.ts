@@ -18,10 +18,7 @@ export async function POST(req: NextRequest) {
 
   const ids = applicants.map((applicant: any) => applicant.id);
 
-  await Promise.all([
-    redis.del(...ids.map((id: string) => `applicant#${id}`)),
-    redis.srem("applicant:ids", ...ids),
-  ]);
+  redis.del(...ids.map((id: string) => `applicant#${id}`)),
 
   await Promise.all(
     applicants.map(async (applicant: any) => {
@@ -29,6 +26,8 @@ export async function POST(req: NextRequest) {
       const positionId: number = applicant.positionId;
       const namespace = index.namespace(`${positionId}`);
       await namespace.delete([`${id}_application`]);
+      await redis.srem(`position#${positionId}:ids`, id);
+      await redis.lrem(`latest:applicants`, 1, { id: id, positionId: positionId });
     })
   );
 
