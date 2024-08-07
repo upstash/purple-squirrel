@@ -14,6 +14,7 @@ import {
   SchedulingInterval,
   Scheduling,
   Role,
+  Position,
 } from "./index";
 import { z } from "zod";
 import {
@@ -65,14 +66,14 @@ export const countryCodeSchema = z.enum(
 ) satisfies z.ZodType<CountryCode>;
 
 const applicantMetadataSchema = z.object({
-  countryCode: countryCodeSchema,
+  countryCode: countryCodeSchema.optional(),
   status: applicantStatusSchema,
   stars: z.number(),
   yoe: z.number(),
 }) satisfies z.ZodType<ApplicantMetadata>;
 
 const applicantSchema = z.object({
-  id: z.string(),
+  id: z.number(),
   ...applicantDataSchema.shape,
   ...applicantMetadataSchema.shape,
 }) satisfies z.ZodType<Applicant>;
@@ -103,6 +104,12 @@ export const queryTerminalSettingsTabSchema = z.enum(
 export const positionStatusSchema = z.enum(
   POSITION_STATUS_OPTIONS
 ) satisfies z.ZodType<PositionStatus>;
+
+export const positionSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  status: positionStatusSchema,
+}) satisfies z.ZodType<Position>;
 
 export const schedulingIntervalSchema = z.enum(
   SCHEDULING_INTERVAL_OPTIONS
