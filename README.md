@@ -1,17 +1,79 @@
-# purple squirrel
-purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
+<p align="center" size="20" style="font-size:1.5em;">AI Powered Open-Source Applicant Tracking System and Search Engine</p>
+<div align="center"><a style="font-size:1.5em;" href="https://purple-squirrel.vercel.app">Live Demo</a> &bull; <a style="font-size:1.5em;" href="https://upstash.com/blog/greatest-complement-to-serverless">Blog Post</a></div>
 
 ## Overview
-- [🔍 Features](#features)
-- [🥞 Stack](#stack)
+- [🔍 Key Features](#key-features)
+- [🥞 Tech Stack](#tech-stack)
 - [🐿️ Deploy your own](#deploy-your-own)
 - [💻 Local development](#local-development)
-- [🚨 Troubleshooting](#troubleshooting)
-- [➕ Contribution Guide](#contribution-guide)
+- [➕ Contributing](#contributing)
 
-## Features
+## Key Features
+<details>
+  <summary>Live Demo</summary>
 
-## Stack
+  Check out the live demo [here](https://purple-squirrel.vercel.app).
+
+</details>
+<details>
+  <summary>Natural Language Queries</summary>
+
+  
+</details>
+<details>
+  <summary>Complex Filtering</summary>
+
+  Filter applicants based on location, application status, years of experience or given stars.
+</details>
+<details>
+  <summary>Alternative Scoring Systems</summary>
+
+  Choose among different scoring systems to rank applicants:
+  - Flash Mode: Fast, cheap semantic search with filtering.
+  - Deep Mode: LLM assisted scoring of top applicants.
+</details>
+<details>
+  <summary>Applicant Tracking System</summary>
+
+
+  **Status** <br/>
+  Track the application status of candidates.
+
+  **Notes** <br/>
+  Take notes on candidates to keep track of your thoughts.
+
+  **Star Ratings** <br/>
+  Rate candidates with stars to easily filter them later.
+
+  **Resumes** <br/>
+  Easily view resumes of candidates via [uploadthing](https://uploadthing.com).
+
+  **Socials** <br/>
+  Reach out to candidates via their email or social media profiles.
+</details>
+<details>
+  <summary>Role Based Authentication</summary>
+
+  Protect your app with role based authentication via [Clerk](https://clerk.com).
+  - Recruiter: Manage applicants.
+  - Admin: Manage positions, application methods and users.
+</details>
+<details>
+  <summary>Admin Dashboard</summary>
+  
+  **Manage Positions** <br/>
+  Open, close or delete positions. Share application links with candidates.
+
+  **Manage Application Methods** <br/>
+  Enable or disable applications via email or through the app.
+  
+
+  **Manage Users** <br/>
+  Change roles of users or delete them.
+
+</details>
+
+## Tech Stack
 - DB: [Upstash Redis](https://upstash.com)
 - VectorDB: [Upstash Vector](https://upstash.com)
 - Scheduling & Serverless Function Orchestration: [Upstash QStash](https://upstash.com)
@@ -82,6 +144,7 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
       * QSTASH_CURRENT_SIGNING_KEY
       * QSTASH_NEXT_SIGNING_KEY<br/><br/>
         <img width="367" alt="qstash-tokens" src="https://github.com/upstash/purple-squirrel/assets/47982397/a532fc41-1391-47a0-a427-95494d73ef95">
+  > QStash free plan has a limit of 500 messages per day. This will limit your mail pipeline to approximately 200 applicants per day. We recommend upgrading to the pay as you go plan. See [QStash Pricing](https://upstash.com/pricing/qstash) for more information.
 
 
 </details>
@@ -180,8 +243,43 @@ purple squirrel is an AI powered open-source Applicant Tracking System (ATS)
 → Step 8: Click deploy & visit your site, it will guide you through the rest of your setup!
 
 ## Local development
+A local tunnel is required in local development since QStash requires a publicly available API to send messages to. This tutorial is based on [localtunnel.me](https://github.com/localtunnel/localtunnel) but you can use any service of your choice.
+<details>
+  <summary>Step 1: Create a local tunnel</summary>
 
-## Troubleshooting
+  ```bash
+  npx localtunnel --port 3000
+  ```
+</details>
 
-## Contribution Guide
+<details>
+  <summary>Step 2: Fill environment variables</summary>
 
+  Copy the output URL and fill the following environment variable in `.env.local`
+
+  ```bash
+  LOCAL_TUNNEL_URL=<YOUR_URL>
+  ```
+
+  Fill the rest of the environment variables in `.env.local` as described in the [Deploy your own](#deploy-your-own) section.
+
+</details>
+
+<details>
+  <summary>Step 3: Install dependencies & run the project</summary>
+
+  ```bash
+  npm install
+  npm run dev
+  ```
+</details>
+
+→ Step 4: Visit your site at `http://localhost:3000`
+
+
+
+> In local development, mail pipeline is triggered only once instead of creating a schedule since local server is not expected to be always available.
+
+## Contributing
+
+We welcome contributions to improve this project. Please feel free to submit issues or pull requests.
