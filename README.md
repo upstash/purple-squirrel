@@ -1,5 +1,7 @@
 <p align="center" size="20" style="font-size:1.5em;">AI Powered Open-Source Applicant Tracking System and Search Engine</p>
 <div align="center"><a style="font-size:1.5em;" href="https://purple-squirrel.vercel.app">Live Demo</a> &bull; <a style="font-size:1.5em;" href="https://upstash.com/blog/greatest-complement-to-serverless">Blog Post</a></div>
+<br/>
+<img width="1440" alt="purple-squirrel" src="https://github.com/user-attachments/assets/cc79a668-b113-4e69-9f78-76db1adb41c7">
 
 ## Overview
 - [🔍 Key Features](#key-features)
@@ -17,13 +19,17 @@
 </details>
 <details>
   <summary>Natural Language Queries</summary>
+	
+  <img width="1427" alt="query" src="https://github.com/user-attachments/assets/0ab56181-7248-460f-aded-22ee549f6c30">
 
-  
 </details>
 <details>
   <summary>Complex Filtering</summary>
 
   Filter applicants based on location, application status, years of experience or given stars.
+  <br/>
+  <img width="382" alt="filtering" src="https://github.com/user-attachments/assets/ccaef2aa-e30c-464a-ad4c-5481c3d0cd5c">
+
 </details>
 <details>
   <summary>Alternative Scoring Systems</summary>
@@ -31,6 +37,10 @@
   Choose among different scoring systems to rank applicants:
   - Flash Mode: Fast, cheap semantic search with filtering.
   - Deep Mode: LLM assisted scoring of top applicants.
+    <br/>
+    <img width="382" alt="flash-mode" src="https://github.com/user-attachments/assets/2ef52816-bb80-4fdf-8dda-5ddb3fb3c8e6">
+    <img width="383" alt="deep-mode" src="https://github.com/user-attachments/assets/2841a59a-1cef-4729-b719-b217b35e3600">
+
 </details>
 <details>
   <summary>Applicant Tracking System</summary>
@@ -38,18 +48,30 @@
 
   **Status** <br/>
   Track the application status of candidates.
+  <br/>
+  <img width="127" alt="status" src="https://github.com/user-attachments/assets/3903c8d2-ad1a-434b-9cb9-5d1e9716087e">
+
 
   **Notes** <br/>
   Take notes on candidates to keep track of your thoughts.
+  <br/>
+  <img width="366" alt="notes" src="https://github.com/user-attachments/assets/06b1fbd5-ab3c-45ec-939e-b723ff539d7c">
+
 
   **Star Ratings** <br/>
   Rate candidates with stars to easily filter them later.
+  <br/>
+  <img width="167" alt="stars" src="https://github.com/user-attachments/assets/9ebda2e8-c4f1-46d2-b086-b877ad0c72b7">
+
 
   **Resumes** <br/>
   Easily view resumes of candidates via [uploadthing](https://uploadthing.com).
 
   **Socials** <br/>
   Reach out to candidates via their email or social media profiles.
+  <br/>
+  <img width="111" alt="socials" src="https://github.com/user-attachments/assets/78503c23-0795-4553-8753-e7820f418af2">
+
 </details>
 <details>
   <summary>Role Based Authentication</summary>
@@ -57,19 +79,31 @@
   Protect your app with role based authentication via [Clerk](https://clerk.com).
   - Recruiter: Manage applicants.
   - Admin: Manage positions, application methods and users.
+    <br/>
+    <img width="506" alt="roles" src="https://github.com/user-attachments/assets/27117570-bb24-4961-bafd-69958da4a3d0">
+
 </details>
 <details>
   <summary>Admin Dashboard</summary>
   
   **Manage Positions** <br/>
   Open, close or delete positions. Share application links with candidates.
+  <br/>
+  <img width="1440" alt="positions" src="https://github.com/user-attachments/assets/09fb18bb-26bb-40af-8301-150810e7bdf3">
+
 
   **Manage Application Methods** <br/>
   Enable or disable applications via email or through the app.
+  <br/>
+  <img width="1440" alt="application-methods" src="https://github.com/user-attachments/assets/37d0a082-64e7-4475-8481-e0486bcb0a05">
+
   
 
   **Manage Users** <br/>
   Change roles of users or delete them.
+  <br/>
+  <img width="1440" alt="users" src="https://github.com/user-attachments/assets/5e09fba3-e7d8-4ed2-855d-0510a3d9d705">
+
 
 </details>
 
