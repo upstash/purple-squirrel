@@ -192,7 +192,7 @@
      <img width="376" alt="uploadthing-create" src="https://github.com/upstash/purple-squirrel/assets/47982397/5e459d12-05e9-4c02-9ab4-8c53b646f34c">
 
 
-  4. Fill the following environment variables in Vercel, which can be found and copied in the API Keys tab:
+  4. Fill the following environment variables in Vercel, which can be found and copied in the API Keys tab (use the Legacy tab):
      * UPLOADTHING_SECRET
      * UPLOADTHING_APP_ID<br/><br/>
      <img width="1246" alt="uploadthing-keys" src="https://github.com/upstash/purple-squirrel/assets/47982397/c729d55e-df70-47d8-a9da-12efadcbfc1c">
