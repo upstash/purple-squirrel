@@ -139,7 +139,7 @@
      * Turn on IMAP in Gmail.
   2. Fill the following environment variables in Vercel:
      * IMAP_USERNAME: Your mail address
-     * IMAP_PASSWORD: App Password you generated
+     * IMAP_PASSWORD: [App Password](https://support.google.com/mail/answer/185833?hl=en#:~:text=Create%20&%20use%20app%20passwords,Google%20Account%20has%20Advanced%20Protection.) you generated
      * IMAP_HOST: imap.gmail.com
      * IMAP_PORT: 993
 </details>
