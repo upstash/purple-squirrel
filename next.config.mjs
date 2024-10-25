@@ -1,8 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-    experimental: {
-      serverComponentsExternalPackages: ['pdf2json'],
-    },
-  };
+const nextConfig = {};
 
 export default nextConfig;

@@ -1,20 +1,19 @@
-// tailwind.config.js
-import {nextui} from "@nextui-org/react";
-import { withUt } from "uploadthing/tw";
+import type { Config } from "tailwindcss";
 
-/** @type {import('tailwindcss').Config} */
-export default withUt({
+const config: Config = {
   content: [
-    // ...
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
-    extend: {}
+    extend: {
+      colors: {
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+      },
+    },
   },
-  darkMode: "class",
-  plugins: [nextui()]
-});
-
+  plugins: [],
+};
+export default config;
