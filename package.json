@@ -27,6 +27,7 @@
     "mailparser": "^3.7.1",
     "next": "14.2.16",
     "node-imap": "^0.9.6",
+    "openai": "^4.68.4",
     "pdf-parse": "^1.1.1",
     "react": "^18",
     "react-dom": "^18",
