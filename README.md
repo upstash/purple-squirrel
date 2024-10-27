@@ -1,36 +1,148 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<p align="center" size="20" style="font-size:1.5em;">Open-Source Applicant Search Engine</p>
+<div align="center"><a style="font-size:1.5em;" href="https://purple-squirrel.vercel.app">Live Demo</a>
 
-## Getting Started
+## Overview
+- [🥞 Tech Stack](#tech-stack)
+- [🐿️ Deploy your own](#deploy-your-own)
+- [💻 Local development](#local-development)
+- [➕ Contributing](#contributing)
 
-First, run the development server:
+## Tech Stack
+- VectorDB & Embedding Models: [Upstash Vector](https://upstash.com)
+- Scheduling & Serverless Function Orchestration: [Upstash QStash](https://upstash.com)
+- App logic: [Next.js](https://nextjs.org)
+- Deployment: [Vercel](https://vercel.com)
+- File Storage: [uploadthing](https://uploadthing.com)
+- LLM: [OpenAI](https://openai.com)
+- UI Components: [shadcn](https://ui.shadcn.com/)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Deploy your own
+<details>
+  <summary>Step 1: Deploying with Vercel</summary>
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+  1. Click the button below.
+  2. Connect your GitHub account & create a Git repository as described.
+  3. Fill the environment variables as described in the next steps.
+</details>
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fupstash%2Fpurple-squirrel&env=UPSTASH_VECTOR_REST_URL,UPSTASH_VECTOR_REST_TOKEN,QSTASH_URL,QSTASH_TOKEN,QSTASH_CURRENT_SIGNING_KEY,QSTASH_NEXT_SIGNING_KEY,IMAP_USERNAME,IMAP_PASSWORD,IMAP_HOST,IMAP_PORT,UPLOADTHING_TOKEN,OPENAI_API_KEY,NEXT_PUBLIC_URL)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+<details>
+  <summary>Step 2: Connect your mailbox</summary>
 
-## Learn More
+  **Note:** This tutorial will be based on Gmail, but you can set up an IMAP connection with any other provider.
+  1. Complete the following steps described in [this tutorial](https://support.google.com/a/answer/9003945#imap_gmail&zippy=%2Cstep-turn-on-imap-in-gmail%2Cstep-create-and-use-app-passwords%2Cstep-turn-on-less-secure-apps).
+     * Turn on Less secure apps.
+     * Create and use App Passwords.
+     * Turn on IMAP in Gmail.
+  2. Fill the following environment variables in Vercel:
+     * IMAP_USERNAME: Your mail address
+     * IMAP_PASSWORD: App Password you generated
+     * IMAP_HOST: imap.gmail.com
+     * IMAP_PORT: 993
+</details>
 
-To learn more about Next.js, take a look at the following resources:
+<details>
+  <summary>Step 3: Set up Upstash</summary>
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+  1. Open an Upstash account.
+  2. Switch to [Vector tab in Console](https://console.upstash.com/vector).
+  3. Click Create Index.
+  4. Think of a name and select a region close to your users, Embedding Model, Dimensions and Metric should be set like below.
+  5. Click Next -> Click Create.
+  6. Fill the following environment variables in Vercel, which can be found and copied in your index page:
+      * UPSTASH_VECTOR_REST_URL: Your endpoint
+      * UPSTASH_VECTOR_REST_TOKEN
+  7. Switch to [QStash tab in Console](https://console.upstash.com/qstash)
+  8. Fill the following environment variables in Vercel, which can be found and copied in your QStash page:
+      * QSTASH_URL
+      * QSTASH_TOKEN
+      * QSTASH_CURRENT_SIGNING_KEY
+      * QSTASH_NEXT_SIGNING_KEY
+  > QStash free plan has a limit of 500 messages per day. This will limit your mail pipeline to approximately 200 applicants per day. We recommend upgrading to the pay as you go plan. See [QStash Pricing](https://upstash.com/pricing/qstash) for more information.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+</details>
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+<details>
+  <summary>Step 4: Set up uploadthing</summary>
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+  1. Sign in to uploadthing.
+  2. Click Create a new app.
+  3. Think of a name and select an app default region close to your users.
+  4. Fill the following environment variables in Vercel, which can be found and copied in the API Keys tab:
+     * UPLOADTHING_TOKEN
+
+</details>
+
+<details>
+  <summary>Step 5: Set OpenAI API key</summary>
+
+  1. Go to [OpenAI Platform -> API keys](https://platform.openai.com/api-keys) and login to your account.
+  2. Click Create new secret key.
+  3. Enter a name and click Create secret key.
+  4. Don't forget to copy and save your key. Fill the following environment variable in Vercel:
+     * OPENAI_API_KEY
+</details>
+
+<details>
+  <summary>Step 6: Set your application URL</summary>
+
+  1. Fill the following environment variables in Vercel:
+     * NEXT_PUBLIC_URL: URL of your application (e.g. https://your-app.vercel.app)
+</details>
+
+<details>
+  <summary>Step 7: Deploy & Setup</summary>
+
+  1. Visit `https://your-app.vercel.app/setup` to set up your application.
+</details>
+
+→ Your application is ready to use!
+
+## Local development
+A local tunnel is required in local development since QStash requires a publicly available API to send messages to. This tutorial is based on [localtunnel.me](https://github.com/localtunnel/localtunnel) but you can use any service of your choice.
+<details>
+  <summary>Step 1: Create a local tunnel</summary>
+
+  ```bash
+  npx localtunnel --port 3000
+  ```
+</details>
+
+<details>
+  <summary>Step 2: Fill environment variables</summary>
+
+  Copy the output URL and fill the following environment variable in `.env.local`
+
+  ```bash
+  LOCAL_TUNNEL_URL=<YOUR_URL>
+  ```
+
+  Fill the rest of the environment variables in `.env.local` as described in the [Deploy your own](#deploy-your-own) section.
+
+</details>
+
+<details>
+  <summary>Step 3: Install dependencies & run the project</summary>
+
+  ```bash
+  npm install
+  npm run dev
+  ```
+</details>
+
+<details>
+  <summary>Step 4: Deploy & Setup</summary>
+
+  1. Visit `http://localhost:3000/setup` to set up your application.
+</details>
+
+→ Your application is ready to use!
+
+
+> In local development, mail pipeline is triggered only once instead of creating a schedule since local server is not expected to be always available.
+
+## Contributing
+
+We welcome contributions to improve this project. Please feel free to submit issues or pull requests.
