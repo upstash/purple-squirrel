@@ -1,5 +1,5 @@
 <p align="center" size="20" style="font-size:1.5em;">Open-Source Applicant Search Engine</p>
-<div align="center"><a style="font-size:1.5em;" href="https://purple-squirrel.vercel.app">Live Demo</a>
+<div align="center"><a style="font-size:1.5em;" href="https://purple-squirrel.vercel.app">Live Demo</a></div>
 
 ## Overview
 - [🥞 Tech Stack](#tech-stack)
