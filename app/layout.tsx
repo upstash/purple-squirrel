@@ -1,31 +1,21 @@
-import { ClerkProvider } from "@clerk/nextjs";
-import { dark } from "@clerk/themes";
-import "@/styles/globals.css";
-import { Providers } from "./providers";
-import { Metadata } from 'next'
- 
+import type { Metadata } from "next";
+import "./globals.css";
+
 export const metadata: Metadata = {
-  title: 'Purple Squirrel',
-}
+  title: "Purple Squirrel",
+  description: "Applicant Search Engine",
+};
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <ClerkProvider
-      appearance={{
-        baseTheme: dark,
-      }}
-    >
-      <html lang="en" className="dark">
-        <body>
-          <Providers>
-            <main>{children}</main>
-          </Providers>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en">
+      <body>
+        {children}
+      </body>
+    </html>
   );
 }
