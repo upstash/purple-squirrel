@@ -104,7 +104,7 @@
 <details>
   <summary>Step 7: Deploy & Setup</summary>
 
-  1. Visit `https://your-app.vercel.app/setup` to set up your application.<br/>
+  1. Deploy & visit `https://your-app.vercel.app/setup` to set up your application.<br/>
   <img width="1440" alt="setup" src="https://github.com/user-attachments/assets/9164f6b6-ee83-4971-ac56-777ac4b34bf5">
 
 </details>
@@ -144,9 +144,10 @@ A local tunnel is required in local development since QStash requires a publicly
 </details>
 
 <details>
-  <summary>Step 4: Deploy & Setup</summary>
+  <summary>Step 4: Setup</summary>
 
-  1. Visit `http://localhost:3000/setup` to set up your application.
+  1. Visit `http://localhost:3000/setup` to set up your application.<br/>
+  <img width="1440" alt="setup" src="https://github.com/user-attachments/assets/9164f6b6-ee83-4971-ac56-777ac4b34bf5">
 </details>
 
 → Your application is ready to use!
