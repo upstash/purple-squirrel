@@ -30,6 +30,7 @@ export async function POST(req: Request) {
       status: 401,
     });
   }
+  const folder = JSON.parse(body).folder
 
   const imap = new Imap({
     user: process.env.IMAP_USERNAME!,
@@ -45,7 +46,7 @@ export async function POST(req: Request) {
   imap.once("ready", function () {
     console.log("Connection ready");
     console.log("Opening inbox");
-    imap.openBox("INBOX", false, function () {
+    imap.openBox(folder, false, function () {
       imap.search(["UNSEEN"], async function (err: Error, results: number[]) {
         if (!results || !results.length) {
           console.log("No new emails");
@@ -59,6 +60,7 @@ export async function POST(req: Request) {
             url: `${QSTASH_TARGET_URL}/api/fetch-unseen`,
             body: {
               mailID: result,
+              folder,
             },
             retries: 0,
           };

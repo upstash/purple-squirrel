@@ -38,6 +38,7 @@ export async function POST(req: Request) {
     });
   }
   const mailID = body.mailID;
+  const folder = body.folder;
   const imap = new Imap({
     user: process.env.IMAP_USERNAME!,
     password: process.env.IMAP_PASSWORD!,
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
   imap.once("ready", function () {
     console.log("Connection ready");
     console.log("Opening inbox");
-    imap.openBox("INBOX", false, function () {
+    imap.openBox(folder, false, function () {
       const f = imap.fetch(mailID, {
         bodies: "",
         markSeen: true,
@@ -66,7 +67,7 @@ export async function POST(req: Request) {
           if (parsed.attachments.length == 1) {
             if (parsed.attachments[0].content.length < 1e6 - 5e4) {
               const fileBlob = new Blob([parsed.attachments[0].content]);
-              const fileEsque = Object.assign(fileBlob, { name: "resume" });
+              const fileEsque = Object.assign(fileBlob, { name: "resume.pdf" });
               const response = await utapi.uploadFiles(fileEsque);
 
               if (response.data) {
