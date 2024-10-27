@@ -9,3 +9,5 @@ export type Applicant = {
   archived: boolean;
   notes: string;
 };
+
+export type FilterTab = "active" | "favorites" | "archived";
