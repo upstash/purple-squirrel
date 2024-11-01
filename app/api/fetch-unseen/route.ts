@@ -1,7 +1,7 @@
 import Imap from "node-imap";
 import { ImapMessage } from "node-imap";
 import { simpleParser, type Source } from "mailparser";
-import { Client, Receiver } from "@upstash/qstash";
+import { Client } from "@upstash/qstash";
 
 import QSTASH_TARGET_URL from "@/lib/qstash-target-url";
 
@@ -10,33 +10,11 @@ import { utapi } from "@/lib/uploadthing/server/uploadthing";
 // @ts-expect-error Error related to pdf-parse
 import pdf from "pdf-parse/lib/pdf-parse";
 
-const receiver = new Receiver({
-  currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY as string,
-  nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY as string,
-});
-
 const client = new Client({ token: process.env.QSTASH_TOKEN as string });
 
 export async function POST(req: Request) {
-  const signature = req.headers.get("Upstash-Signature");
   const body = await req.json();
 
-  if (!signature) {
-    return new Response("Unauthorized", {
-      status: 401,
-    });
-  }
-  const isValid = await receiver.verify({
-    body: JSON.stringify(body),
-    signature,
-    url: `${QSTASH_TARGET_URL}/api/fetch-unseen`,
-  });
-
-  if (!isValid) {
-    return new Response("Unauthorized", {
-      status: 401,
-    });
-  }
   const mailID = body.mailID;
   const folder = body.folder;
   const imap = new Imap({

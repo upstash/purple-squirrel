@@ -25,7 +25,7 @@
   3. Fill the environment variables as described in the next steps.
 </details>
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fupstash%2Fpurple-squirrel&env=UPSTASH_VECTOR_REST_URL,UPSTASH_VECTOR_REST_TOKEN,QSTASH_URL,QSTASH_TOKEN,QSTASH_CURRENT_SIGNING_KEY,QSTASH_NEXT_SIGNING_KEY,IMAP_USERNAME,IMAP_PASSWORD,IMAP_HOST,IMAP_PORT,UPLOADTHING_TOKEN,OPENAI_API_KEY,NEXT_PUBLIC_URL)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fupstash%2Fpurple-squirrel&env=UPSTASH_VECTOR_REST_URL,UPSTASH_VECTOR_REST_TOKEN,QSTASH_URL,QSTASH_TOKEN,IMAP_USERNAME,IMAP_PASSWORD,IMAP_HOST,IMAP_PORT,UPLOADTHING_TOKEN,OPENAI_API_KEY,NEXT_PUBLIC_URL)
 
 <details>
   <summary>Step 2: Connect your mailbox</summary>
@@ -57,8 +57,6 @@
   8. Fill the following environment variables in Vercel, which can be found and copied in your QStash page:
       * QSTASH_URL
       * QSTASH_TOKEN
-      * QSTASH_CURRENT_SIGNING_KEY
-      * QSTASH_NEXT_SIGNING_KEY
   > QStash free plan has a limit of 500 messages per day. This will limit your mail pipeline to approximately 200 applicants per day. We recommend upgrading to the pay as you go plan. See [QStash Pricing](https://upstash.com/pricing/qstash) for more information.
 
 

@@ -78,74 +78,80 @@ export default function TableCard({ displayApplicants, onUpdate }: Props) {
                 </Dialog>
               </TableCell>
               <TableCell className="text-right">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <NoteDialog applicant={applicant} onUpdate={onUpdate} />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Add or edit notes</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className={cn(
-                          "hover:text-violet-700",
-                          applicant.favorite
-                            ? "text-violet-700"
-                            : "text-zinc-700"
-                        )}
-                        onClick={async () => {
-                          await onUpdate({
-                            ...applicant,
-                            favorite: !applicant.favorite,
-                          });
-                        }}
-                      >
-                        {applicant.favorite ? <StarFilledIcon /> : <StarIcon />}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        {applicant.favorite
-                          ? "Remove from favorites"
-                          : "Add to favorites"}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className={cn(
-                          "hover:text-violet-700",
-                          applicant.archived
-                            ? "text-violet-700"
-                            : "text-zinc-700"
-                        )}
-                        onClick={async () => {
-                          await onUpdate({
-                            ...applicant,
-                            archived: !applicant.archived,
-                          });
-                        }}
-                      >
-                        <ArchiveIcon />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{applicant.archived ? "Unarchive" : "Archive"}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <div className="flex flex-row flex-nowrap">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <NoteDialog applicant={applicant} onUpdate={onUpdate} />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Add or edit notes</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={cn(
+                            "hover:text-violet-700",
+                            applicant.favorite
+                              ? "text-violet-700"
+                              : "text-zinc-700"
+                          )}
+                          onClick={async () => {
+                            await onUpdate({
+                              ...applicant,
+                              favorite: !applicant.favorite,
+                            });
+                          }}
+                        >
+                          {applicant.favorite ? (
+                            <StarFilledIcon />
+                          ) : (
+                            <StarIcon />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>
+                          {applicant.favorite
+                            ? "Remove from favorites"
+                            : "Add to favorites"}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={cn(
+                            "hover:text-violet-700",
+                            applicant.archived
+                              ? "text-violet-700"
+                              : "text-zinc-700"
+                          )}
+                          onClick={async () => {
+                            await onUpdate({
+                              ...applicant,
+                              archived: !applicant.archived,
+                            });
+                          }}
+                        >
+                          <ArchiveIcon />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{applicant.archived ? "Unarchive" : "Archive"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </TableCell>
             </TableRow>
           ))}

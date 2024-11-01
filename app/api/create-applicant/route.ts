@@ -1,17 +1,10 @@
 import { Index } from "@upstash/vector";
-import { Receiver } from "@upstash/qstash";
 import type { NextRequest } from "next/server";
 import OpenAI from "openai";
 import { v4 as uuidv4 } from "uuid";
 import type { Applicant } from "@/types";
-import QSTASH_TARGET_URL from "@/lib/qstash-target-url";
 
 export const runtime = "edge";
-
-const receiver = new Receiver({
-  currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY as string,
-  nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY as string,
-});
 
 const index = new Index({
   url: process.env.UPSTASH_VECTOR_REST_URL as string,
@@ -23,25 +16,8 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: NextRequest) {
-  const signature = req.headers.get("Upstash-Signature");
   const body = await req.json();
 
-  if (!signature) {
-    return new Response("Unauthorized", {
-      status: 401,
-    });
-  }
-  const isValid = await receiver.verify({
-    body: JSON.stringify(body),
-    signature,
-    url: `${QSTASH_TARGET_URL}/api/create-applicant`,
-  });
-
-  if (!isValid) {
-    return new Response("Unauthorized", {
-      status: 401,
-    });
-  }
   const mailData = body.mailData;
 
   console.log("PIPELINE: Fetching OpenAI Parsing Response");
