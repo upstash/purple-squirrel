@@ -60,9 +60,7 @@
   7. Switch to [QStash tab in Console](https://console.upstash.com/qstash)
   8. Fill the following environment variables in Vercel, which can be found and copied in your QStash page:
       * QSTASH_URL
-      * QSTASH_TOKEN
-      * QSTASH_CURRENT_SIGNING_KEY
-      * QSTASH_NEXT_SIGNING_KEY<br/>
+      * QSTASH_TOKEN<br/>
       ![env-qstash](https://github.com/user-attachments/assets/64a30afa-3f69-46d0-85e8-98bb9b7c6c7b)
   > QStash free plan has a limit of 500 messages per day. This will limit your mail pipeline to approximately 200 applicants per day. We recommend upgrading to the pay as you go plan. See [QStash Pricing](https://upstash.com/pricing/qstash) for more information.
 
