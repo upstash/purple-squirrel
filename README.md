@@ -1,4 +1,6 @@
 <p align="center" size="20" style="font-size:1.5em;">Open-Source Applicant Search Engine</p>
+<div align="center"><img width="1440" alt="purple-squirrel" src="https://github.com/user-attachments/assets/320533b0-52a7-4903-a350-3095ad47b2a2"></div>
+
 <div align="center"><a style="font-size:1.5em;" href="https://purple-squirrel.vercel.app">Live Demo</a></div>
 
 ## Overview
@@ -30,7 +32,7 @@
 <details>
   <summary>Step 2: Connect your mailbox</summary>
 
-  **Note:** This tutorial will be based on Gmail, but you can set up an IMAP connection with any other provider.
+  **Note:** This tutorial will be based on Gmail, but you can set up an IMAP connection with any other provider. We recommend creating a separate email like ps@company.com and forwarding job mails there. You can also create a folder like JOBS and configure the application to read from that folder in the setup step.
   1. Complete the following steps described in [this tutorial](https://support.google.com/a/answer/9003945#imap_gmail&zippy=%2Cstep-turn-on-imap-in-gmail%2Cstep-create-and-use-app-passwords%2Cstep-turn-on-less-secure-apps).
      * Turn on Less secure apps.
      * Create and use App Passwords.
@@ -48,15 +50,20 @@
   1. Open an Upstash account.
   2. Switch to [Vector tab in Console](https://console.upstash.com/vector).
   3. Click Create Index.
-  4. Think of a name and select a region close to your users, Embedding Model, Dimensions and Metric should be set like below.
+  4. Think of a name and select a region close to your users, Embedding Model, Dimensions and Metric should be set like below.<br/>
+  ![create-index](https://github.com/user-attachments/assets/9029637a-5dd5-4b4a-b800-9c9332332d42)
   5. Click Next -> Click Create.
   6. Fill the following environment variables in Vercel, which can be found and copied in your index page:
       * UPSTASH_VECTOR_REST_URL: Your endpoint
-      * UPSTASH_VECTOR_REST_TOKEN
+      * UPSTASH_VECTOR_REST_TOKEN<br/>
+      ![env-index](https://github.com/user-attachments/assets/71a1f771-a3f5-4fcb-8e9d-4fcf871119a9)
   7. Switch to [QStash tab in Console](https://console.upstash.com/qstash)
   8. Fill the following environment variables in Vercel, which can be found and copied in your QStash page:
       * QSTASH_URL
       * QSTASH_TOKEN
+      * QSTASH_CURRENT_SIGNING_KEY
+      * QSTASH_NEXT_SIGNING_KEY<br/>
+      ![env-qstash](https://github.com/user-attachments/assets/64a30afa-3f69-46d0-85e8-98bb9b7c6c7b)
   > QStash free plan has a limit of 500 messages per day. This will limit your mail pipeline to approximately 200 applicants per day. We recommend upgrading to the pay as you go plan. See [QStash Pricing](https://upstash.com/pricing/qstash) for more information.
 
 
@@ -67,9 +74,12 @@
 
   1. Sign in to uploadthing.
   2. Click Create a new app.
-  3. Think of a name and select an app default region close to your users.
+  3. Think of a name and select an app default region close to your users.<br/>
+  ![create-uploadthing](https://github.com/user-attachments/assets/c77bdc2c-8925-4559-8686-dbbfe821a679)
   4. Fill the following environment variables in Vercel, which can be found and copied in the API Keys tab:
-     * UPLOADTHING_TOKEN
+     * UPLOADTHING_TOKEN<br/>
+     ![env-uploadthing](https://github.com/user-attachments/assets/4b23ca2d-4d33-444f-ad48-5eeca0cd3209)
+
 
 </details>
 
@@ -78,7 +88,8 @@
 
   1. Go to [OpenAI Platform -> API keys](https://platform.openai.com/api-keys) and login to your account.
   2. Click Create new secret key.
-  3. Enter a name and click Create secret key.
+  3. Enter a name and click Create secret key.<br/>
+  ![openai-key](https://github.com/user-attachments/assets/eb8860cc-b729-4404-88be-5af514505fcd)
   4. Don't forget to copy and save your key. Fill the following environment variable in Vercel:
      * OPENAI_API_KEY
 </details>
@@ -93,7 +104,9 @@
 <details>
   <summary>Step 7: Deploy & Setup</summary>
 
-  1. Visit `https://your-app.vercel.app/setup` to set up your application.
+  1. Deploy & visit `https://your-app.vercel.app/setup` to set up your application.<br/>
+  <img width="1440" alt="setup" src="https://github.com/user-attachments/assets/9164f6b6-ee83-4971-ac56-777ac4b34bf5">
+
 </details>
 
 → Your application is ready to use!
@@ -131,9 +144,10 @@ A local tunnel is required in local development since QStash requires a publicly
 </details>
 
 <details>
-  <summary>Step 4: Deploy & Setup</summary>
+  <summary>Step 4: Setup</summary>
 
-  1. Visit `http://localhost:3000/setup` to set up your application.
+  1. Visit `http://localhost:3000/setup` to set up your application.<br/>
+  <img width="1440" alt="setup" src="https://github.com/user-attachments/assets/9164f6b6-ee83-4971-ac56-777ac4b34bf5">
 </details>
 
 → Your application is ready to use!
