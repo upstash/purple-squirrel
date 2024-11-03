@@ -30,35 +30,40 @@ export default function Page() {
           It may take ~2 minutes for applicants to show up after you set the
           digest.
         </div>
-        <div className="flex flex-row gap-2 items-center">
-          Every
-          <Input
-            placeholder="2"
-            value={quantity}
-            type="number"
-            onChange={(e) => setQuantity(parseInt(e.target.value))}
-            className="w-[80px]"
-          />
-          <Select
-            value={interval}
-            onValueChange={(value) => setInterval(value as "minutes" | "hours")}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Interval" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="minutes">Minutes</SelectItem>
-              <SelectItem value="hours">Hours</SelectItem>
-            </SelectContent>
-          </Select>
-          Read
-          <Input
-            placeholder="INBOX"
-            value={folder}
-            onChange={(e) => setFolder(e.target.value)}
-            className="w-[120px]"
-          />
-          Folder
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-row gap-2 items-center">
+            Period:
+            <Input
+              placeholder="2"
+              value={quantity}
+              type="number"
+              onChange={(e) => setQuantity(parseInt(e.target.value))}
+              className="w-[80px]"
+            />
+            <Select
+              value={interval}
+              onValueChange={(value) =>
+                setInterval(value as "minutes" | "hours")
+              }
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Interval" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="minutes">Minutes</SelectItem>
+                <SelectItem value="hours">Hours</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-row gap-2 items-center">
+            Folder:
+            <Input
+              placeholder="INBOX"
+              value={folder}
+              onChange={(e) => setFolder(e.target.value)}
+              className="w-[120px]"
+            />
+          </div>
           <Button
             className="w-min"
             onClick={async () => {

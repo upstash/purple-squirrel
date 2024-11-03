@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 
   await index.upsert({
     id: applicant.id,
-    data: mailData.resumeText,
+    data: `RESUME: ${mailData.resumeText}\n\nCOVER_LETTER: ${applicant.coverLetter}`,
     metadata: applicant,
   });
 

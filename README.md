@@ -20,14 +20,16 @@
 
 ## Deploy your own
 <details>
-  <summary>Step 1: Deploying with Vercel</summary>
+  <summary>Step 1: Clone the repository</summary>
 
-  1. Click the button below.
-  2. Connect your GitHub account & create a Git repository as described.
+  1. Clone the repository:
+      ```bash
+      git clone https://github.com/upstash/purple-squirrel.git
+      cd purple-squirrel
+      ```
+  2. Create a `.env` file in the root directory, and copy the contents of `.env.local.example` into it.
   3. Fill the environment variables as described in the next steps.
 </details>
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fupstash%2Fpurple-squirrel&env=UPSTASH_VECTOR_REST_URL,UPSTASH_VECTOR_REST_TOKEN,QSTASH_URL,QSTASH_TOKEN,IMAP_USERNAME,IMAP_PASSWORD,IMAP_HOST,IMAP_PORT,UPLOADTHING_TOKEN,OPENAI_API_KEY,NEXT_PUBLIC_URL)
 
 <details>
   <summary>Step 2: Connect your mailbox</summary>
@@ -37,7 +39,7 @@
      * Turn on Less secure apps.
      * Create and use App Passwords.
      * Turn on IMAP in Gmail.
-  2. Fill the following environment variables in Vercel:
+  2. Fill the following environment variables in your `.env` file:
      * IMAP_USERNAME: Your mail address
      * IMAP_PASSWORD: App Password you generated
      * IMAP_HOST: imap.gmail.com
@@ -53,12 +55,12 @@
   4. Think of a name and select a region close to your users, Embedding Model, Dimensions and Metric should be set like below.<br/>
   ![create-index](https://github.com/user-attachments/assets/9029637a-5dd5-4b4a-b800-9c9332332d42)
   5. Click Next -> Click Create.
-  6. Fill the following environment variables in Vercel, which can be found and copied in your index page:
+  6. Fill the following environment variables in your `.env` file, which can be found and copied in your index page:
       * UPSTASH_VECTOR_REST_URL: Your endpoint
       * UPSTASH_VECTOR_REST_TOKEN<br/>
       ![env-index](https://github.com/user-attachments/assets/71a1f771-a3f5-4fcb-8e9d-4fcf871119a9)
   7. Switch to [QStash tab in Console](https://console.upstash.com/qstash)
-  8. Fill the following environment variables in Vercel, which can be found and copied in your QStash page:
+  8. Fill the following environment variables in your `.env` file, which can be found and copied in your QStash page:
       * QSTASH_URL
       * QSTASH_TOKEN<br/>
       ![env-qstash](https://github.com/user-attachments/assets/64a30afa-3f69-46d0-85e8-98bb9b7c6c7b)
@@ -74,7 +76,7 @@
   2. Click Create a new app.
   3. Think of a name and select an app default region close to your users.<br/>
   ![create-uploadthing](https://github.com/user-attachments/assets/c77bdc2c-8925-4559-8686-dbbfe821a679)
-  4. Fill the following environment variables in Vercel, which can be found and copied in the API Keys tab:
+  4. Fill the following environment variables in your `.env` file, which can be found and copied in the API Keys tab:
      * UPLOADTHING_TOKEN<br/>
      ![env-uploadthing](https://github.com/user-attachments/assets/4b23ca2d-4d33-444f-ad48-5eeca0cd3209)
 
@@ -88,21 +90,24 @@
   2. Click Create new secret key.
   3. Enter a name and click Create secret key.<br/>
   ![openai-key](https://github.com/user-attachments/assets/eb8860cc-b729-4404-88be-5af514505fcd)
-  4. Don't forget to copy and save your key. Fill the following environment variable in Vercel:
+  4. Don't forget to copy and save your key. Fill the following environment variable in your `.env` file:
      * OPENAI_API_KEY
 </details>
 
 <details>
-  <summary>Step 6: Set your application URL</summary>
+  <summary>Step 6: Deploy & Setup</summary>
 
-  1. Fill the following environment variables in Vercel:
-     * NEXT_PUBLIC_URL: URL of your application (e.g. https://your-app.vercel.app)
-</details>
-
-<details>
-  <summary>Step 7: Deploy & Setup</summary>
-
-  1. Deploy & visit `https://your-app.vercel.app/setup` to set up your application.<br/>
+  1. Deploy your application to Vercel with the following command:
+      ```bash
+      vercel
+      ```
+  2. Go to your project at [Vercel Dashboard](https://vercel.com/) for the next steps.
+  3. Learn the Production Domain of your application from the Project tab.
+  4. Go to Settings -> Environment Variables, copy and paste your `.env` file.
+  5. Fill the following environment variable with the Production Domain (Not the Deployment URL) of your application:
+      * NEXT_PUBLIC_URL: Production Domain of your application (e.g. https://your-app.vercel.app)
+  6. Go to the Deployments tab and redeploy your application.
+  7. Visit `https://your-app.vercel.app/setup` to set up your application.<br/>
   <img width="1440" alt="setup" src="https://github.com/user-attachments/assets/9164f6b6-ee83-4971-ac56-777ac4b34bf5">
 
 </details>
