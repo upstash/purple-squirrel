@@ -102,11 +102,13 @@
       vercel
       ```
   2. Go to your project at [Vercel Dashboard](https://vercel.com/) for the next steps.
-  3. Learn the Production Domain of your application from the Project tab.
+  3. Learn the Production Domain of your application from the Project tab.<br/>
+  ![domain](https://github.com/user-attachments/assets/457b4e87-5622-4472-97eb-ec0cfead6043)
   4. Go to Settings -> Environment Variables, copy and paste your `.env` file.
   5. Fill the following environment variable with the Production Domain (Not the Deployment URL) of your application:
       * NEXT_PUBLIC_URL: Production Domain of your application (e.g. https://your-app.vercel.app)
-  6. Go to the Deployments tab and redeploy your application.
+  6. Go to the Deployments tab and redeploy your application.<br/>
+  ![redeploy](https://github.com/user-attachments/assets/53710764-26c0-4963-8b01-12e60b215da3)
   7. Visit `https://your-app.vercel.app/setup` to set up your application.<br/>
   <img width="1440" alt="setup" src="https://github.com/user-attachments/assets/9164f6b6-ee83-4971-ac56-777ac4b34bf5">
 
