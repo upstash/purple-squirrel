@@ -44,16 +44,12 @@ export default function Home() {
         <Search
           className="mt-6"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyUp={async (e) => {
-            if (e.key === "Enter") {
-              return onSearch(query);
-            }
-          }}
+          setQuery={setQuery}
+          onSearch={onSearch}
         />
       </header>
 
-      <div className="mx-auto mt-8 flex w-full max-w-screen-lg flex-col gap-3">
+      <div className="mx-auto mt-6 flex w-full max-w-screen-lg flex-col gap-3">
         {loading && <Spinner className="text-primary" />}
 
         {!loading && applicants.length > 0 ? (

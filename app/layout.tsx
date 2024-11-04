@@ -34,8 +34,8 @@ export default function RootLayout({
         "scroll-smooth antialiased md:text-base",
       )}
     >
-      <body className="flex min-h-screen flex-col px-6">
-        <div className="grow">{children}</div>
+      <body className="px-6">
+        {children}
         <Footer />
       </body>
     </html>
