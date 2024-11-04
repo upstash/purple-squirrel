@@ -35,7 +35,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="py-12">
+    <main className="pt-12">
       <header className="mx-auto max-w-screen-sm">
         <h1 className="font-display text-center text-2xl font-bold text-primary">
           Purple Squirrel
