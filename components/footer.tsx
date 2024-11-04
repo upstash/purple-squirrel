@@ -11,11 +11,11 @@ export default function Footer() {
       </a>{" "}
       • Powered by{" "}
       <a
-        href="https://upstash.com/?utm_source=purple-squirrel"
+        href="https://upstash.com/docs/vector/overall/whatisvector"
         target="_blank"
         className="underline"
       >
-        Upstash
+        Upstash Vector
       </a>
     </footer>
   );
