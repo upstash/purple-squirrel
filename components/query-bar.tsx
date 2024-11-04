@@ -10,7 +10,7 @@ type Props = {
 
 export default function QueryBar({ query, setQuery, onSearch }: Props) {
   return (
-    <div className="flex flex-row gap-2 w-full">
+    <div className="flex w-full flex-row gap-2">
       <Input
         placeholder="Search applicants..."
         className="w-full"

@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
-import { StarIcon, StarFilledIcon, ArchiveIcon } from "@radix-ui/react-icons";
+import { ArchiveIcon, StarFilledIcon, StarIcon } from "@radix-ui/react-icons";
 import {
   Dialog,
   DialogContent,
@@ -99,7 +99,7 @@ export default function TableCard({ displayApplicants, onUpdate }: Props) {
                             "hover:text-violet-700",
                             applicant.favorite
                               ? "text-violet-700"
-                              : "text-zinc-700"
+                              : "text-zinc-700",
                           )}
                           onClick={async () => {
                             await onUpdate({
@@ -134,7 +134,7 @@ export default function TableCard({ displayApplicants, onUpdate }: Props) {
                             "hover:text-violet-700",
                             applicant.archived
                               ? "text-violet-700"
-                              : "text-zinc-700"
+                              : "text-zinc-700",
                           )}
                           onClick={async () => {
                             await onUpdate({

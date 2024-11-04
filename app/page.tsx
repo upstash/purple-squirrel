@@ -25,18 +25,18 @@ export default function Home() {
 
   async function onUpdate(applicant: Applicant) {
     setApplicants((applicants) =>
-      applicants?.map((a) => (a.id === applicant.id ? applicant : a))
+      applicants?.map((a) => (a.id === applicant.id ? applicant : a)),
     );
     await update(applicant);
   }
 
   return (
-    <div className="flex flex-col items-center justify-between min-h-screen p-10">
-      <main className="flex flex-col gap-6 row-start-2 items-center sm:items-start w-[860px] pt-16">
-        <div className="text-violet-600 font-bold text-3xl">
+    <div className="flex min-h-screen flex-col items-center justify-between p-10">
+      <main className="row-start-2 flex w-[860px] flex-col items-center gap-6 pt-16 sm:items-start">
+        <div className="text-3xl font-bold text-violet-600">
           Purple Squirrel
         </div>
-        <div className="flex flex-col gap-3 w-full">
+        <div className="flex w-full flex-col gap-3">
           <QueryBar query={query} setQuery={setQuery} onSearch={onSearch} />
           {loading ? (
             <Spinner className="text-violet-700" />
@@ -44,7 +44,7 @@ export default function Home() {
             applicants.length > 0 ? (
               <ApplicantTable applicants={applicants} onUpdate={onUpdate} />
             ) : (
-              <div className="text-zinc-500 text-center">
+              <div className="text-center text-zinc-500">
                 No applicants found.
               </div>
             )
@@ -53,9 +53,9 @@ export default function Home() {
           )}
         </div>
       </main>
-      <footer className="flex gap-6 flex-wrap items-center justify-center">
+      <footer className="flex flex-wrap items-center justify-center gap-6">
         <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4 text-zinc-700"
+          className="flex items-center gap-2 text-zinc-700 hover:underline hover:underline-offset-4"
           href="https://upstash.com/"
           target="_blank"
           rel="noopener noreferrer"

@@ -9,7 +9,7 @@ type Props = {
 
 export default function TableTabs({ tab, onTabChange }: Props) {
   return (
-    <div className="flex flex-row w-full justify-center">
+    <div className="flex w-full flex-row justify-center">
       <Tabs
         value={tab}
         onValueChange={(value) => onTabChange(value as FilterTab)}
