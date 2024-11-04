@@ -24,11 +24,11 @@ export async function digest({
 
   await client.publishJSON({
     url: `${QSTASH_TARGET_URL}/api/search-unseen`,
-    method: "POST", 
+    method: "POST",
     retries: 0,
     body: {
       folder,
-    }
+    },
   });
   if (process.env.NODE_ENV === "production") {
     const cron =

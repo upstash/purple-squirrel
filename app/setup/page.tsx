@@ -21,17 +21,15 @@ export default function Page() {
   const [interval, setInterval] = useState<"minutes" | "hours">("hours");
   const [loading, setLoading] = useState<boolean>(false);
   return (
-    <div className="flex flex-col items-center justify-between min-h-screen p-10">
-      <main className="flex flex-col gap-6 row-start-2 items-center sm:items-start w-[860px] pt-16">
-        <div className="text-violet-600 font-bold text-3xl">
-          Purple Squirrel
-        </div>
-        <div className="text-zinc-500">
+    <div className="flex min-h-screen flex-col items-center justify-between p-10">
+      <main className="row-start-2 flex w-[860px] flex-col items-center gap-6 pt-16 sm:items-start">
+        <div className="text-3xl font-bold text-primary">Purple Squirrel</div>
+        <div className="text-muted-foreground">
           It may take ~2 minutes for applicants to show up after you set the
           digest.
         </div>
         <div className="flex flex-col gap-2">
-          <div className="flex flex-row gap-2 items-center">
+          <div className="flex flex-row items-center gap-2">
             Period:
             <Input
               placeholder="2"
@@ -55,7 +53,7 @@ export default function Page() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex flex-row gap-2 items-center">
+          <div className="flex flex-row items-center gap-2">
             Folder:
             <Input
               placeholder="INBOX"
@@ -78,9 +76,9 @@ export default function Page() {
           </Button>
         </div>
       </main>
-      <footer className="flex gap-6 flex-wrap items-center justify-center">
+      <footer className="flex flex-wrap items-center justify-center gap-6">
         <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4 text-zinc-700"
+          className="flex items-center gap-2 text-muted-foreground hover:underline hover:underline-offset-4"
           href="https://upstash.com/"
           target="_blank"
           rel="noopener noreferrer"

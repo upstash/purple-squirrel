@@ -1,5 +1,4 @@
-import Imap from "node-imap";
-import { ImapMessage } from "node-imap";
+import Imap, { ImapMessage } from "node-imap";
 import { simpleParser, type Source } from "mailparser";
 import { Client } from "@upstash/qstash";
 
@@ -117,7 +116,7 @@ export async function POST(req: Request) {
       resolve(
         new Response("OK", {
           status: 200,
-        })
+        }),
       );
     });
   });

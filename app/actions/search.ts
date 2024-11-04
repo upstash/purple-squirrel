@@ -8,7 +8,7 @@ const index = new Index({
   token: process.env.UPSTASH_VECTOR_REST_TOKEN as string,
 });
 
-export async function search(query: string) {
+export async function search(query: string = ""): Promise<Applicant[]> {
   const response = await index.query({
     topK: 50,
     data: query,

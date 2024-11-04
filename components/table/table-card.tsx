@@ -7,8 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
-import { StarIcon, StarFilledIcon, ArchiveIcon } from "@radix-ui/react-icons";
+import { ArchiveIcon, StarFilledIcon, StarIcon } from "@radix-ui/react-icons";
 import {
   Dialog,
   DialogContent,
@@ -29,45 +28,56 @@ import NoteDialog from "./note-dialog";
 import type { Applicant } from "@/types";
 
 type Props = {
-  displayApplicants: Applicant[];
+  applicants: Applicant[];
   onUpdate: (applicant: Applicant) => Promise<void>;
 };
 
-export default function TableCard({ displayApplicants, onUpdate }: Props) {
+export default function TableCard({ applicants, onUpdate }: Props) {
   return (
-    <Card className="p-1">
+    <div className="rounded-lg border px-4">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[100px]">Name</TableHead>
-            <TableHead>Location</TableHead>
-            <TableHead>Position</TableHead>
-            <TableHead className="pl-6">Resume</TableHead>
-            <TableHead className="pl-6">Cover Letter</TableHead>
-            <TableHead className="pl-5">Actions</TableHead>
+            <TableHead className="w-[25%]">Name</TableHead>
+            <TableHead className="w-[25%]">Position</TableHead>
+            <TableHead className="w-[20%]">Location</TableHead>
+            <TableHead>Resume</TableHead>
+            <TableHead>Cover</TableHead>
+            <TableHead></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {displayApplicants.map((applicant) => (
+          {applicants.map((applicant) => (
             <TableRow key={applicant.id}>
-              <TableCell>{applicant.name}</TableCell>
-              <TableCell>{applicant.location}</TableCell>
-              <TableCell>{applicant.position}</TableCell>
               <TableCell>
-                <Button variant="link">
-                  <a
-                    href={applicant.resumeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View Resume
-                  </a>
-                </Button>
+                <b>{applicant.name}</b>
+              </TableCell>
+              <TableCell>{applicant.position}</TableCell>
+              <TableCell className="text-muted-foreground">
+                {applicant.location}
+              </TableCell>
+              <TableCell>
+                <a
+                  href={applicant.resumeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  View
+                </a>
               </TableCell>
               <TableCell>
                 <Dialog>
                   <DialogTrigger>
-                    <Button variant="link">View Cover Letter</Button>
+                    <a
+                      className={cn(
+                        applicant.coverLetter
+                          ? "text-primary hover:underline"
+                          : "text-muted-foreground",
+                      )}
+                    >
+                      View
+                    </a>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
@@ -77,86 +87,79 @@ export default function TableCard({ displayApplicants, onUpdate }: Props) {
                   </DialogContent>
                 </Dialog>
               </TableCell>
-              <TableCell className="text-right">
-                <div className="flex flex-row flex-nowrap">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <NoteDialog applicant={applicant} onUpdate={onUpdate} />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Add or edit notes</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className={cn(
-                            "hover:text-violet-700",
-                            applicant.favorite
-                              ? "text-violet-700"
-                              : "text-zinc-700"
-                          )}
-                          onClick={async () => {
-                            await onUpdate({
-                              ...applicant,
-                              favorite: !applicant.favorite,
-                            });
-                          }}
-                        >
-                          {applicant.favorite ? (
-                            <StarFilledIcon />
-                          ) : (
-                            <StarIcon />
-                          )}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>
-                          {applicant.favorite
-                            ? "Remove from favorites"
-                            : "Add to favorites"}
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className={cn(
-                            "hover:text-violet-700",
-                            applicant.archived
-                              ? "text-violet-700"
-                              : "text-zinc-700"
-                          )}
-                          onClick={async () => {
-                            await onUpdate({
-                              ...applicant,
-                              archived: !applicant.archived,
-                            });
-                          }}
-                        >
-                          <ArchiveIcon />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{applicant.archived ? "Unarchive" : "Archive"}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
+              <TableCell className="flex items-center justify-end gap-0">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <NoteDialog applicant={applicant} onUpdate={onUpdate} />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Add or edit notes</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                          applicant.favorite
+                            ? "text-primary"
+                            : "text-muted-foreground",
+                        )}
+                        onClick={async () => {
+                          await onUpdate({
+                            ...applicant,
+                            favorite: !applicant.favorite,
+                          });
+                        }}
+                      >
+                        {applicant.favorite ? <StarFilledIcon /> : <StarIcon />}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {applicant.favorite
+                          ? "Remove from favorites"
+                          : "Add to favorites"}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                          applicant.archived
+                            ? "text-primary"
+                            : "text-muted-foreground",
+                        )}
+                        onClick={async () => {
+                          await onUpdate({
+                            ...applicant,
+                            archived: !applicant.archived,
+                          });
+                        }}
+                      >
+                        <ArchiveIcon />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{applicant.archived ? "Unarchive" : "Archive"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-    </Card>
+    </div>
   );
 }

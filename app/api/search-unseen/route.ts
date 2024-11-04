@@ -8,7 +8,7 @@ const client = new Client({ token: process.env.QSTASH_TOKEN as string });
 export async function POST(req: Request) {
   const body = await req.json();
 
-  const folder = body.folder
+  const folder = body.folder;
 
   const imap = new Imap({
     user: process.env.IMAP_USERNAME!,
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
       resolve(
         new Response("OK", {
           status: 200,
-        })
+        }),
       );
     });
   });
