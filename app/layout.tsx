@@ -34,7 +34,7 @@ export default function RootLayout({
         "scroll-smooth antialiased md:text-base",
       )}
     >
-      <body className="px-6">
+      <body className="px-6 py-8">
         {children}
         <Footer />
       </body>

@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="fixed inset-1 top-auto rounded-md bg-zinc-900 px-8 py-4 text-center text-sm text-white">
+    <footer className="fixed inset-1 top-auto rounded-md bg-zinc-800 px-8 py-3 text-center text-sm text-white">
       Open source project on{" "}
       <a
         href="https://github.com/upstash/purple-squirrel"

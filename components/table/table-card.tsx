@@ -49,7 +49,10 @@ export default function TableCard({ applicants, onUpdate }: Props) {
         </TableHeader>
         <TableBody>
           {applicants.map((applicant) => (
-            <TableRow key={applicant.id}>
+            <TableRow
+              key={applicant.id}
+              className={applicant.favorite ? "!bg-primary/5" : ""}
+            >
               <TableCell>
                 <TooltipProvider>
                   <Tooltip>
@@ -109,7 +112,7 @@ export default function TableCard({ applicants, onUpdate }: Props) {
                           : "text-muted-foreground",
                       )}
                     >
-                      View
+                      {applicant.coverLetter ? "View" : "-"}
                     </a>
                   </DialogTrigger>
                   <DialogContent>

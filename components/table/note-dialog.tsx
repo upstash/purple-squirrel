@@ -31,7 +31,10 @@ export default function NoteDialog({ applicant, onUpdate }: Props) {
           variant="ghost"
           size="icon"
           className={cn(
-            applicant.notes ? "text-primary" : "text-muted-foreground",
+            "rounded-full",
+            applicant.notes
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground",
           )}
         >
           <Pencil2Icon />
