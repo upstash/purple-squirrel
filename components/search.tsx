@@ -50,13 +50,15 @@ export default function Search({
         className="w-full px-10 py-6"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <div className="text-muted-foreground">Example Queries</div>
+        <h5 className="text-xs uppercase text-muted-foreground">
+          Example Queries
+        </h5>
 
-        <ul>
+        <ul className="mt-2">
           {exampleQueries.map((exampleQuery) => (
             <li key={exampleQuery}>
               <Button
-                className="p-0"
+                className={cn("p-0 text-muted-foreground hover:text-primary")}
                 variant="link"
                 onClick={async () => {
                   setQuery(exampleQuery);
