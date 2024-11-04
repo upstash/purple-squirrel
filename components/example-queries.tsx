@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import React from "react";
 
 type Props = {
   setQuery: (query: string) => void;
@@ -7,21 +9,25 @@ type Props = {
 
 export default function ExampleQueries({ setQuery, onSearch }: Props) {
   return (
-    <div className="flex flex-col items-center pt-2">
-      <div className="text-zinc-500">Example Queries</div>
-      {exampleQueries.map((exampleQuery) => (
-        <Button
-          key={exampleQuery}
-          className="text-zinc-700"
-          variant="link"
-          onClick={async () => {
-            setQuery(exampleQuery);
-            await onSearch(exampleQuery);
-          }}
-        >
-          {exampleQuery} →
-        </Button>
-      ))}
+    <div className="flex flex-col items-center text-center">
+      <div className="text-muted-foreground">Example Queries</div>
+
+      <ul className="mt-2">
+        {exampleQueries.map((exampleQuery) => (
+          <li key={exampleQuery}>
+            <Button
+              variant="link"
+              onClick={async () => {
+                setQuery(exampleQuery);
+                return onSearch(exampleQuery);
+              }}
+            >
+              {exampleQuery}
+              <MagnifyingGlassIcon />
+            </Button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

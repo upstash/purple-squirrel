@@ -7,7 +7,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
 import { ArchiveIcon, StarFilledIcon, StarIcon } from "@radix-ui/react-icons";
 import {
   Dialog,
@@ -29,45 +28,54 @@ import NoteDialog from "./note-dialog";
 import type { Applicant } from "@/types";
 
 type Props = {
-  displayApplicants: Applicant[];
+  applicants: Applicant[];
   onUpdate: (applicant: Applicant) => Promise<void>;
 };
 
-export default function TableCard({ displayApplicants, onUpdate }: Props) {
+export default function TableCard({ applicants, onUpdate }: Props) {
   return (
-    <Card className="p-1">
+    <div className="rounded-lg border px-4">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[100px]">Name</TableHead>
+            <TableHead>Name</TableHead>
             <TableHead>Location</TableHead>
             <TableHead>Position</TableHead>
-            <TableHead className="pl-6">Resume</TableHead>
-            <TableHead className="pl-6">Cover Letter</TableHead>
-            <TableHead className="pl-5">Actions</TableHead>
+            <TableHead>Resume</TableHead>
+            <TableHead>Cover Letter</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {displayApplicants.map((applicant) => (
+          {applicants.map((applicant) => (
             <TableRow key={applicant.id}>
               <TableCell>{applicant.name}</TableCell>
               <TableCell>{applicant.location}</TableCell>
               <TableCell>{applicant.position}</TableCell>
               <TableCell>
-                <Button variant="link">
+                <Button variant="link" asChild>
                   <a
                     href={applicant.resumeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    View Resume
+                    View
                   </a>
                 </Button>
               </TableCell>
               <TableCell>
                 <Dialog>
                   <DialogTrigger>
-                    <Button variant="link">View Cover Letter</Button>
+                    <Button
+                      variant="link"
+                      className={cn(
+                        applicant.coverLetter
+                          ? "text-violet-700"
+                          : "text-zinc-700",
+                      )}
+                    >
+                      View
+                    </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
@@ -96,10 +104,7 @@ export default function TableCard({ displayApplicants, onUpdate }: Props) {
                           variant="ghost"
                           size="icon"
                           className={cn(
-                            "hover:text-violet-700",
-                            applicant.favorite
-                              ? "text-violet-700"
-                              : "text-zinc-700",
+                            applicant.favorite ? "text-violet-700" : "",
                           )}
                           onClick={async () => {
                             await onUpdate({
@@ -131,7 +136,6 @@ export default function TableCard({ displayApplicants, onUpdate }: Props) {
                           variant="ghost"
                           size="icon"
                           className={cn(
-                            "hover:text-violet-700",
                             applicant.archived
                               ? "text-violet-700"
                               : "text-zinc-700",
@@ -157,6 +161,6 @@ export default function TableCard({ displayApplicants, onUpdate }: Props) {
           ))}
         </TableBody>
       </Table>
-    </Card>
+    </div>
   );
 }

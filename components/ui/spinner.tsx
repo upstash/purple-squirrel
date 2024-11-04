@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import React from "react";
 
 export interface ISVGProps extends React.SVGProps<SVGSVGElement> {
   size?: number;
@@ -7,7 +8,7 @@ export interface ISVGProps extends React.SVGProps<SVGSVGElement> {
 
 export const Spinner = ({ size = 24, className, ...props }: ISVGProps) => {
   return (
-    <div className="flex justify-center pt-5">
+    <div className="flex justify-center">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width={size}
