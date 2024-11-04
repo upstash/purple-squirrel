@@ -44,12 +44,8 @@ export default function Home() {
         <Search
           className="mt-6"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyUp={async (e) => {
-            if (e.key === "Enter") {
-              return onSearch(query);
-            }
-          }}
+          setQuery={setQuery}
+          onSearch={onSearch}
         />
       </header>
 

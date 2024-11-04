@@ -38,6 +38,7 @@ export default function TableCard({ applicants, onUpdate }: Props) {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead></TableHead>
             <TableHead className="w-[25%]">Name</TableHead>
             <TableHead className="w-[25%]">Position</TableHead>
             <TableHead className="w-[20%]">Location</TableHead>
@@ -49,6 +50,38 @@ export default function TableCard({ applicants, onUpdate }: Props) {
         <TableBody>
           {applicants.map((applicant) => (
             <TableRow key={applicant.id}>
+              <TableCell>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                          applicant.favorite
+                            ? "text-primary"
+                            : "text-muted-foreground",
+                        )}
+                        onClick={async () => {
+                          await onUpdate({
+                            ...applicant,
+                            favorite: !applicant.favorite,
+                          });
+                        }}
+                      >
+                        {applicant.favorite ? <StarFilledIcon /> : <StarIcon />}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {applicant.favorite
+                          ? "Remove from favorites"
+                          : "Add to favorites"}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </TableCell>
               <TableCell>
                 <b>{applicant.name}</b>
               </TableCell>
@@ -99,36 +132,6 @@ export default function TableCard({ applicants, onUpdate }: Props) {
                   </Tooltip>
                 </TooltipProvider>
 
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className={cn(
-                          applicant.favorite
-                            ? "text-primary"
-                            : "text-muted-foreground",
-                        )}
-                        onClick={async () => {
-                          await onUpdate({
-                            ...applicant,
-                            favorite: !applicant.favorite,
-                          });
-                        }}
-                      >
-                        {applicant.favorite ? <StarFilledIcon /> : <StarIcon />}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        {applicant.favorite
-                          ? "Remove from favorites"
-                          : "Add to favorites"}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
