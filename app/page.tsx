@@ -49,7 +49,7 @@ export default function Home() {
         />
       </header>
 
-      <div className="mx-auto mt-8 flex w-full max-w-screen-lg flex-col gap-3">
+      <div className="mx-auto mt-6 flex w-full max-w-screen-lg flex-col gap-3">
         {loading && <Spinner className="text-primary" />}
 
         {!loading && applicants.length > 0 ? (
