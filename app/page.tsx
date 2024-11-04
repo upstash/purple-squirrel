@@ -54,12 +54,14 @@ export default function Home() {
       </header>
 
       <div className="mx-auto mt-8 flex w-full max-w-screen-lg flex-col gap-3">
-        {loading && <Spinner className="text-violet-700" />}
+        {loading && <Spinner className="text-primary" />}
 
         {!loading && applicants.length > 0 ? (
           <ApplicantTable applicants={applicants} onUpdate={onUpdate} />
         ) : (
-          <div className="text-center text-zinc-500">No applicants found.</div>
+          <div className="text-center text-muted-foreground">
+            No applicants found.
+          </div>
         )}
       </div>
     </main>

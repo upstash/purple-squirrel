@@ -30,7 +30,9 @@ export default function NoteDialog({ applicant, onUpdate }: Props) {
         <Button
           variant="ghost"
           size="icon"
-          className={cn(applicant.notes ? "text-violet-700" : "")}
+          className={cn(
+            applicant.notes ? "text-primary" : "text-muted-foreground",
+          )}
         >
           <Pencil2Icon />
         </Button>

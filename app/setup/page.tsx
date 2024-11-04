@@ -23,10 +23,8 @@ export default function Page() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-between p-10">
       <main className="row-start-2 flex w-[860px] flex-col items-center gap-6 pt-16 sm:items-start">
-        <div className="text-3xl font-bold text-violet-600">
-          Purple Squirrel
-        </div>
-        <div className="text-zinc-500">
+        <div className="text-3xl font-bold text-primary">Purple Squirrel</div>
+        <div className="text-muted-foreground">
           It may take ~2 minutes for applicants to show up after you set the
           digest.
         </div>
@@ -80,7 +78,7 @@ export default function Page() {
       </main>
       <footer className="flex flex-wrap items-center justify-center gap-6">
         <a
-          className="flex items-center gap-2 text-zinc-700 hover:underline hover:underline-offset-4"
+          className="flex items-center gap-2 text-muted-foreground hover:underline hover:underline-offset-4"
           href="https://upstash.com/"
           target="_blank"
           rel="noopener noreferrer"
