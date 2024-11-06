@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { Client } from "@upstash/qstash";
 import QSTASH_TARGET_URL from "@/lib/qstash-target-url";
 
@@ -14,6 +15,11 @@ export async function digest({
   quantity: number;
   interval: "minutes" | "hours";
 }) {
+  const headersList = headers();
+  const authHeader =
+    headersList.get("authorization") ||
+    headersList.get("Authorization") ||
+    "mock-auth";
   const queue = client.queue({
     queueName: "mail-fetch-queue",
   });
@@ -26,6 +32,9 @@ export async function digest({
     url: `${QSTASH_TARGET_URL}/api/search-unseen`,
     method: "POST",
     retries: 0,
+    headers: {
+      Authorization: authHeader,
+    },
     body: {
       folder,
     },
@@ -50,6 +59,9 @@ export async function digest({
       destination: `${QSTASH_TARGET_URL}/api/search-unseen`,
       cron,
       retries: 0,
+      headers: {
+        Authorization: authHeader,
+      },
       body: JSON.stringify({
         folder,
       }),

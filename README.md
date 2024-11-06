@@ -95,7 +95,20 @@
 </details>
 
 <details>
-  <summary>Step 6: Deploy & Setup</summary>
+  <summary>Step 6: Set up Basic Auth</summary>
+
+  1. Decide if you want Basic Auth in your application, and set the following environment variable in your `.env` file:<br/>
+    BASIC_AUTH_ENABLED=true<br/>
+    or<br/>
+    BASIC_AUTH_ENABLED=false<br/>
+  2. If you want Basic Auth, fill the following environment variables in your `.env` file:
+      * BASIC_AUTH_USERNAME
+      * BASIC_AUTH_PASSWORD
+  
+</details>
+
+<details>
+  <summary>Step 7: Deploy & Setup</summary>
 
   1. Deploy your application to Vercel with the following command:
       ```bash

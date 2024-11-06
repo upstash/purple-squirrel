@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import Imap, { ImapMessage } from "node-imap";
 import { simpleParser, type Source } from "mailparser";
 import { Client } from "@upstash/qstash";
@@ -12,6 +13,11 @@ import pdf from "pdf-parse/lib/pdf-parse";
 const client = new Client({ token: process.env.QSTASH_TOKEN as string });
 
 export async function POST(req: Request) {
+  const headersList = headers();
+  const authHeader =
+    headersList.get("authorization") ||
+    headersList.get("Authorization") ||
+    "mock-auth";
   const body = await req.json();
 
   const mailID = body.mailID;
@@ -66,6 +72,9 @@ export async function POST(req: Request) {
                   await client.publishJSON({
                     url: `${QSTASH_TARGET_URL}/api/create-applicant`,
                     method: "POST",
+                    headers: {
+                      Authorization: authHeader,
+                    },
                     body: {
                       mailData: mailData,
                     },

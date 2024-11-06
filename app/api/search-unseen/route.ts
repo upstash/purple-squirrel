@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import Imap from "node-imap";
 import { Client } from "@upstash/qstash";
 
@@ -6,6 +7,11 @@ import QSTASH_TARGET_URL from "@/lib/qstash-target-url";
 const client = new Client({ token: process.env.QSTASH_TOKEN as string });
 
 export async function POST(req: Request) {
+  const headersList = headers();
+  const authHeader =
+    headersList.get("authorization") ||
+    headersList.get("Authorization") ||
+    "mock-auth";
   const body = await req.json();
 
   const folder = body.folder;
@@ -36,6 +42,9 @@ export async function POST(req: Request) {
           return {
             queueName: "mail-fetch-queue",
             url: `${QSTASH_TARGET_URL}/api/fetch-unseen`,
+            headers: {
+              Authorization: authHeader,
+            },
             body: {
               mailID: result,
               folder,
