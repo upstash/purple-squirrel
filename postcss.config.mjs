@@ -1,8 +1,1 @@
-/** @type {import('postcss-load-config').Config} */
-const config = {
-  plugins: {
-    tailwindcss: {},
-  },
-};
-
-export default config;
+There are no grammatical errors in the given markdown file content, so no changes are needed.
