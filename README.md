@@ -1,7 +1,7 @@
 <p align="center" size="20" style="font-size:1.5em;">Open-Source Applicant Search Engine</p>
 <div align="center"><img width="1440" alt="purple-squirrel" src="https://github.com/user-attachments/assets/320533b0-52a7-4903-a350-3095ad47b2a2"></div>
 
-<div align="center"><a style="font-size:1.5em;" href="https://purple-squirrel.vercel.app">Live Demo</a></div>
+<div align="center"><a style="font-size:1.5em;" href="https://purple-squirrel-demo.vercel.app/">Live Demo</a></div>
 
 ## Overview
 - [🥞 Tech Stack](#tech-stack)
