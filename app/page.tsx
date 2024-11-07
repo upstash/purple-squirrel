@@ -37,7 +37,7 @@ export default function Home() {
   return (
     <main>
       <header className="mx-auto max-w-screen-sm">
-        <h1 className="font-display text-center text-xl font-bold text-primary">
+        <h1 className="text-center font-display text-xl font-bold text-primary">
           Purple Squirrel
         </h1>
 

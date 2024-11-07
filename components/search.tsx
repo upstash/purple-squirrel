@@ -1,6 +1,6 @@
 import { Input, InputProps } from "@/components/ui/input";
 import React from "react";
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import { Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
 import {
   Popover,
@@ -21,7 +21,7 @@ export default function Search({
   ...props
 }: InputProps & {
   setQuery: (query: string) => void;
-  onSearch: (query: string) => void;
+  onSearch: (query?: string) => void;
 }) {
   const [open, setOpen] = React.useState(false);
 
@@ -43,6 +43,19 @@ export default function Search({
             onBlur={() => setOpen(false)}
             className={cn("pl-10", props.className)}
           />
+          {props.value && (
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => {
+                setQuery("");
+                onSearch();
+              }}
+              className="absolute right-2 top-1/2 size-7 -translate-y-1/2"
+            >
+              <Cross2Icon />
+            </Button>
+          )}
         </div>
       </PopoverAnchor>
 
