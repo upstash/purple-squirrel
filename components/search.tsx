@@ -34,7 +34,7 @@ export default function Search({ query, setQuery }: Props) {
             value={query}
             onFocus={() => setFocus(true)}
             onBlur={() => setFocus(false)}
-            className={"mt-6 pl-10"}
+            className="pl-10"
           />
           {query && (
             <Button

@@ -9,13 +9,6 @@ import {
 } from "@/components/ui/table";
 import { ArchiveIcon, StarFilledIcon, StarIcon } from "@radix-ui/react-icons";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -34,16 +27,14 @@ type Props = {
 
 export default function TableCard({ applicants, onUpdate }: Props) {
   return (
-    <div className="rounded-lg border px-4">
-      <Table>
-        <TableHeader>
+    <div className="overflow-x-auto border-b">
+      <Table className="min-w-[800px]">
+        <TableHeader className="bg-zinc-50">
           <TableRow>
-            <TableHead></TableHead>
-            <TableHead className="w-[25%]">Name</TableHead>
-            <TableHead className="w-[25%]">Position</TableHead>
-            <TableHead className="w-[20%]">Location</TableHead>
+            <TableHead className="w-[60px]"></TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Position / Location</TableHead>
             <TableHead>Resume</TableHead>
-            <TableHead>Cover</TableHead>
             <TableHead></TableHead>
           </TableRow>
         </TableHeader>
@@ -86,11 +77,18 @@ export default function TableCard({ applicants, onUpdate }: Props) {
                 </TooltipProvider>
               </TableCell>
               <TableCell>
-                <b>{applicant.name}</b>
+                <h4>
+                  <b>{applicant.name}</b>
+                </h4>
+                <p className={cn(applicant.coverLetter ? "" : "text-zinc-400")}>
+                  {applicant.coverLetter || "No cover letter"}
+                </p>
               </TableCell>
-              <TableCell>{applicant.position}</TableCell>
-              <TableCell className="text-muted-foreground">
-                {applicant.location}
+              <TableCell>
+                <p>
+                  <b>{applicant.position}</b>
+                </p>
+                <p className="text-muted-foreground">{applicant.location}</p>
               </TableCell>
               <TableCell>
                 <a
@@ -103,64 +101,45 @@ export default function TableCard({ applicants, onUpdate }: Props) {
                 </a>
               </TableCell>
               <TableCell>
-                <Dialog>
-                  <DialogTrigger>
-                    <a
-                      className={cn(
-                        applicant.coverLetter
-                          ? "text-primary hover:underline"
-                          : "text-muted-foreground",
-                      )}
-                    >
-                      {applicant.coverLetter ? "View" : "-"}
-                    </a>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Cover Letter</DialogTitle>
-                    </DialogHeader>
-                    {applicant.coverLetter || "No cover letter found."}
-                  </DialogContent>
-                </Dialog>
-              </TableCell>
-              <TableCell className="flex items-center justify-end gap-0">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <NoteDialog applicant={applicant} onUpdate={onUpdate} />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Add or edit notes</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <div className="flex items-center justify-end">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <NoteDialog applicant={applicant} onUpdate={onUpdate} />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Add or edit notes</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
 
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className={cn(
-                          applicant.archived
-                            ? "text-primary"
-                            : "text-muted-foreground",
-                        )}
-                        onClick={async () => {
-                          await onUpdate({
-                            ...applicant,
-                            archived: !applicant.archived,
-                          });
-                        }}
-                      >
-                        <ArchiveIcon />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{applicant.archived ? "Unarchive" : "Archive"}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={cn(
+                            applicant.archived
+                              ? "text-primary"
+                              : "text-muted-foreground",
+                          )}
+                          onClick={async () => {
+                            await onUpdate({
+                              ...applicant,
+                              archived: !applicant.archived,
+                            });
+                          }}
+                        >
+                          <ArchiveIcon />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{applicant.archived ? "Unarchive" : "Archive"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </TableCell>
             </TableRow>
           ))}

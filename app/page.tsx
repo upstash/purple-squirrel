@@ -73,31 +73,35 @@ export default function Home() {
           Purple Squirrel
         </h1>
 
-        <Search query={query} setQuery={setQuery} />
+        <div className="mt-4">
+          <Search query={query} setQuery={setQuery} />
+        </div>
       </header>
 
-      <div className="mx-auto mt-4 flex w-full max-w-screen-lg flex-col gap-3">
+      <div className="mx-auto mt-6 flex w-full max-w-screen-lg flex-col gap-6">
         {loading || !tab ? (
           <TableSkeleton />
         ) : (
-          <div className="space-y-4">
-            <div className="flex justify-center">
-              <div className="flex w-min flex-nowrap justify-center gap-1 text-nowrap rounded-lg bg-violet-100 px-2 py-1 text-sm text-violet-600">
-                <span>Search has been completed in</span>
-                <span className="font-bold">{duration.toFixed(0)}ms</span>
-              </div>
-            </div>
+          <>
             <TableTabs
               tab={tab}
               onTabChange={onTabChange}
               applicantsByGroup={applicantsByGroup}
             />
+
             <TableCard
               applicants={applicantsByGroup[tab]}
               onUpdate={onUpdate}
             />
-          </div>
+          </>
         )}
+      </div>
+
+      <div className="mt-6 flex justify-center">
+        <div className="flex w-min flex-nowrap justify-center gap-1 text-nowrap rounded-lg bg-violet-100 px-3 py-1 text-sm text-violet-600">
+          <span>Search has been completed in</span>
+          <span className="font-bold">{duration.toFixed(0)}ms</span>
+        </div>
       </div>
     </main>
   );
