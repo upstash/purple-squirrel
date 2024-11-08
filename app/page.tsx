@@ -1,25 +1,33 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { Spinner } from "@/components/ui/spinner";
 
 import Search from "@/components/search";
-import ApplicantTable from "@/components/table";
+import TableSkeleton from "@/components/table/skeleton";
+import TableTabs from "@/components/table/tabs";
+import TableCard from "@/components/table/card";
 
-import type { Applicant } from "@/types";
+import type { Applicant, FilterTab } from "@/types";
 import { search } from "@/app/actions/search";
 import { update } from "@/app/actions/update";
 
 export default function Home() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") as FilterTab;
+
   const [applicants, setApplicants] = useState<Applicant[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [duration, setDuration] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
   const [query, setQuery] = useState<string>("");
+  const [firstLoad, setFirstLoad] = useState<boolean>(true);
 
   async function onSearch(query?: string) {
     setLoading(true);
     const response = await search(query);
-    setApplicants(response);
-    console.log(response);
+    setDuration(response.duration);
+    setApplicants(response.applicants);
     setLoading(false);
   }
 
@@ -30,9 +38,33 @@ export default function Home() {
     await update(applicant);
   }
 
+  function onTabChange(tab: FilterTab) {
+    router.push(`/?tab=${tab}`);
+  }
+
+  const applicantsByGroup = {
+    active: applicants.filter((o) => !o.archived),
+    favorites: applicants.filter((o) => o.favorite),
+    archived: applicants.filter((o) => o.archived),
+  };
+
   useEffect(() => {
-    onSearch();
-  }, []);
+    if (firstLoad) {
+      setFirstLoad(false);
+      router.push(`/?tab=active`);
+      onSearch();
+    }
+  }, [firstLoad, router]);
+
+  useEffect(() => {
+    if (firstLoad) return;
+    const timeout = setTimeout(() => {
+      onSearch(query);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
 
   return (
     <main>
@@ -41,22 +73,29 @@ export default function Home() {
           Purple Squirrel
         </h1>
 
-        <Search
-          className="mt-6"
-          value={query}
-          setQuery={setQuery}
-          onSearch={onSearch}
-        />
+        <Search query={query} setQuery={setQuery} />
       </header>
 
-      <div className="mx-auto mt-6 flex w-full max-w-screen-lg flex-col gap-3">
-        {loading && <Spinner className="text-primary" />}
-
-        {!loading && applicants.length > 0 ? (
-          <ApplicantTable applicants={applicants} onUpdate={onUpdate} />
+      <div className="mx-auto mt-4 flex w-full max-w-screen-lg flex-col gap-3">
+        {loading || !tab ? (
+          <TableSkeleton />
         ) : (
-          <div className="text-center text-muted-foreground">
-            No applicants found.
+          <div className="space-y-4">
+            <div className="flex justify-center">
+              <div className="flex w-min flex-nowrap justify-center gap-1 text-nowrap rounded-lg bg-violet-100 px-2 py-1 text-sm text-violet-600">
+                <span>Search has been completed in</span>
+                <span className="font-bold">{duration.toFixed(0)}ms</span>
+              </div>
+            </div>
+            <TableTabs
+              tab={tab}
+              onTabChange={onTabChange}
+              applicantsByGroup={applicantsByGroup}
+            />
+            <TableCard
+              applicants={applicantsByGroup[tab]}
+              onUpdate={onUpdate}
+            />
           </div>
         )}
       </div>

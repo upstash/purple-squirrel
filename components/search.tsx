@@ -1,4 +1,4 @@
-import { Input, InputProps } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import React from "react";
 import { Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
@@ -15,41 +15,33 @@ const exampleQueries = [
   "3+ years of experience in Kubernetes",
 ];
 
-export default function Search({
-  setQuery,
-  onSearch,
-  ...props
-}: InputProps & {
+type Props = {
+  query: string;
   setQuery: (query: string) => void;
-  onSearch: (query?: string) => void;
-}) {
-  const [open, setOpen] = React.useState(false);
+};
+
+export default function Search({ query, setQuery }: Props) {
+  const [focus, setFocus] = React.useState(false);
 
   return (
-    <Popover open={open}>
+    <Popover open={focus && query.length === 0}>
       <PopoverAnchor asChild>
         <div className="relative">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search applicants..."
             onChange={(e) => setQuery(e.target.value)}
-            onKeyUp={async (e) => {
-              if (e.key === "Enter") {
-                return onSearch(e.currentTarget.value);
-              }
-            }}
-            {...props}
-            onFocus={() => setOpen(true)}
-            onBlur={() => setOpen(false)}
-            className={cn("pl-10", props.className)}
+            value={query}
+            onFocus={() => setFocus(true)}
+            onBlur={() => setFocus(false)}
+            className={"mt-6 pl-10"}
           />
-          {props.value && (
+          {query && (
             <Button
               size="icon"
               variant="ghost"
               onClick={() => {
                 setQuery("");
-                onSearch();
               }}
               className="absolute right-2 top-1/2 size-7 -translate-y-1/2"
             >
@@ -73,9 +65,8 @@ export default function Search({
               <Button
                 className={cn("p-0 text-muted-foreground hover:text-primary")}
                 variant="link"
-                onClick={async () => {
+                onClick={() => {
                   setQuery(exampleQuery);
-                  return onSearch(exampleQuery);
                 }}
               >
                 {exampleQuery}

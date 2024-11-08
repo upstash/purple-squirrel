@@ -8,12 +8,19 @@ const index = new Index({
   token: process.env.UPSTASH_VECTOR_REST_TOKEN as string,
 });
 
-export async function search(query: string = ""): Promise<Applicant[]> {
+export async function search(
+  query: string = "",
+): Promise<{ applicants: Applicant[]; duration: number }> {
+  const startTime = performance.now();
   const response = await index.query({
     topK: 50,
     data: query,
     includeMetadata: true,
     includeVectors: false,
   });
-  return response.map((result) => result.metadata) as Applicant[];
+  const endTime = performance.now();
+  return {
+    applicants: response.map((result) => result.metadata) as Applicant[],
+    duration: endTime - startTime,
+  };
 }
