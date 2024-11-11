@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import NoteDialog from "./note-dialog";
 
 import type { Applicant } from "@/types";
+import Collapse from "@/components/collapse";
 
 type Props = {
   applicants: Applicant[];
@@ -32,7 +33,7 @@ export default function TableCard({ applicants, onUpdate }: Props) {
         <TableHeader className="bg-zinc-50">
           <TableRow>
             <TableHead className="w-[60px]"></TableHead>
-            <TableHead>Name</TableHead>
+            <TableHead className="w-[50%]">Name</TableHead>
             <TableHead>Position / Location</TableHead>
             <TableHead>Resume</TableHead>
             <TableHead></TableHead>
@@ -42,9 +43,9 @@ export default function TableCard({ applicants, onUpdate }: Props) {
           {applicants.map((applicant) => (
             <TableRow
               key={applicant.id}
-              className={applicant.favorite ? "!bg-primary/5" : ""}
+              className={cn(applicant.favorite ? "!bg-primary/5" : "")}
             >
-              <TableCell>
+              <TableCell className="align-top">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
@@ -76,21 +77,21 @@ export default function TableCard({ applicants, onUpdate }: Props) {
                   </Tooltip>
                 </TooltipProvider>
               </TableCell>
-              <TableCell>
+              <TableCell className="align-top">
                 <h4>
                   <b>{applicant.name}</b>
                 </h4>
-                <p className={cn(applicant.coverLetter ? "" : "text-zinc-400")}>
-                  {applicant.coverLetter || "No cover letter"}
-                </p>
+                <Collapse className="" placeholder="No cover letter">
+                  {applicant.coverLetter}
+                </Collapse>
               </TableCell>
-              <TableCell>
+              <TableCell className="align-top">
                 <p>
                   <b>{applicant.position}</b>
                 </p>
                 <p className="text-muted-foreground">{applicant.location}</p>
               </TableCell>
-              <TableCell>
+              <TableCell className="align-top">
                 <a
                   href={applicant.resumeUrl}
                   target="_blank"
@@ -100,7 +101,7 @@ export default function TableCard({ applicants, onUpdate }: Props) {
                   View
                 </a>
               </TableCell>
-              <TableCell>
+              <TableCell className="align-top">
                 <div className="flex items-center justify-end">
                   <TooltipProvider>
                     <Tooltip>
