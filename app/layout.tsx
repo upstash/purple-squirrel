@@ -4,6 +4,7 @@ import React from "react";
 import Footer from "@/components/footer";
 import { Inter, Inter_Tight } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Purple Squirrel",
@@ -35,7 +36,7 @@ export default function RootLayout({
       )}
     >
       <body className="px-6 pb-40 pt-8">
-        {children}
+        <Suspense>{children}</Suspense>
         <Footer />
       </body>
     </html>
