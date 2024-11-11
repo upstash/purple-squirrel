@@ -1,7 +1,6 @@
 <p align="center" size="20" style="font-size:2.5em;">Open-Source Job Application Search Engine</p>
-<div align="center"><img width="1440" alt="purple-squirrel" src="https://github.com/user-attachments/assets/320533b0-52a7-4903-a350-3095ad47b2a2"></div>
-
 <div align="center"><a style="font-size:1.5em;" href="https://purple-squirrel-demo.vercel.app/">Live Demo</a></div>
+<div align="center"><img width="1440" alt="purple-squirrel" src="https://github.com/user-attachments/assets/320533b0-52a7-4903-a350-3095ad47b2a2"></div>
 
 ## Overview
 - [🥞 Tech Stack](#tech-stack)
@@ -30,6 +29,9 @@
   2. Create a `.env` file in the root directory, and copy the contents of `.env.local.example` into it.
   3. Fill the environment variables as described in the next steps.
 </details>
+Alternatively you can use the Vercel Deploy Button:<br/>
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fupstash%2Fpurple-squirrel&env=UPSTASH_VECTOR_REST_URL,UPSTASH_VECTOR_REST_TOKEN,QSTASH_URL,QSTASH_TOKEN,IMAP_USERNAME,IMAP_PASSWORD,IMAP_HOST,IMAP_PORT,UPLOADTHING_TOKEN,OPENAI_API_KEY,NEXT_PUBLIC_URL,BASIC_AUTH_ENABLED,BASIC_AUTH_USERNAME,BASIC_AUTH_PASSWORD)
 
 <details>
   <summary>Step 2: Connect your mailbox</summary>
