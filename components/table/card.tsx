@@ -81,9 +81,13 @@ export default function TableCard({ applicants, onUpdate }: Props) {
                 <h4>
                   <b>{applicant.name}</b>
                 </h4>
-                <Collapse className="" placeholder="No cover letter">
-                  {applicant.coverLetter}
-                </Collapse>
+                {applicant.coverLetter ? (
+                  <Collapse className="" placeholder="No cover letter">
+                    {applicant.coverLetter}
+                  </Collapse>
+                ) : (
+                  "No cover letter"
+                )}
               </TableCell>
               <TableCell className="align-top">
                 <p>

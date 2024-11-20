@@ -72,7 +72,7 @@ export default function Page() {
             }}
             disabled={loading}
           >
-            {loading ? "Setting..." : "Set"}
+            {loading ? "Setting..." : "Run and Set"}
           </Button>
         </div>
       </main>
