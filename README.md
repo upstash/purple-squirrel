@@ -37,10 +37,10 @@ Alternatively you can use the Vercel Deploy Button:<br/>
   <summary>Step 2: Connect your mailbox</summary>
 
   **Note:** This tutorial will be based on Gmail, but you can set up an IMAP connection with any other provider. We recommend creating a separate email like ps@company.com and forwarding job mails there. You can also create a folder like JOBS and configure the application to read from that folder in the setup step.
-  1. Complete the following steps described in [this tutorial](https://support.google.com/a/answer/9003945#imap_gmail&zippy=%2Cstep-turn-on-imap-in-gmail%2Cstep-create-and-use-app-passwords%2Cstep-turn-on-less-secure-apps).
-     * Turn on Less secure apps.
-     * Create and use App Passwords.
-     * Turn on IMAP in Gmail.
+  1. Complete the following steps described in [this tutorial](https://support.google.com/a/answer/9003945#less_secure&zippy=%2Cstep-turn-on-less-secure-apps%2Cstep-create-and-use-app-passwords%2Cstep-turn-on-imap-in-gmail).
+     * [Step 1: Turn on Less secure apps](https://support.google.com/a/answer/9003945#less_secure&zippy=%2Cstep-turn-on-less-secure-apps)
+     * [Step 2: Create and use App Passwords](https://support.google.com/a/answer/9003945#app_passwords&zippy=%2Cstep-create-and-use-app-passwords)
+     * [Step 3: Turn on IMAP in Gmail](https://support.google.com/a/answer/9003945#imap_gmail&zippy=%2Cstep-turn-on-imap-in-gmail)
   2. Fill the following environment variables in your `.env` file:
      * IMAP_USERNAME: Your mail address
      * IMAP_PASSWORD: App Password you generated
