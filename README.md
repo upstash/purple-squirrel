@@ -49,7 +49,7 @@ Alternatively you can use the Vercel Deploy Button:<br/>
 </details>
 
 <details>
-  <summary>Step 3: Set up Upstash</summary>
+  <summary>Step 3: Set up Upstash Vector</summary>
 
   1. Open an Upstash account.
   2. Switch to [Vector tab in Console](https://console.upstash.com/vector).
@@ -61,8 +61,15 @@ Alternatively you can use the Vercel Deploy Button:<br/>
       * UPSTASH_VECTOR_REST_URL: Your endpoint
       * UPSTASH_VECTOR_REST_TOKEN<br/>
       ![env-index](https://github.com/user-attachments/assets/71a1f771-a3f5-4fcb-8e9d-4fcf871119a9)
-  7. Switch to [QStash tab in Console](https://console.upstash.com/qstash)
-  8. Fill the following environment variables in your `.env` file, which can be found and copied in your QStash page:
+
+
+</details>
+
+<details>
+  <summary>Step 4: Set up Upstash QStash</summary>
+
+  1. Switch to [QStash tab in Upstash Console](https://console.upstash.com/qstash)
+  2. Fill the following environment variables in your `.env` file, which can be found and copied in your QStash page:
       * QSTASH_URL
       * QSTASH_TOKEN<br/>
       ![env-qstash](https://github.com/user-attachments/assets/64a30afa-3f69-46d0-85e8-98bb9b7c6c7b)
@@ -72,9 +79,9 @@ Alternatively you can use the Vercel Deploy Button:<br/>
 </details>
 
 <details>
-  <summary>Step 4: Set up uploadthing</summary>
+  <summary>Step 5: Set up uploadthing</summary>
 
-  1. Sign in to uploadthing.
+  1. Sign in to [uploadthing](https://uploadthing.com/).
   2. Click Create a new app.
   3. Think of a name and select an app default region close to your users.<br/>
   ![create-uploadthing](https://github.com/user-attachments/assets/c77bdc2c-8925-4559-8686-dbbfe821a679)
@@ -86,7 +93,7 @@ Alternatively you can use the Vercel Deploy Button:<br/>
 </details>
 
 <details>
-  <summary>Step 5: Set OpenAI API key</summary>
+  <summary>Step 6: Set OpenAI API key</summary>
 
   1. Go to [OpenAI Platform -> API keys](https://platform.openai.com/api-keys) and login to your account.
   2. Click Create new secret key.
@@ -97,7 +104,7 @@ Alternatively you can use the Vercel Deploy Button:<br/>
 </details>
 
 <details>
-  <summary>Step 6: Set up Basic Auth</summary>
+  <summary>Step 7: Set up Basic Auth</summary>
 
   1. Decide if you want Basic Auth in your application, and set the following environment variable in your `.env` file:<br/>
     BASIC_AUTH_ENABLED=true<br/>
@@ -110,7 +117,7 @@ Alternatively you can use the Vercel Deploy Button:<br/>
 </details>
 
 <details>
-  <summary>Step 7: Deploy & Setup</summary>
+  <summary>Step 8: Deploy & Setup</summary>
 
   1. Deploy your application to Vercel with the following command:
       ```bash
