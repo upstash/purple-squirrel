@@ -52,7 +52,7 @@ export default function Search({ query, setQuery }: Props) {
       </PopoverAnchor>
 
       <PopoverContent
-        className="w-full px-10 py-6"
+        className="max-h-[--radix-popover-content-available-height] w-[--radix-popover-trigger-width] px-10 py-6"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <h5 className="text-xs uppercase text-muted-foreground">
@@ -63,7 +63,9 @@ export default function Search({ query, setQuery }: Props) {
           {exampleQueries.map((exampleQuery) => (
             <li key={exampleQuery}>
               <Button
-                className={cn("p-0 text-muted-foreground hover:text-primary")}
+                className={cn(
+                  "whitespace-normal p-0 text-left text-muted-foreground hover:text-primary",
+                )}
                 variant="link"
                 onClick={() => {
                   setQuery(exampleQuery);
