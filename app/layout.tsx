@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import React from "react";
+import React, { Suspense } from "react";
 import Footer from "@/components/footer";
 import { Inter, Inter_Tight } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Purple Squirrel",
@@ -32,7 +31,7 @@ export default function RootLayout({
       className={cn(
         fontText.variable,
         fontDisplay.variable,
-        "scroll-smooth antialiased md:text-base",
+        "scroll-smooth antialiased",
       )}
     >
       <body className="px-6 pb-40 pt-8">

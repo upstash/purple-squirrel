@@ -11,6 +11,7 @@ import TableCard from "@/components/table/card";
 import type { Applicant, FilterTab } from "@/types";
 import { search } from "@/app/actions/search";
 import { update } from "@/app/actions/update";
+import Link from "next/link";
 
 export default function Home() {
   const router = useRouter();
@@ -68,6 +69,13 @@ export default function Home() {
 
   return (
     <main>
+      <Link
+        className="fixed right-4 top-4 text-sm text-muted-foreground"
+        href="/setup"
+      >
+        Setup {`->`}
+      </Link>
+
       <header className="mx-auto max-w-screen-sm">
         <h1 className="text-center font-display text-xl font-bold text-primary">
           Purple Squirrel
