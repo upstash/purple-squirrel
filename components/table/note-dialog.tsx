@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 import type { Applicant } from "@/types";
 import { cn } from "@/lib/utils";
@@ -23,42 +24,56 @@ type Props = {
 
 export default function NoteDialog({ applicant, onUpdate }: Props) {
   const [note, setNote] = useState(applicant.notes);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleSave = async () => {
+    await onUpdate({
+      ...applicant,
+      notes: note,
+    });
+    setIsOpen(false);
+  };
 
   return (
-    <Dialog>
-      <DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
           className={cn(
-            "rounded-full",
+            "rounded-full hover:bg-primary/20",
             applicant.notes
-              ? "bg-primary/10 text-primary"
-              : "text-muted-foreground",
+              ? "bg-primary/10 text-primary hover:text-primary"
+              : "text-muted-foreground hover:text-primary"
           )}
         >
           <Pencil2Icon />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Notes</DialogTitle>
+          <DialogTitle>Notes for {applicant.name}</DialogTitle>
         </DialogHeader>
-        <Textarea value={note} onChange={(e) => setNote(e.target.value)} />
-        <DialogFooter className="justify-end">
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label>Add your notes about this candidate</Label>
+            <Textarea
+              placeholder="Enter your notes here..."
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              className="h-40"
+            />
+          </div>
+        </div>
+        <DialogFooter className="flex justify-between sm:justify-between">
           <DialogClose asChild>
-            <Button
-              type="button"
-              onClick={async () => {
-                await onUpdate({
-                  ...applicant,
-                  notes: note,
-                });
-              }}
-            >
-              Save
+            <Button type="button" variant="ghost">
+              Cancel
             </Button>
           </DialogClose>
+          <Button type="button" onClick={handleSave}>
+            Save Notes
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

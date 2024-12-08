@@ -88,6 +88,12 @@ export default function TableCard({ applicants, onUpdate }: Props) {
                 ) : (
                   "No cover letter"
                 )}
+                {applicant.notes && (
+                  <div className="mt-2 rounded-md bg-primary/5 p-2 text-sm">
+                    <p className="font-semibold text-primary">Notes:</p>
+                    <p className="whitespace-pre-wrap">{applicant.notes}</p>
+                  </div>
+                )}
               </TableCell>
               <TableCell className="align-top">
                 <p>
